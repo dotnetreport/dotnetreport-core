@@ -25,7 +25,7 @@
                 <a href="/">
                     <img src="~/img/report-logo.png" alt=".Net Report Builder" width="200" />
                 </a>
-            </div>         
+            </div>
         </div>
     </div>
     <div class="body-content">
@@ -244,16 +244,16 @@
         </div>
     </script>
     <script type="text/html" id="fly-filter-template">
-        <div class="panel panel-default" data-bind="visible: FlyFilters().length>0">
-            <div class="panel-heading">
-                <h3 class="panel-title">
+        <div class="card" data-bind="visible: FlyFilters().length>0">
+            <div class="card-header">
+                <h5 class="card-title">
                     <a data-toggle="collapse" data-target="#filter-panel" href="#">
                         <i class="fa fa-filter"></i> Choose filter options
                     </a>
-                </h3>
+                </h5>
             </div>
-            <div id="filter-panel" class="panel-collapse">
-                <div class="panel-body">
+            <div id="filter-panel" class="card-body">
+                <div>
                     <!-- ko foreach: FlyFilters -->
                     <div class="row">
 
@@ -273,7 +273,7 @@
                         </div>
                         <div data-bind="with: Field" class="col-xs-5">
                             <div data-bind="if: $parent.Apply">
-                                @Html.PartialAsync("_reportFilter")
+                                @Html.Partial("_reportFilter")
                             </div>
                         </div>
                     </div>
@@ -292,6 +292,7 @@
     <script src="~/lib/jquery-blockui/jquery.blockUI.js"></script>
     <script src="~/lib/bootbox/bootbox.min.js"></script>
     <script src="~/lib/toastr/toastr.min.js"></script>
+    <script src="~/lib/bootstrap-datepicker/js/bootstrap-datepicker.js"></script>
     <script src="~/lib/knockout-sortable/knockout-sortable.min.js"></script>
     <script src="~/lib/select2/js/select2.min.js"></script>
     <script src="~/lib/lodash/lodash.min.js"></script>
