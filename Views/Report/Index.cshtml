@@ -297,13 +297,13 @@
                             <div class="form-group">
                                 <label class="col-sm-2 control-label">Field Label</label>
                                 <div class="col-sm-10">
-                                    <input type="text" class="form-control input-sm" data-bind="value: formulaFieldLabel" required placeholder="Custom Field Label" />
+                                    <input type="text" class="form-control form-control-sm" data-bind="value: formulaFieldLabel" required placeholder="Custom Field Label" />
                                 </div>
                             </div>
                             <div class="form-group">
                                 <label class="col-sm-2 control-label">Data Format</label>
                                 <div class="col-sm-10">
-                                    <select class="form-control input-sm" data-bind="value: formulaDataFormat" required>
+                                    <select class="form-control form-control-sm" data-bind="value: formulaDataFormat" required>
                                         <!-- ko ifnot: formulaOnlyHasDateFields -->
                                         <option>String</option>
                                         <option>Integer</option>
@@ -327,13 +327,13 @@
                                     <div class="list-group-item pull-left" style="margin-left: 15px; padding: 5px 15px">
                                         <span data-bind="text: fieldName, visible: !setupFormula.isConstantValue()"></span>
                                         <!-- ko if: setupFormula.isConstantValue -->
-                                        <input data-bind="value: setupFormula.constantValue" class="form-control input-sm" required />
+                                        <input data-bind="value: setupFormula.constantValue" class="form-control form-control-sm" required />
                                         <!-- /ko -->
                                     </div>
                                     <!-- /ko -->
                                     <h3 class="pull-left" data-bind="visible: setupFormula.isParenthesesEnd" style="margin-top: 0;">)</h3>
                                     <div class="pull-left" style="margin-left: 15px;" data-bind="visible: $parent.showFormulaOperation($index())">
-                                        <select class="form-control input-sm" style="max-width: 50px;" data-bind="value: setupFormula.formulaOperation">
+                                        <select class="form-control form-control-sm" style="max-width: 50px;" data-bind="value: setupFormula.formulaOperation">
                                             <option>-</option>
                                             <!-- ko if: ['Int','Money','Float'].indexOf(fieldType) != -1 -->
                                             <option>+</option>
@@ -367,35 +367,38 @@
                     <ul class="list-group" data-bind="sortable: { data: SelectedFields, options: { handle: '.sortable', cursor: 'move', placeholder: 'drop-highlight' } }">
                         <li class="list-group-item">
                             <div class="row">
-                                <span class="fa fa-columns"></span>
-                                <span data-bind="text: selectedFieldName"></span>
-                                <span data-bind="visible: !$root.isFieldValidForYAxis($index(), fieldType)">
-                                    <span class="label label-danger" data-bind="visible: !groupInGraph()">Will not show in <span data-bind="text: $root.ReportType"></span> Chart</span>
-                                </span>
-
-                                <div class="input-group pull-right" style="margin-top: -5px;">
-                                    <select class="form-control input-sm" style="width: 120px;" data-bind="options: $root.canDrilldown() && $index()>0 ? fieldAggregateWithDrilldown : fieldAggregate, value: selectedAggregate, visible: $parent.AggregateReport"></select>
-                                </div>
-                                <div class="sortable pull-right" style="padding-right: 15px;">
-                                    <span class="fa fa-arrows " aria-hidden="true" title="Drag to reorder"></span>
-                                </div>
-                                <div class="pull-right" style="padding-right: 15px;">
-                                    <span class="fa fa-trash" style="cursor: pointer;" aria-hidden="true" title="Delete this Field" data-bind="click: $parent.RemoveField"></span>
-                                </div>
-                                <div class="pull-right" style="padding-right: 15px;">
-                                    <span class="button-box no-padding" tabindex="0" data-bind="click: function(){ filterOnFly(!filterOnFly()); }, css: {active: filterOnFly()==true}">
-                                        <span class="fa fa-filter" aria-hidden="true" title="Filter by this field on the Report"></span>
+                                <div class="col">
+                                    <span class="fa fa-columns"></span>
+                                    <span data-bind="text: selectedFieldName"></span>
+                                    <span data-bind="visible: !$root.isFieldValidForYAxis($index(), fieldType)">
+                                        <span class="label label-danger" data-bind="visible: !groupInGraph()">Will not show in <span data-bind="text: $root.ReportType"></span> Chart</span>
                                     </span>
                                 </div>
-                                <div class="pull-right" style="padding-right: 15px;" data-bind="visible: $root.ReportType()=='Summary'">
-                                    <span class="button-box no-padding" tabindex="0" data-bind="click: function(){ hideInDetail(!hideInDetail()); }, css: {active: hideInDetail()==true}">
-                                        <span class="fa fa-eye-slash" aria-hidden="true" title="Hide in Details"></span>
-                                    </span>
-                                </div>
-                                <div class="pull-right" style="padding-right: 15px;" data-bind="visible: !$root.isFieldValidForSubGroup($index(), fieldType) && $root.isChart()">
-                                    <span class="button-box no-padding" tabindex="0" data-bind="click: function(){ groupInGraph(!groupInGraph()); }, css: {active: groupInGraph()==true}">
-                                        <span class="fa fa-line-chart" aria-hidden="true" title="Include in series"></span>
-                                    </span>
+                                <div class="col">
+                                    <div class="pull-right" style="margin-top: -5px;">
+                                        <select class="form-control form-control-sm" data-bind="options: $root.canDrilldown() && $index()>0 ? fieldAggregateWithDrilldown : fieldAggregate, value: selectedAggregate, visible: $parent.AggregateReport"></select>
+                                    </div>
+                                    <div class="sortable pull-right" style="padding-right: 15px;">
+                                        <span class="fa fa-arrows " aria-hidden="true" title="Drag to reorder"></span>
+                                    </div>
+                                    <div class="pull-right" style="padding-right: 15px;">
+                                        <span class="fa fa-trash" style="cursor: pointer;" aria-hidden="true" title="Delete this Field" data-bind="click: $parent.RemoveField"></span>
+                                    </div>
+                                    <div class="pull-right" style="padding-right: 15px;">
+                                        <span class="button-box no-padding" tabindex="0" data-bind="click: function(){ filterOnFly(!filterOnFly()); }, css: {active: filterOnFly()==true}">
+                                            <span class="fa fa-filter" aria-hidden="true" title="Filter by this field on the Report"></span>
+                                        </span>
+                                    </div>
+                                    <div class="pull-right" style="padding-right: 15px;" data-bind="visible: $root.ReportType()=='Summary'">
+                                        <span class="button-box no-padding" tabindex="0" data-bind="click: function(){ hideInDetail(!hideInDetail()); }, css: {active: hideInDetail()==true}">
+                                            <span class="fa fa-eye-slash" aria-hidden="true" title="Hide in Details"></span>
+                                        </span>
+                                    </div>
+                                    <div class="pull-right" style="padding-right: 15px;" data-bind="visible: !$root.isFieldValidForSubGroup($index(), fieldType) && $root.isChart()">
+                                        <span class="button-box no-padding" tabindex="0" data-bind="click: function(){ groupInGraph(!groupInGraph()); }, css: {active: groupInGraph()==true}">
+                                            <span class="fa fa-line-chart" aria-hidden="true" title="Include in series"></span>
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                         </li>
@@ -404,7 +407,7 @@
                 <hr />
                 <h5><span class="fa fa-filter"></span> Choose filters</h5>
 
-                <div class="row" style="padding: 10px 10px ">
+                <div class="row" style="padding: 10px 10px; overflow-x: auto;">
                     <div data-bind="template: {name: 'filter-group'}"></div>
                     <br />
                 </div>
@@ -412,28 +415,28 @@
                 <hr />
                 <h5><span class="fa fa-hourglass"></span> Choose Schedule</h5>
 
-                <div class="row" style="padding: 10px 10px ">
+                <div style="padding: 10px 10px ">
                     <div data-bind="template: {name: 'report-schedule'}"></div>
                 </div>
                 <hr />
 
-                <form class="form-horizontal">
-                    <div class="form-group">
+                <div>
+                    <div class="form-group row">
                         <label class="col-sm-2 control-label">Report Name</label>
                         <div class="col-sm-10">
-                            <input type="text" class="form-control" required placeholder="Report Name" data-bind="value: ReportName">
+                            <input type="text" style="width: 100%;" class="form-control" required placeholder="Report Name" data-bind="value: ReportName">
                         </div>
                     </div>
-                    <div class="form-group">
+                    <div class="form-group row">
                         <label class="col-sm-2 control-label">Report Description</label>
                         <div class="col-sm-10">
-                            <textarea class="form-control" rows="3" placeholder="Optional Report Description" data-bind="value: ReportDescription"></textarea>
+                            <textarea class="form-control" style="width: 100%;" rows="3" placeholder="Optional Report Description" data-bind="value: ReportDescription"></textarea>
                         </div>
                     </div>
-                    <div class="form-group">
+                    <div class="form-group row">
                         <label class="col-sm-2 control-label">Sort By</label>
                         <div class="col-sm-10">
-                            <select class="form-control" required data-bind="options: enabledFields, optionsText: 'selectedFieldName', optionsValue: 'fieldId', value: SortByField"></select>
+                            <select class="form-control" style="width: 100%;" required data-bind="options: enabledFields, optionsText: 'selectedFieldName', optionsValue: 'fieldId', value: SortByField"></select>
                         </div>
                     </div>
                     <div class="checkbox">
@@ -459,10 +462,10 @@
                             <input type="checkbox" data-bind="checked: SaveReport"> Save Report
                         </label>
                     </div>
-                    <div class="form-group" data-bind="visible: SaveReport">
+                    <div class="form-group row" data-bind="visible: SaveReport">
                         <label class="col-sm-2 control-label">Choose Folder</label>
                         <div class="col-sm-10">
-                            <select class="form-control" data-bind="options: Folders, optionsText: 'FolderName', optionsValue: 'Id', value: FolderID"></select>
+                            <select class="form-control" style="width: 100%;" data-bind="options: Folders, optionsText: 'FolderName', optionsValue: 'Id', value: FolderID"></select>
                         </div>
                     </div>
 
@@ -470,7 +473,7 @@
                     <hr />
                     <div data-bind="template: {name: 'manage-access-template'}"></div>
                     <!-- /ko -->
-                </form>
+                </div>
             </div>
             <div class="modal-footer">
                 <a href="#" class="btn btn-danger" data-bind="click: cancelCreateReport">Cancel editing Report</a>
@@ -510,13 +513,13 @@
 
 <script type="text/html" id="filter-group">
     <div data-bind="foreach: FilterGroups">
-        <div class="panel panel-default panel-body" style="margin-left: 20px;">
-            <div data-bind="visible: !isRoot">
-                <select data-bind="value: AndOr" class="form-control pull-left" style="width: 150px;">
+        <div class="card" style="margin-left: 20px;">
+            <div class="card-body" data-bind="visible: !isRoot">
+                <select data-bind="value: AndOr" class="form-control form-control-sm pull-left">
                     <option>And</option>
                     <option>Or</option>
                 </select>
-                <button class="btn btn-sm pull-left" data-bind="click: $parent.RemoveFilterGroup, visible: !isRoot">Remove Group</button>&nbsp;
+                <button class="btn btn-sm btn-secondary pull-left" data-bind="click: $parent.RemoveFilterGroup, visible: !isRoot">Remove Group</button>&nbsp;
                 <hr />
             </div>
             <div data-bind="template: {name: 'filter-inner'}"></div>
@@ -525,48 +528,49 @@
 </script>
 
 <script type="text/html" id="filter-inner">
-
-    <table class="table table-responsive table-noborder" data-bind="visible: Filters().length>0">
-        <thead>
-            <tr>
-                <th style="width: 100px;"></th>
-                <th style="width: 300px;">Field</th>
-                <th style="width: 100px;"></th>
-                <th style="width: 200px;">Filter</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody data-bind="foreach: Filters">
-            <tr>
-                <td>
-                    <select data-bind="value: AndOr, visible: $index()>0" class="form-control">
-                        <option>And</option>
-                        <option>Or</option>
-                    </select>
-                </td>
-                <td>
-                    <div class="form-group">
-                        <select class="form-control" data-bind="options: $root.selectedFieldsCanFilter, optionsText: 'selectedFieldName', optionsCaption: 'Please Choose', value: Field, attr: {required: Field()==null?'required':false}"></select>
-                    </div>
-                </td>
-                <td data-bind="with: Field">
-                    <div class="form-group">
-                        <select class="form-control" data-bind="options: fieldFilter, value: $parent.Operator" required></select>
-                    </div>
-                </td>
-                <td data-bind="with: Field">
-                    @Html.PartialAsync("_reportFilter")
-                </td>
-                <td>
-                    <button class="btn btn-sm" data-bind="click: $parent.RemoveFilter">Remove</button>
-                </td>
-            </tr>
-        </tbody>
-    </table>
+    <div class="table-responsive">
+        <table class="table  table-hover table-borderless" data-bind="visible: Filters().length>0">
+            <thead>
+                <tr>
+                    <th style="width: 100px;"></th>
+                    <th style="width: 300px;">Field</th>
+                    <th style="width: 100px;"></th>
+                    <th style="width: 200px;">Filter</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody data-bind="foreach: Filters">
+                <tr>
+                    <td>
+                        <select data-bind="value: AndOr, visible: $index()>0" class="form-control">
+                            <option>And</option>
+                            <option>Or</option>
+                        </select>
+                    </td>
+                    <td>
+                        <div class="form-group">
+                            <select class="form-control" data-bind="options: $root.selectedFieldsCanFilter, optionsText: 'selectedFieldName', optionsCaption: 'Please Choose', value: Field, attr: {required: Field()==null?'required':false}"></select>
+                        </div>
+                    </td>
+                    <td data-bind="with: Field">
+                        <div class="form-group">
+                            <select class="form-control" data-bind="options: fieldFilter, value: $parent.Operator" required></select>
+                        </div>
+                    </td>
+                    <td data-bind="with: Field">
+                        @Html.Partial("_reportFilter")
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-secondary" data-bind="click: $parent.RemoveFilter">Remove</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
     <div data-bind="template: {name: 'filter-group'}"></div>
     <div>
-        <button class="btn btn-sm" data-bind="click: AddFilterGroup">Add Group</button>&nbsp;
-        <button class="btn btn-sm" data-bind="click: AddFilter">Add Filter</button>
+        <button class="btn btn-sm btn-link" data-bind="click: AddFilterGroup">Add Group</button>&nbsp;
+        <button class="btn btn-sm btn-link" data-bind="click: AddFilter">Add Filter</button>
     </div>
 </script>
 
@@ -581,18 +585,18 @@
         <div data-bind="if: hasSchedule">
             <div class="form-inline form-group">
 
-                Every <select class="form-control" required data-bind="options: options, value: selectedOption"></select>
+                Every&nbsp;<select class="form-control" required data-bind="options: options, value: selectedOption"></select>
                 <!-- ko if: showDays -->
-                on <select multiple class="form-control" required style="width: 30%;" data-bind="select2: { placeholder: 'Choose Days', allowClear: true }, options: days, selectedOptions: selectedDays"></select>
+                &nbsp;on&nbsp;<select multiple class="form-control" required style="width: 30%;" data-bind="select2: { placeholder: 'Choose Days', allowClear: true }, options: days, selectedOptions: selectedDays"></select>
                 <!-- /ko -->
                 <!-- ko if: showDates -->
-                on <select multiple class="form-control" required style="width: 30%;" data-bind="select2: { placeholder: 'Choose Dates', allowClear: true }, options: dates, selectedOptions: selectedDates"></select>
+                &nbsp;on&nbsp;<select multiple class="form-control" required style="width: 30%;" data-bind="select2: { placeholder: 'Choose Dates', allowClear: true }, options: dates, selectedOptions: selectedDates"></select>
                 <!-- /ko -->
                 <!-- ko if: showMonths -->
-                of <select multiple class="form-control" required style="width: 30%;" data-bind="select2: { placeholder: 'Choose Months', allowClear: true }, options: months, selectedOptions: selectedMonths"></select>
+                &nbsp;of&nbsp;<select multiple class="form-control" required style="width: 30%;" data-bind="select2: { placeholder: 'Choose Months', allowClear: true }, options: months, selectedOptions: selectedMonths"></select>
                 <!-- /ko -->
                 <!-- ko if: showAtTime -->
-                at <select class="form-control" data-bind="options: hours, value: selectedHour"></select>
+                &nbsp;at&nbsp;<select class="form-control" data-bind="options: hours, value: selectedHour"></select>
                 <select class="form-control" data-bind="options: minutes, value: selectedMinute"></select>
                 <select class="form-control" data-bind="value: selectedAmPm">
                     <option>AM</option>
@@ -617,10 +621,10 @@
                 <!-- /ko-->
             </div>
             <div class="form-horizontal form-group">
-                <div class="form-group">
+                <div class="form-group row">
                     <label class="col-sm-2 control-label">Email to</label>
                     <div class="col-sm-10">
-                        <input type="text" class="form-control" data-bind="value: emailTo" placeholder="Enter Email Addresses separated by comma to send the Report to" required />
+                        <input type="text" class="form-control" style="width: 100%;" data-bind="value: emailTo" placeholder="Enter Email Addresses separated by comma to send the Report to" required />
                     </div>
                 </div>
             </div>
