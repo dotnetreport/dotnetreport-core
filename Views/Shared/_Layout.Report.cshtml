@@ -16,34 +16,16 @@
     <link href="~/css/dotnetreport.css?v=3.0.0" rel="stylesheet" />
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     @RenderSection("head", required: false)
-    <style type="text/css">
-        body {
-            padding-top: 80px;
-            padding-bottom: 40px;
-        }
-    </style>
 </head>
 
 <body>
-    <div class="navbar navbar-fixed-top" style="background-color: white;">
+    <div class="navbar  border-bottom box-shadow ">
         <div class="">
-            <div class="navbar-header">
-                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button>
-                <div class="navbar-brand" style="padding-top: 8px;">
-                    <a href="/">
-                        <img src="~/Content/img/report-logo.png" alt=".Net Report Builder" width="200" />
-                    </a>
-                </div>
-            </div>
-            <div class="navbar-collapse collapse">
-                <ul class="nav navbar-nav">
-                    @*<li>@Html.ActionLink("Home", "Index", "Home")</li>*@
-                </ul>
-            </div>
+            <div class="navbar-brand">
+                <a href="/">
+                    <img src="~/img/report-logo.png" alt=".Net Report Builder" width="200" />
+                </a>
+            </div>         
         </div>
     </div>
     <div class="body-content">

@@ -63,43 +63,45 @@
 <!-- Folders/Report List -->
 <div id="report-start">
 
-    <div class="panel panel-default folder-panel">
-        @*<div class="panel-heading">
-                <h3 class="panel-title">Choose Report</h3>
-            </div>*@
-        <div class="panel-body">
-            <nav class="navbar navbar-default">
-                <div class="">
-                    <div class="navbar-header">
-                        <a class="navbar-brand" href="#" data-bind="click: function() {SelectedFolder(null);}">Manage Reports</a>
-                    </div>
-                    <ul class="nav navbar-nav">
+    <div class="card folder-panel">
+        <div class="card-header">
+            <nav class="navbar navbar-expand-lg navbar-light bg-light">
+                <a class="navbar-brand" href="#" data-bind="click: function() {SelectedFolder(null);}">Manage Reports</a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav mr-auto">
                         <!-- ko if: CanSaveReports() || adminMode() -->
-                        <li class="active">
-                            <a href="#" class="active" data-bind="click: createNewReport" data-toggle="modal" data-target="#modal-reportbuilder">Create a New Report</a>
+                        <li class="nav-item active">
+                            <a href="#" class="nav-link" data-bind="click: createNewReport" data-toggle="modal" data-target="#modal-reportbuilder">Create a New Report</a>
                         </li>
                         <!-- /ko -->
                         <!-- ko if: CanManageFolders() || adminMode() -->
-                        <li class="active">
-                            <a href="#" data-bind="click: ManageFolder.newFolder">Add a new Folder</a>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-bind="click: ManageFolder.newFolder">Add a new Folder</a>
                         </li>
-                        <li class="dropdown" data-bind="visible: SelectedFolder()!=null">
-                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Folder Options<span class="caret"></span></a>
-                            <ul class="dropdown-menu" role="menu">
-
-                                <li><a href="#" data-bind="click: ManageFolder.editFolder">Edit Selected Folder</a></li>
-                                <li><a href="#" data-bind="click: ManageFolder.deleteFolder">Delete Selected Folder</a></li>
-                            </ul>
+                        <li class="nav-item dropdown" data-bind="visible: SelectedFolder()!=null">
+                            <a href="#" class="nav-link dropdown-toggle" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Folder Options
+                            </a>
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item" href="#" data-bind="click: ManageFolder.editFolder">Edit Selected Folder</a>
+                                <a class="dropdown-item"href="#" data-bind="click: ManageFolder.deleteFolder">Delete Selected Folder</a>
+                            </div>
                         </li>
-                        <!-- /ko -->
+                        <!-- /ko -->                       
                     </ul>
                 </div>
             </nav>
+        </div>
+        <div class="card-body">
             <div data-bind="visible: SelectedFolder()==null">
                 <p>Please choose Folders below to view Reports</p>
                 <ul class="folder-list" data-bind="foreach: Folders">
                     <li data-bind="click: function(){ $parent.SelectedFolder($data); }">
-                        <span class="glyphicon glyphicon-folder-open"></span>
+                        <span class="fa fa-3x fa-folder"></span>
                         <span class="desc" data-bind="text: FolderName"></span>
                     </li>
                 </ul>
