@@ -101,7 +101,7 @@
                 <p>Please choose Folders below to view Reports</p>
                 <ul class="folder-list" data-bind="foreach: Folders">
                     <li data-bind="click: function(){ $parent.SelectedFolder($data); }">
-                        <span class="fa fa-3x fa-folder"></span>
+                        <span class="fa fa-3x fa-folder" style="color: #ffd800"></span>
                         <span class="desc" data-bind="text: FolderName"></span>
                     </li>
                 </ul>
@@ -123,69 +123,70 @@
                         No Reports Saved in this Folder
                     </div>
                     <!-- ko foreach: reportsInFolder -->
-                    <div class="list-group-item row">
-                        <div class="col-sm-8">
-                            <div class="fa pull-left" data-bind="css: {'fa-file': reportType=='List', 'fa-th-list': reportType=='Summary', 'fa-bar-chart': reportType=='Bar', 'fa-pie-chart': reportType=='Pie',  'fa-line-chart': reportType=='Line', 'fa-globe': reportType =='Map'}" style="font-size: 14pt; color: #808080"></div>
-                            <div class="pull-left">
-                                <h4 class="list-group-item-heading"><a data-bind="text: reportName, click: runReport" style="cursor: pointer"></a></h4>
+                    <div class="list-group-item">
+                        <div class="row">
+                            <div class="col-sm-7">
+                                <div class="fa fa-2x pull-left" data-bind="css: {'fa-file': reportType=='List', 'fa-th-list': reportType=='Summary', 'fa-bar-chart': reportType=='Bar', 'fa-pie-chart': reportType=='Pie',  'fa-line-chart': reportType=='Line', 'fa-globe': reportType =='Map'}"></div>
+                                <div class="pull-left">
+                                    <h4><a data-bind="text: reportName, click: runReport" style="cursor: pointer"></a></h4>
+                                </div>
+                                <div class="clearfix"></div>
+                                <p data-bind="text: reportDescription"></p>
+                                <!-- ko if: $parent.adminMode -->
+                                <div class="small">
+                                    <b>Report Access</b><br />
+                                    Manage by User <span class="label label-info" data-bind="text: userId ? userId : 'No User'"></span><br />
+                                    View only by User <span class="label label-info" data-bind="text: (viewOnlyUserId ? viewOnlyUserId : (userId ? userId : 'Any User'))"></span><br />
+                                    <!-- ko if: userRole -->
+                                    Manage by Role <span class="label label-info" data-bind="text: userRole ? userRole : 'No Role'"></span><br />
+                                    <!-- /ko -->
+                                    <!-- ko if: viewOnlyUserRole -->
+                                    View only by Role <span class="label label-info" data-bind="text: viewOnlyUserRole ? viewOnlyUserRole : 'Any Role'"></span><br />
+                                    <!-- /ko -->
+                                    <!-- ko if: clientId -->
+                                    For Client <span class="label label-info" data-bind="text: clientId ? clientId : 'Any'"></span><br />
+                                    <!-- /ko -->
+                                </div>
+                                <!-- /ko -->
                             </div>
-                            <div class="clearfix"></div>
-                            <p class="list-group-item-text" data-bind="text: reportDescription"></p>
-                            <!-- ko if: $parent.adminMode -->
-                            <div class="small">
-                                <b>Report Access</b><br />
-                                Manage by User <span class="label label-info" data-bind="text: userId ? userId : 'No User'"></span><br />
-                                View only by User <span class="label label-info" data-bind="text: (viewOnlyUserId ? viewOnlyUserId : (userId ? userId : 'Any User'))"></span><br />
-                                <!-- ko if: userRole -->
-                                Manage by Role <span class="label label-info" data-bind="text: userRole ? userRole : 'No Role'"></span><br />
-                                <!-- /ko -->
-                                <!-- ko if: viewOnlyUserRole -->
-                                View only by Role <span class="label label-info" data-bind="text: viewOnlyUserRole ? viewOnlyUserRole : 'Any Role'"></span><br />
-                                <!-- /ko -->
-                                <!-- ko if: clientId -->
-                                For Client <span class="label label-info" data-bind="text: clientId ? clientId : 'Any'"></span><br />
-                                <!-- /ko -->
-                            </div>
-                            <!-- /ko -->
-                        </div>
-                        <div class="col-sm-4">
-                            <div class="pull-right hidden-sm hidden-xs">
-                                <br />
-                                <!-- ko if: $root.CanSaveReports() || $root.adminMode()-->
-                                <button class="btn btn-sm btn-default" data-bind="click: openReport, visible: canEdit" data-toggle="modal" data-target="#modal-reportbuilder">
-                                    <span class="fa fa-edit" aria-hidden="true"></span> Edit
-                                </button>
-                                <button class="btn btn-sm btn-default" data-bind="click: copyReport" data-toggle="modal" data-target="#modal-reportbuilder">
-                                    <span class="fa fa-copy" aria-hidden="true"></span> Copy
-                                </button>
-                                <!-- /ko -->
-                                <button class="btn btn-sm btn-primary" data-bind="click: runReport">
-                                    <span class="fa fa-gears" aria-hidden="true"></span> Run
-                                </button>
-                                <button class="btn btn-sm btn-danger" data-bind="click: deleteReport, visible: canEdit">
-                                    <span class="fa fa-trash" aria-hidden="true"></span> Delete
-                                </button>
-                                <br />
-                            </div>
+                            <div class="col-sm-5 right-align">
+                                <div class="d-none d-md-block">
+                                    <br />
+                                    <!-- ko if: $root.CanSaveReports() || $root.adminMode()-->
+                                    <button class="btn btn-sm btn-default" data-bind="click: openReport, visible: canEdit" data-toggle="modal" data-target="#modal-reportbuilder">
+                                        <span class="fa fa-edit" aria-hidden="true"></span> Edit
+                                    </button>
+                                    <button class="btn btn-sm btn-default" data-bind="click: copyReport" data-toggle="modal" data-target="#modal-reportbuilder">
+                                        <span class="fa fa-copy" aria-hidden="true"></span> Copy
+                                    </button>
+                                    <!-- /ko -->
+                                    <button class="btn btn-sm btn-primary" data-bind="click: runReport">
+                                        <span class="fa fa-gears" aria-hidden="true"></span> Run
+                                    </button>
+                                    <button class="btn btn-sm btn-danger" data-bind="click: deleteReport, visible: canEdit">
+                                        <span class="fa fa-trash" aria-hidden="true"></span> Delete
+                                    </button>
+                                    <br />
+                                </div>
 
-                            <div class="pull-right visible-sm visible-xs">
-                                <!-- ko if: $root.CanSaveReports() || $root.adminMode()-->
-                                <button class="btn btn-sm btn-default" title="Edit Report" data-bind="click: openReport, visible: canEdit" data-toggle="modal" data-target="#modal-reportbuilder">
-                                    <span class="fa fa-edit" aria-hidden="true"></span>
-                                </button>
-                                <button class="btn btn-sm btn-default" data-bind="click: copyReport" title="Copy Report" data-toggle="modal" data-target="#modal-reportbuilder">
-                                    <span class="fa fa-copy" aria-hidden="true"></span>
-                                </button>
-                                <!-- /ko -->
-                                <button class="btn btn-sm btn-primary" data-bind="click: runReport" title="Run Report">
-                                    <span class="fa fa-gears" aria-hidden="true"></span>
-                                </button>
-                                <button class="btn btn-sm btn-danger" title="Delete Report" data-bind="click: deleteReport, visible: canEdit">
-                                    <span class="fa fa-trash" aria-hidden="true"></span>
-                                </button>
+                                <div class="d-block d-md-none">
+                                    <!-- ko if: $root.CanSaveReports() || $root.adminMode()-->
+                                    <button class="btn btn-sm btn-default" title="Edit Report" data-bind="click: openReport, visible: canEdit" data-toggle="modal" data-target="#modal-reportbuilder">
+                                        <span class="fa fa-edit" aria-hidden="true"></span>
+                                    </button>
+                                    <button class="btn btn-sm btn-default" data-bind="click: copyReport" title="Copy Report" data-toggle="modal" data-target="#modal-reportbuilder">
+                                        <span class="fa fa-copy" aria-hidden="true"></span>
+                                    </button>
+                                    <!-- /ko -->
+                                    <button class="btn btn-sm btn-primary" data-bind="click: runReport" title="Run Report">
+                                        <span class="fa fa-gears" aria-hidden="true"></span>
+                                    </button>
+                                    <button class="btn btn-sm btn-danger" title="Delete Report" data-bind="click: deleteReport, visible: canEdit">
+                                        <span class="fa fa-trash" aria-hidden="true"></span>
+                                    </button>
+                                </div>
                             </div>
                         </div>
-
                     </div>
                     <!-- /ko -->
                 </div>
