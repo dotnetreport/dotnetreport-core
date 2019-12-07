@@ -1,0 +1,320 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <link rel="shortcut icon" href="/favicon.ico">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asp .Net Ad Hoc Report Builder - @ViewBag.Title </title>
+    <meta name="keywords" content="ad-hoc reporting, reporting, asp .net reporting, asp .net report, report builder, ad hoc report builder, ad-hoc report builder, adhoc report, ad hoc reports, .net report viewer, reportviewer, sql reportviewer, report builder mvc, report mvc, report builder web forms, query builder, sql report builder,visual report builder,custom query,query maker" />
+    <meta name="description" content="Ad hoc Reporting software that allows programmers to easily add Reporting functionality to their ASP .NET Web Software Solution" />
+    <link href="~/lib/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="~/lib/bootstrap-datepicker/css/bootstrap-datepicker.min.css" rel="stylesheet" />
+    <link href="~/lib/toastr/toastr.min.css" rel="stylesheet" />
+    <link href="~/lib/font-awesome/css/font-awesome.min.css" rel="stylesheet" />
+    <link href="~/lib/select2/css/select2.min.css" rel="stylesheet" />
+    <link href="~/css/dotnetreport.css?v=3.0.0" rel="stylesheet" />
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    @RenderSection("head", required: false)
+    <style type="text/css">
+        body {
+            padding-top: 80px;
+            padding-bottom: 40px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="navbar navbar-fixed-top" style="background-color: white;">
+        <div class="">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <div class="navbar-brand" style="padding-top: 8px;">
+                    <a href="/">
+                        <img src="~/Content/img/report-logo.png" alt=".Net Report Builder" width="200" />
+                    </a>
+                </div>
+            </div>
+            <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav">
+                    @*<li>@Html.ActionLink("Home", "Index", "Home")</li>*@
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="body-content">
+        @RenderBody()
+        <!-- ########################## IMPORTANT - PLEASE DO NOT REMOVE WITHOUT PURCHASING LICENSE ########################### -->
+
+        <div style="padding-top: 30px;">Powered by <a href="http://www.dotNetReport.com" target="_blank">dotNetReport.com</a></div>
+
+        <!--########################## IMPORTANT - PLEASE DO NOT REMOVE WITHOUT PURCHASING LICENSE ########################### -->
+        <hr />
+        <footer>
+            <p>&copy; @DateTime.Now.Year .Net Report Builder<br /><a href="https://dotnetreport.com">www.dotnetreport.com</a></p>
+        </footer>
+    </div>
+
+    <!-- Templates -->
+    <script type="text/html" id="pager-template">
+        <div class="pager-container">
+            <a href="" title="first" data-bind="click: first, enable: !isFirstPage()"><i class="fa fa-backward report-pager-btn" style="font-size: 18px;"></i></a>&nbsp;
+            <a href="" title="previous" data-bind="click: previous, enable: !isFirstPage()"><i class="fa fa-caret-left fa-2x report-pager-btn"></i></a>
+
+            <span class="pager-pageinfo">
+                <span>Page</span>&nbsp;
+                <input type="number" min="1" pattern="[0-9]*" class="text-center" data-bind="
+                                    value: currentPage,
+                                    attr: { max: pages() }" />&nbsp;
+                <span>of</span>&nbsp;
+                <span data-bind="text: pages"></span>
+            </span>&nbsp;
+
+            <a href="" title="next" data-bind="click: next, enable: !isLastPage()"><i class="fa fa-caret-right fa-2x report-pager-btn"></i></a>&nbsp;
+            <a href="" title="last" data-bind="click: last, enable: !isLastPage()"><i class="fa fa-forward report-pager-btn" style="font-size: 18px;"></i></a>
+        </div>
+    </script>
+
+    <script type="text/html" id="report-template">
+        <div class="report-chart" data-bind="attr: {id: 'chart_div_' + $parent.ReportID()}, visible: $parent.isChart"></div>
+
+        <div class="table-responsive" data-bind="with: ReportData">
+            <table class="table table-hover table-condensed">
+                <thead>
+                    <tr class="no-highlight">
+                        <!-- ko if: $parentContext.$parent.canDrilldown() && !IsDrillDown() -->
+                        <th></th>
+                        <!-- /ko -->
+                        <!-- ko foreach: Columns -->
+                        <th data-bind="attr: { id: 'col' + $index() }">
+                            <a href="" data-bind="click: function(){ $parentContext.$parentContext.$parent.changeSort(SqlField); }">
+                                <span data-bind="text: ColumnName"></span>
+                                <span data-bind="text: $parentContext.$parentContext.$parent.pager.sortColumn() === SqlField ? ($parentContext.$parentContext.$parent.pager.sortDescending() ? '&#9660;' : '&#9650;') : ''">
+                                </span>
+                            </a>
+                        </th>
+                        <!-- /ko -->
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="display: none;" data-bind="visible: Rows.length < 1">
+                        <td class="text-info" data-bind="attr:{colspan: Columns.length}">
+                            No records found
+                        </td>
+                    </tr>
+                    <!-- ko foreach: Rows  -->
+                    <tr>
+                        <!-- ko if: $parentContext.$parentContext.$parent.canDrilldown() && !$parent.IsDrillDown() -->
+                        <td><a href="#" data-bind="click: function(){ toggle(); }"><span class="fa" data-bind="css: {'fa-plus': !isExpanded(), 'fa-minus': isExpanded()}"></span></a></td>
+                        <!-- /ko -->
+                        <!-- ko foreach: Items -->
+                        <td data-bind="html: FormattedValue"></td>
+                        <!-- /ko -->
+                    </tr>
+                    <!-- ko if: isExpanded -->
+                    <tr>
+                        <td></td>
+                        <td data-bind="attr:{colspan: $parent.Columns.length }">
+                            <!-- ko if: DrillDownData -->
+                            <table class="table table-hover table-condensed" data-bind="with: DrillDownData">
+                                <thead>
+                                    <tr class="no-highlight">
+                                        <!-- ko foreach: Columns -->
+                                        <th>
+                                            <a href="" data-bind="click: function(){ $parents[1].changeSort(SqlField); }">
+                                                <span data-bind="text: ColumnName"></span>
+                                                <span data-bind="text: $parents[1].pager.sortColumn() === SqlField ? ($parents[1].pager.sortDescending() ? '&#9660;' : '&#9650;') : ''">
+                                                </span>
+                                            </a>
+                                        </th>
+                                        <!-- /ko -->
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr style="display: none;" data-bind="visible: Rows.length < 1">
+                                        <td class="text-info" data-bind="attr:{colspan: Columns.length}">
+                                            No records found
+                                        </td>
+                                    </tr>
+                                    <!-- ko foreach: Rows  -->
+                                    <tr>
+                                        <!-- ko foreach: Items -->
+                                        <td data-bind="html: FormattedValue"></td>
+                                        <!-- /ko -->
+                                    </tr>
+                                    <!-- /ko -->
+                                </tbody>
+                            </table>
+                            <div class="col-xs-12 col-centered" data-bind="with: pager">
+                                <div class="form-inline small text-muted">
+                                    <div class="pull-left total-records" data-bind="visible: pages()">
+                                        <span data-bind="text: 'Total Records: ' + totalRecords()"></span>
+                                    </div>
+                                    <div class="pull-left">
+                                        @using (Html.BeginForm("DownloadExcel", "Report", FormMethod.Post))
+                                        {
+                                            <input type="hidden" id="reportSql" name="reportSql" data-bind="value: $parent.sql" />
+                                            <input type="hidden" id="connectKey" name="connectKey" data-bind="value: $parent.connectKey" />
+                                            <input type="hidden" id="reportName" name="reportName" data-bind="value: 'Sub Report for ' + $parentContext.$parentContext.$parentContext.$parent.ReportName()" />
+                                            <button type="submit" class="btn btn-xs" title="Download Excel"><span class="fa fa-file-excel-o"></span></button>
+                                        }
+                                    </div>
+                                    <div class="pull-left">
+                                        @using (Html.BeginForm("DownloadXml", "Report", FormMethod.Post))
+                                        {
+                                            <input type="hidden" id="reportSql" name="reportSql" data-bind="value: $parent.sql" />
+                                            <input type="hidden" id="connectKey" name="connectKey" data-bind="value: $parent.connectKey" />
+                                            <input type="hidden" id="reportName" name="reportName" data-bind="value: 'Sub Report for ' + $parentContext.$parentContext.$parentContext.$parent.ReportName()" />
+                                            <button type="submit" class="btn btn-xs" title="Download XML"><span class="fa fa-file-code-o"></span></button>
+                                        }
+                                    </div>
+                                    <div class="form-group pull-right" data-bind="visible: pages()">
+                                        <div data-bind="template: 'pager-template', data: $data"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- /ko -->
+                        </td>
+                    </tr>
+                    <!-- /ko -->
+                    <!-- /ko -->
+                </tbody>
+            </table>
+        </div>
+
+    </script>
+    <script type="text/html" id="admin-mode-template">
+        <div class="row" style="padding: 10px 10px">
+            <div class="material-switch pull-right">
+                <input id="admin-mode" type="checkbox" data-bind="checked: adminMode" />
+                <label for="admin-mode" class="label-primary"></label>
+            </div>
+            <div class="pull-right">Admin Mode</div>
+        </div>
+
+        <div class="alert alert-info" data-bind="visible: adminMode">
+            <i class="fa fa-user-circle"></i> Admin Mode is turned on now, it allows you to setup and view Reports or Dashboards for all roles and users. You should remove the Admin mode toggle for non-admin users.<br />
+        </div>
+    </script>
+    <script type="text/html" id="manage-access-template">
+        <h5><span class="fa fa-key"></span> Manage Access</h5>
+        <div class="panel panel-default panel-body" style="margin-left: 20px;">
+            <div class="alert alert-info">
+                <span class="fa fa-lightbulb-o fa-2x"></span> &nbsp;User level rights over rule Role level rights. No selection for a rule implies report is available to all.
+            </div>
+            <b>Manage by User</b> (allow edit/delete)
+            <div class="row container-fluid">
+                <!-- ko foreach: manageAccess.users -->
+                <div class="pull-left">
+                    <div class="checkbox">
+                        <label class="label label-info">
+                            <input type="checkbox" data-bind="checked: selected">&nbsp;<span data-bind="text: value"></span>&nbsp;
+                        </label>
+                    </div>
+                </div>
+                <!-- /ko -->
+            </div>
+            <br />
+            <b>View only by User</b> (no edit/delete)
+            <div class="row container-fluid">
+                <!-- ko foreach: manageAccess.viewOnlyUsers -->
+                <div class="pull-left">
+                    <div class="checkbox">
+                        <label class="label label-info">
+                            <input type="checkbox" data-bind="checked: selected">&nbsp;<span data-bind="text: value"></span>&nbsp;
+                        </label>
+                    </div>
+                </div>
+                <!-- /ko -->
+            </div>
+            <br />
+            <b>Manage by User Role</b> (allow edit/delete)
+            <div class="row container-fluid">
+                <!-- ko foreach: manageAccess.userRoles -->
+                <div class="pull-left">
+                    <div class="checkbox">
+                        <label class="label label-info">
+                            <input type="checkbox" data-bind="checked: selected">&nbsp;<span data-bind="text: value"></span>&nbsp;
+                        </label>
+                    </div>
+                </div>
+                <!-- /ko -->
+            </div>
+            <br />
+            <b>View only by User Role</b> (no edit/delete)
+            <div class="row container-fluid">
+                <!-- ko foreach: manageAccess.viewOnlyUserRoles -->
+                <div class="pull-left">
+                    <div class="checkbox">
+                        <label class="label label-info">
+                            <input type="checkbox" data-bind="checked: selected">&nbsp;<span data-bind="text: value"></span>&nbsp;
+                        </label>
+                    </div>
+                </div>
+                <!-- /ko -->
+
+            </div>
+
+        </div>
+    </script>
+    <script type="text/html" id="fly-filter-template">
+        <div class="panel panel-default" data-bind="visible: FlyFilters().length>0">
+            <div class="panel-heading">
+                <h3 class="panel-title">
+                    <a data-toggle="collapse" data-target="#filter-panel" href="#">
+                        <i class="fa fa-filter"></i> Choose filter options
+                    </a>
+                </h3>
+            </div>
+            <div id="filter-panel" class="panel-collapse">
+                <div class="panel-body">
+                    <!-- ko foreach: FlyFilters -->
+                    <div class="row">
+
+                        <div class="col-sm-5 col-xs-4">
+                            <div data-bind="with: Field" class="checkbox">
+                                <div class="checkbox">
+                                    <label>
+                                        <input type="checkbox" title="Apply this filter" data-bind="checked: $parent.Apply" /><span data-bind="text: selectedFieldName"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div data-bind="with: Field" class="col-sm-2 col-xs-3">
+                            <div class="form-group" data-bind="if: $parent.Apply">
+                                <select class="form-control" data-bind="options: fieldFilter, value: $parent.Operator" required></select>
+                            </div>
+                        </div>
+                        <div data-bind="with: Field" class="col-xs-5">
+                            <div data-bind="if: $parent.Apply">
+                                @Html.PartialAsync("_reportFilter")
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /ko -->
+                    <button class="btn btn-primary" data-bind="click: RunReport">Refresh Report</button>
+                </div>
+            </div>
+        </div>
+    </script>
+
+    @* Required Javascript Libraries *@
+    <script src="~/lib/jquery/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="~/lib/jquery-validation/jquery.validate.min.js"></script>
+    <script src="~/lib/knockout/knockout-latest.js"></script>
+    <script src="~/lib/jquery-blockui/jquery.blockUI.js"></script>
+    <script src="~/lib/bootbox/bootbox.min.js"></script>
+    <script src="~/lib/toastr/toastr.min.js"></script>
+    <script src="~/lib/knockout-sortable/knockout-sortable.min.js"></script>
+    <script src="~/lib/select2/js/select2.min.js"></script>
+    <script src="~/lib/lodash/lodash.min.js"></script>
+    <script src="~/js/dotnetreport-helper.js"></script>
+    <script src="~/js/dotnetreport.js?v=2.5.0"></script>
+    @RenderSection("scripts", required: false)
+</body>
+</html>

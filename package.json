@@ -1,0 +1,28 @@
+{
+  "version": "1.0.0",
+  "name": "asp.net",
+  "private": true,
+  "dependencies": {
+    "jquery": "^3.4.1",
+    "bootstrap": "4.3.1",
+    "bootbox": "5.3.4",
+    "jquery-blockui": "2.7.0",
+    "jquery-validation": "^1.19.1",
+    "jquery-validation-unobtrusive": "^3.2.11",
+    "knockout": "3.5.0",
+    "lodash": "4.17.15",
+    "toastr": "2.1.4",
+    "bootstrap-datepicker": "1.9.0",
+    "font-awesome": "4.7.0",
+    "select2": "4.0.12",
+    "knockout-sortable": "1.2.0"
+  },
+  "devDependencies": {
+    "gulp": "^4.0.2",
+    "gulp-concat": "2.6.1",
+    "gulp-htmlclean": "^2.7.22",
+    "gulp-uglify": "^3.0.2",
+    "merge-stream": "^1.0.1",
+    "rimraf": "^2.7.1"
+  }
+}
