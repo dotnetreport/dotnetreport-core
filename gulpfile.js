@@ -24,6 +24,9 @@ var deps = {
 	"jquery": {
 		"dist/*": ""
 	},
+	"jquery-ui-dist": {
+		"jquery-ui.min.js": ""
+	},
 	"jquery-validation": {
 		"dist/**/*": ""
 	},

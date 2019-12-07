@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "jquery": "^3.4.1",
+    "jquery-ui-dist": "1.12.1",
     "bootstrap": "4.3.1",
     "bootbox": "5.3.4",
     "jquery-blockui": "2.7.0",
@@ -15,7 +16,7 @@
     "bootstrap-datepicker": "1.9.0",
     "font-awesome": "4.7.0",
     "select2": "4.0.12",
-    "knockout-sortable": "1.2.0"
+    "knockout-sortable": "1.1.0"
   },
   "devDependencies": {
     "gulp": "^4.0.2",
