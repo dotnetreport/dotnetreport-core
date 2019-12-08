@@ -4,6 +4,16 @@ var concat = require('gulp-concat');
 var rimraf = require("rimraf");
 var merge = require('merge-stream');
 
+gulp.task('dist', function (cb) {
+	rimraf("wwwroot/js/dist/", cb);
+	return gulp.src('wwwroot/js/dotnetreport.js')
+		// Minify the file
+		.pipe(uglify())
+		.pipe(concat("dotnetreport.min.js"))
+		// Output
+		.pipe(gulp.dest('wwwroot/js/dist'));
+});
+
 gulp.task("minify", function () {
 
 	var streams = [
@@ -94,4 +104,5 @@ gulp.task("scripts", function () {
 gulp.task('build', gulp.series(
 	'clean',
 	'minify',
-	'scripts'));
+	'scripts'
+));
