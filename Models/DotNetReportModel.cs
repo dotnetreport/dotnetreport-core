@@ -147,13 +147,14 @@ namespace ReportBuilder.Web.Core.Models
         public string Password { get; set; }
         public bool IntegratedSecurity { get; set; }
 
-
+        public string ApiUrl { get; set; }
         public string AccountApiKey { get; set; }
         public string DatabaseApiKey { get; set; }
     }
 
     public class ManageViewModel
     {
+        public string ApiUrl { get; set; }
         public string AccountApiKey { get; set; }
         public string DatabaseApiKey { get; set; }
 

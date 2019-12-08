@@ -59,6 +59,15 @@ var deps = {
 	},
 	"knockout-sortable": {
 		"build/*": ""
+	},
+	"knockout-mapping": {
+		"dist/*": ""
+	},
+	"x-editable-bs4": {
+		"dist/bootstrap4-editable/**/*": ""
+	},
+	"knockout-x-editable": {
+		"knockout.x-editable.min.js": ""
 	}
 };
 
