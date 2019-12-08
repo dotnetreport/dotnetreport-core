@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Web;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using ReportBuilder.Web.Core.Models;
 
 namespace ReportBuilder.Web.Core.Controllers
@@ -44,10 +45,10 @@ namespace ReportBuilder.Web.Core.Controllers
             var model = new List<DotNetDasboardReportModel>();
             var settings = reportApi.GetSettings();
 
-            var dashboards = (dynamic[])(await reportApi.GetDashboardsData(adminMode));
-            if (!id.HasValue && dashboards.Length > 0)
+            var dashboards = (JArray)(await reportApi.GetDashboardsData(adminMode));
+            if (!id.HasValue && dashboards.Count > 0)
             {
-                id = ((dynamic)dashboards.First()).id;
+                id = ((dynamic)dashboards.First()).Id;
             }
 
             using (var client = new HttpClient())

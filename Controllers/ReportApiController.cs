@@ -43,9 +43,12 @@ namespace ReportBuilder.Web.Core.Controllers
             return settings;
         }
         
-        [HttpGet]
-        public IActionResult GetLookupList(string lookupSql, string connectKey)
+        [HttpPost]
+        public IActionResult GetLookupList(dynamic model)
         {
+            string lookupSql = model.lookupSql;
+            string connectKey = model.connectKey;
+
             var sql = DotNetReportHelper.Decrypt(lookupSql);
 
             // Uncomment if you want to restrict max records returned
@@ -64,7 +67,7 @@ namespace ReportBuilder.Web.Core.Controllers
             var data = new List<object>();
             foreach (DataRow dr in dt.Rows)
             {
-                data.Add(new { id = dr[0], value = dr[1] });
+                data.Add(new { id = dr[0], text = dr[1] });
             }
 
             return Ok(data);
@@ -103,8 +106,8 @@ namespace ReportBuilder.Web.Core.Controllers
                 var content = new FormUrlEncodedContent(keyvalues);
                 var response = await client.PostAsync(new Uri(settings.ApiUrl + method), content);
                 var stringContent = await response.Content.ReadAsStringAsync();
-
-                var result = JsonConvert.DeserializeObject(stringContent);
+                var result = JsonConvert.DeserializeObject(stringContent);                
+                if (stringContent == "\"\"") result = new {};
                 return Ok(result);
             }
 
