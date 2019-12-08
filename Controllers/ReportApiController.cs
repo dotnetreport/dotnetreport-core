@@ -226,6 +226,7 @@ namespace ReportBuilder.Web.Core.Controllers
             var settings = GetSettings();
             return Ok(new
             {
+                noAccount = string.IsNullOrEmpty(settings.AccountApiToken) || settings.AccountApiToken == "Your Public Account Api Token",
                 users = settings.CanUseAdminMode ? settings.Users : new List<string>(),
                 userRoles = settings.CanUseAdminMode ? settings.UserRoles : new List<string>(),
                 currentUserId = settings.UserId,
