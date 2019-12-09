@@ -17,7 +17,17 @@ To start the Scheduler Job, add the following line to your Startup.cs:
 	JobScheduler.Start();
 
 For .net Core, dotnet Report uses npm packages for all the client side libraries, and uses gulp to place them in the wwwroot/js/lib folder. 
-The package.json and gulpfile.js is included in the nuget package, but for existing projects, you would likely have to manually merge it in to your existing package.json and gulpfile.js
+
+----------------------------------------------
+-----------------IMPORTANT--------------------
+----------------------------------------------
+client side packages need to be added manually. The list is included package-addme.json and gulpfile-addme.js.
+Please manually merge the contents in to your project's actual package.json and gulpfile.js.
+
+You would also need to add Controller with Views and set NewtonSoft Json setting in your Startup.cs
+
+		services.AddControllersWithViews()
+                .AddNewtonsoftJson(options => options.UseMemberCasing());
 
 For more details and documentation, you can visit https://www.dotnetreport.com. 
 
