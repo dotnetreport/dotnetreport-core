@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
         <id>dotNetReport.core</id>
-        <version>3.0.6-beta</version>
+        <version>3.0.1</version>
         <authors>dotnetReport Builder</authors>
         <owners>dotnetReport Builder</owners>
         <projectUrl>https://dotnetreport.com/</projectUrl>
@@ -20,40 +20,37 @@
             <dependency id="System.Data.SqlClient" version="4.7.0"></dependency>
         </dependencies>
       <contentFiles>
-        <files include="wwwroot/img/report-logo.png" buildAction="Content" />
-        <files include="wwwroot/js/dotnetreport*.js" buildAction="Content" />
-        <files include="Views/Report/*.cshtml" buildAction="Content" />
-        <files include="Views/Setup/*.cshtml" buildAction="Content" />
-        <files include="Views/shared/_reportFilter.cshtml" buildAction="Content" />
-        <files include="Views/shared/_Layout.Report.cshtml" buildAction="Content" />
-        <files include="wwwroot/css/dotnetreport.css" buildAction="Content" />
-        <files include="gulpfile.js" buildAction="None" />
-        <files include="package.json" buildAction="Content" copyToOutput="true" />
+        <files include="any/any/wwwroot/img/report-logo.png" buildAction="Content" />
+        <files include="any/any/wwwroot/js/dotnetreport*.js" buildAction="Content" />
+        <files include="any/any/wwwroot/css/dotnetreport.css" buildAction="Content" />
+        <files include="any/any/Views/Report/*.cshtml" buildAction="Content" />
+        <files include="any/any/Views/Setup/*.cshtml" buildAction="Content" />
+        <files include="any/any/Views/shared/_reportFilter.cshtml" buildAction="Content" />
+        <files include="any/any/Views/shared/_Layout.Report.cshtml" buildAction="Content" />
+        <files include="any/any/gulpfile*.*" buildAction="None" />
+        <files include="any/any/package*.*" buildAction="None" />
       </contentFiles>
     </metadata>
     <files>
         <file src="readme.txt" target="" />
-        <!--
-        <file src="wwwroot/img/report-logo.png" target="contentFiles\any\any\wwwroot/img/report-logo.png" />
-        <file src="wwwroot/js/dotnetreport.js" target="contentFiles\any\any\wwwroot/js/dotnetreport.js" />
-        <file src="wwwroot/js/dotnetreport-helper.js" target="contentFiles\any\any\wwwroot/js/dotnetreport-helper.js" />
-        <file src="wwwroot/js/dotnetreport-setup.js" target="contentFiles\any\any\wwwroot/js/dotnetreport-setup.js" />
-        <file src="wwwroot/js/dotnetreport-wizard.js" target="contentFiles\any\any\wwwroot/js/dotnetreport-wizard.js" />
-        <file src="Views/Report/Index.cshtml" target="contentFiles\any\any\Views/Report/Index.cshtml" />
-        <file src="Views/Report/Dashboard.cshtml" target="contentFiles\any\any\Views/Report/Dashboard.cshtml" />
-        <file src="Views/Report/Report.cshtml" target="contentFiles\any\any\Views/Report/Report.cshtml" />
-        <file src="Views/Setup/Index.cshtml" target="contentFiles\any\any\Views/Setup/Index.cshtml" />
-        <file src="Views/shared/_reportFilter.cshtml" target="contentFiles\any\any\Views/shared/_reportFilter.cshtml" />
-        <file src="Views/shared/_Layout.Report.cshtml" target="contentFiles\any\any\Views/shared/_Layout.Report.cshtml"/>
-        <file src="wwwroot/css/dotnetreport.css" target="contentFiles\any\any\wwwroot/css/dotnetreport.css" />
-        <file src="gulpfile.js" target="contentFiles\any\any\gulpfile.js" />
-        <file src="package.json" target="contentFiles\any\any\package.json" />
-        -->
+        <file src="wwwroot/img/report-logo.png" target="contentFiles\any\any\wwwroot\img\report-logo.png" />
+        <file src="wwwroot/js/dotnetreport.js" target="contentFiles\any\any\wwwroot\js\dotnetreport.js" />
+        <file src="wwwroot\js\dotnetreport-helper.js" target="contentFiles\any\any\wwwroot\js\dotnetreport-helper.js" />
+        <file src="wwwroot\js\dotnetreport-setup.js" target="contentFiles\any\any\wwwroot\js\dotnetreport-setup.js" />
+        <file src="wwwroot\js\dotnetreport-wizard.js" target="contentFiles\any\any\wwwroot\js\dotnetreport-wizard.js" />
+        <file src="wwwroot\css\dotnetreport.css" target="contentFiles\any\any\wwwroot\css\dotnetreport.css" />
+        <file src="gulpfile.js" target="contentFiles\any\any\gulpfile-addme.text" />
+        <file src="package.json" target="contentFiles\any\any\package-addme.text" />
+        <file src="Views\Report\Index.cshtml" target="contentFiles\any\any\Views\Report\Index.cshtml" />
+        <file src="Views\Report\Dashboard.cshtml" target="contentFiles\any\any\Views\Report\Dashboard.cshtml" />
+        <file src="Views\Report\Report.cshtml" target="contentFiles\any\any\Views\Report\Report.cshtml" />
+        <file src="Views\Setup\Index.cshtml" target="contentFiles\any\any\Views\Setup\Index.cshtml" />
+        <file src="Views\shared\_reportFilter.cshtml" target="contentFiles\any\any\Views\shared\_reportFilter.cshtml" />
+        <file src="Views\shared\_Layout.Report.cshtml" target="contentFiles\any\any\Views\shared\_Layout.Report.cshtml" />
         <file src="Controllers\ReportController.cs" target="contentFiles\any\any\Controllers\ReportController.cs" />
         <file src="Controllers\ReportApiController.cs" target="contentFiles\any\any\Controllers\ReportApiController.cs" />
         <file src="Controllers\SetupController.cs" target="contentFiles\any\any\Controllers\SetupController.cs" />      
         <file src="Jobs\ReportJob.cs" target="contentFiles\any\any\Jobs\DotNetReportJob.cs" />
         <file src="Models\DotNetReportModel.cs" target="contentFiles\any\any\Models\DotNetReportModel.cs" />
-        <file src="Startup.cs" target="contentFiles\any\any\Startup.cs" />
     </files>
 </package>
