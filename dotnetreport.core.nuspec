@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
         <id>dotNetReport.core</id>
-        <version>3.0.2-beta</version>
+        <version>3.0.6-beta</version>
         <authors>dotnetReport Builder</authors>
         <owners>dotnetReport Builder</owners>
         <projectUrl>https://dotnetreport.com/</projectUrl>
@@ -12,10 +12,12 @@
         <copyright>(c) dotnet Report Builder</copyright>
         <tags>embedded analytics, report generator, .net core report builder, sql reporting tools, visual studio report designer, ad-hoc reporting, asp .net mvc report, report builder, ad hoc adhoc reports, viewer, reportviewer, sql builder mvc, web forms, query builder,mvc reporting,custom query,query maker, dotnetreport</tags>
         <dependencies>            
-            <dependency id="EPPlus" version="4.1.0" />
-            <dependency id="Newtonsoft.Json" version="9.0.1" />            
+            <dependency id="EPPlus" version="4.5.3.2" />
+            <dependency id="Microsoft.AspNetCore.Mvc.NewtonsoftJson" version="3.0.0" />            
             <dependency id="Quartz" version="3.0.7" />
-            <dependency id="System.Net.Http" version="4.3.4"></dependency>
+            <dependency id="System.Data.Common" version="4.3.0"></dependency>
+            <dependency id="System.Data.OleDb" version="4.7.0"></dependency>
+            <dependency id="System.Data.SqlClient" version="4.7.0"></dependency>
         </dependencies>
       <contentFiles>
         <files include="wwwroot/img/report-logo.png" buildAction="Content" />
@@ -31,6 +33,22 @@
     </metadata>
     <files>
         <file src="readme.txt" target="" />
+        <!--
+        <file src="wwwroot/img/report-logo.png" target="contentFiles\any\any\wwwroot/img/report-logo.png" />
+        <file src="wwwroot/js/dotnetreport.js" target="contentFiles\any\any\wwwroot/js/dotnetreport.js" />
+        <file src="wwwroot/js/dotnetreport-helper.js" target="contentFiles\any\any\wwwroot/js/dotnetreport-helper.js" />
+        <file src="wwwroot/js/dotnetreport-setup.js" target="contentFiles\any\any\wwwroot/js/dotnetreport-setup.js" />
+        <file src="wwwroot/js/dotnetreport-wizard.js" target="contentFiles\any\any\wwwroot/js/dotnetreport-wizard.js" />
+        <file src="Views/Report/Index.cshtml" target="contentFiles\any\any\Views/Report/Index.cshtml" />
+        <file src="Views/Report/Dashboard.cshtml" target="contentFiles\any\any\Views/Report/Dashboard.cshtml" />
+        <file src="Views/Report/Report.cshtml" target="contentFiles\any\any\Views/Report/Report.cshtml" />
+        <file src="Views/Setup/Index.cshtml" target="contentFiles\any\any\Views/Setup/Index.cshtml" />
+        <file src="Views/shared/_reportFilter.cshtml" target="contentFiles\any\any\Views/shared/_reportFilter.cshtml" />
+        <file src="Views/shared/_Layout.Report.cshtml" target="contentFiles\any\any\Views/shared/_Layout.Report.cshtml"/>
+        <file src="wwwroot/css/dotnetreport.css" target="contentFiles\any\any\wwwroot/css/dotnetreport.css" />
+        <file src="gulpfile.js" target="contentFiles\any\any\gulpfile.js" />
+        <file src="package.json" target="contentFiles\any\any\package.json" />
+        -->
         <file src="Controllers\ReportController.cs" target="contentFiles\any\any\Controllers\ReportController.cs" />
         <file src="Controllers\ReportApiController.cs" target="contentFiles\any\any\Controllers\ReportApiController.cs" />
         <file src="Controllers\SetupController.cs" target="contentFiles\any\any\Controllers\SetupController.cs" />      
