@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+    <metadata>
+        <id>dotNetReport.core</id>
+        <version>3.0.2-beta</version>
+        <authors>dotnetReport Builder</authors>
+        <owners>dotnetReport Builder</owners>
+        <projectUrl>https://dotnetreport.com/</projectUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>.Net Embedded Analytics and Report Generator that allows programmers to easily add Report building functionality to their ASP .NET Web Application</description>
+        <releaseNotes>Initial version for dotnet Report for .net Core</releaseNotes>
+        <copyright>(c) dotnet Report Builder</copyright>
+        <tags>embedded analytics, report generator, .net core report builder, sql reporting tools, visual studio report designer, ad-hoc reporting, asp .net mvc report, report builder, ad hoc adhoc reports, viewer, reportviewer, sql builder mvc, web forms, query builder,mvc reporting,custom query,query maker, dotnetreport</tags>
+        <dependencies>            
+            <dependency id="EPPlus" version="4.1.0" />
+            <dependency id="Newtonsoft.Json" version="9.0.1" />            
+            <dependency id="Quartz" version="3.0.7" />
+            <dependency id="System.Net.Http" version="4.3.4"></dependency>
+        </dependencies>
+      <contentFiles>
+        <files include="wwwroot/img/report-logo.png" buildAction="Content" />
+        <files include="wwwroot/js/dotnetreport*.js" buildAction="Content" />
+        <files include="Views/Report/*.cshtml" buildAction="Content" />
+        <files include="Views/Setup/*.cshtml" buildAction="Content" />
+        <files include="Views/shared/_reportFilter.cshtml" buildAction="Content" />
+        <files include="Views/shared/_Layout.Report.cshtml" buildAction="Content" />
+        <files include="wwwroot/css/dotnetreport.css" buildAction="Content" />
+        <files include="gulpfile.js" buildAction="None" />
+        <files include="package.json" buildAction="Content" copyToOutput="true" />
+      </contentFiles>
+    </metadata>
+    <files>
+        <file src="readme.txt" target="" />
+        <file src="Controllers\ReportController.cs" target="contentFiles\any\any\Controllers\ReportController.cs" />
+        <file src="Controllers\ReportApiController.cs" target="contentFiles\any\any\Controllers\ReportApiController.cs" />
+        <file src="Controllers\SetupController.cs" target="contentFiles\any\any\Controllers\SetupController.cs" />      
+        <file src="Jobs\ReportJob.cs" target="contentFiles\any\any\Jobs\DotNetReportJob.cs" />
+        <file src="Models\DotNetReportModel.cs" target="contentFiles\any\any\Models\DotNetReportModel.cs" />
+        <file src="Startup.cs" target="contentFiles\any\any\Startup.cs" />
+    </files>
+</package>
