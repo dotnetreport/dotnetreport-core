@@ -38,7 +38,11 @@
 
     function downloadXml() {
         $("#downloadXml").submit();
-    }
+     }
+
+        function downloadPdf() {
+            $("#downloadPdf").submit();
+        }
 
     $(document).ready(function () {
         var vm = new reportViewModel({
@@ -82,7 +86,13 @@
             <input type="hidden" id="connectKey" name="connectKey" data-bind="value: currentConnectKey" />
             <input type="hidden" id="reportName" name="reportName" data-bind="value: ReportName" />
         }
-
+        @using (Html.BeginForm("DownloadPdf", "Report", FormMethod.Post, new { id = "downloadPdf" }))
+        {
+            <input type="hidden" id="chartdata" name="chartData" data-bind="value: ChartData" />
+            <input type="hidden" id="reportSql" name="reportSql" data-bind="value: currentSql" />
+            <input type="hidden" id="connectKey" name="connectKey" data-bind="value: currentConnectKey" />
+            <input type="hidden" id="reportName" name="reportName" data-bind="value: ReportName" />
+        }
         <div class="pull-right">
             <a href="@Url.Action("Index","Report")?folderId=@Model.SelectedFolder" class="btn btn-primary">
                 Back to Reports
@@ -99,6 +109,11 @@
                     <span class="fa fa-download"></span> Export <span class="caret"></span>
                 </button>
                 <ul class="dropdown-menu">
+                    <li>
+                        <a href="#" onclick="downloadPdf();">
+                            <span class="fa fa-file-pdf-o"></span> Pdf
+                        </a>
+                    </li>
                     <li>
                         <a href="#" onclick="downloadExcel();">
                             <span class="fa fa-file-excel-o"></span> Excel
@@ -121,7 +136,7 @@
             <br />
             <button class="btn btn-secondary btn-sm" data-bind="click: ExpandAll">Expand All</button>
             <button class="btn btn-secondary btn-sm" data-bind="click: CollapseAll">Collapse All</button>
-        </div>           
+        </div>
         <br />
         <div class="report-menubar">
             <div class="col-xs-12 col-centered" data-bind="with: pager">

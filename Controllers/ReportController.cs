@@ -96,6 +96,13 @@ namespace ReportBuilder.Web.Core.Controllers
 
             return File(xml, "application/xml", reportName + ".xml");
         }
+        [HttpPost]
+        public ActionResult DownloadPdf(string reportSql, string connectKey, string reportName, string ChartData = null)
+        {
+
+            var pdf = DotNetReportHelper.GetPdfFile(reportSql, connectKey, reportName, ChartData);
+            return File(pdf, "application/pdf", reportName + ".pdf");
+        }
 
     }
 }

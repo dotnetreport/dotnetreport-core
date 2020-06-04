@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using iTextSharp.text;
+using iTextSharp.text.pdf;
+using Microsoft.Extensions.Configuration;
 using OfficeOpenXml;
 using System;
 using System.Collections.Generic;
@@ -8,6 +10,7 @@ using System.Data.SqlClient;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
+using System.Web;
 
 namespace ReportBuilder.Web.Core.Models
 {
@@ -23,7 +26,7 @@ namespace ReportBuilder.Web.Core.Models
         public string ReportFilter { get; set; }
         public string ReportType { get; set; }
         public bool ShowDataWithGraph { get; set; }
-
+        public string ChartData { get; set; }
         public string ConnectKey { get; set; }
         public bool IsDashboard { get; set; }
         public int SelectedFolder { get; set; }
@@ -246,7 +249,7 @@ namespace ReportBuilder.Web.Core.Models
     {
         public static byte[] GetExcelFile(string reportSql, string connectKey, string reportName)
         {
-            var sql = Decrypt(reportSql);
+            var sql = Decrypt(HttpUtility.HtmlDecode(reportSql));
 
             // Execute sql
             var dt = new DataTable();
@@ -297,7 +300,7 @@ namespace ReportBuilder.Web.Core.Models
 
         public static string GetXmlFile(string reportSql, string connectKey, string reportName)
         {
-            var sql = Decrypt(reportSql);
+            var sql = Decrypt(HttpUtility.HtmlDecode(reportSql));
 
             // Execute sql
             var dt = new DataTable();
@@ -321,16 +324,91 @@ namespace ReportBuilder.Web.Core.Models
             var xml = ds.GetXml();
             return xml;
         }
+        public static byte[] GetPdfFile(string reportSql, string connectKey, string reportName, string ChartData = null)
+        {
+            var sql = Decrypt(HttpUtility.HtmlDecode(reportSql));
+            var dt = new DataTable();
+            using (var conn = new SqlConnection(Startup.StaticConfig.GetConnectionString(connectKey)))
+            {
+                conn.Open();
+                var command = new SqlCommand(sql, conn);
+                var adapter = new SqlDataAdapter(command);
 
+                adapter.Fill(dt);
+            }
+            Document document = new Document();
+            using (var ms = new MemoryStream())
+            {
+                PdfWriter writer = PdfWriter.GetInstance(document, ms);
+                document.Open();
+                PdfPTable table = new PdfPTable(dt.Columns.Count);
+                table.WidthPercentage = 100;
+                // table.DefaultCell.Border = 1;
+                //Set columns names in the pdf file
+                for (int k = 0; k < dt.Columns.Count; k++)
+                {
+                    PdfPCell cell = new PdfPCell(new Phrase(dt.Columns[k].ColumnName));
+                    cell.HorizontalAlignment = PdfPCell.ALIGN_CENTER;
+                    cell.VerticalAlignment = PdfPCell.ALIGN_CENTER;
+                    cell.BorderColor = BaseColor.LIGHT_GRAY;
+                    cell.BorderWidth = 1f;
+                    // cell.BackgroundColor = new iTextSharp.text.BaseColor(51, 102, 102);
+                    table.AddCell(cell);
+                }
+                //Add values of DataTable in pdf file
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+                    for (int j = 0; j < dt.Columns.Count; j++)
+                    {
+                        PdfPCell cell = new PdfPCell(new Phrase(dt.Rows[i][j].ToString()));
+                        //Align the cell in the center
+                        cell.HorizontalAlignment = PdfPCell.ALIGN_LEFT;
+                        cell.VerticalAlignment = PdfPCell.ALIGN_LEFT;
+                        cell.BorderColor = BaseColor.LIGHT_GRAY;
+                        cell.BorderWidth = 1f;
+                        table.AddCell(cell);
+                    }
+                }
+                //Create a PdfReader bound to that byte array
+                if (!string.IsNullOrEmpty(ChartData))
+                {
+                    byte[] sPDFDecoded = Convert.FromBase64String(ChartData.Substring(ChartData.LastIndexOf(',') + 1));
+                    var image = Image.GetInstance(sPDFDecoded);
+                    if (image.Height > image.Width)
+                    {
+                        //Maximum height is 800 pixels.
+                        float percentage = 0.0f;
+                        percentage = 700 / image.Height;
+                        image.ScalePercent(percentage * 100);
+                    }
+                    else
+                    {
+                        //Maximum width is 600 pixels.
+                        float percentage = 0.0f;
+                        percentage = 540 / image.Width;
+                        image.ScalePercent(percentage * 100);
+                    }
+                    // If need to add boarder
+                    //   image.Border = iTextSharp.text.Rectangle.BOX;
+                    //  image.BorderColor = iTextSharp.text.BaseColor.BLACK;
+                    //  image.BorderWidth = 3f;
+                    document.Add(image);
+                }
+                document.Add(table);
+                document.Close();
+                return ms.ToArray();
+            }
+        }
         /// <summary>
         /// Method to Deycrypt encrypted sql statement. PLESE DO NOT CHANGE THIS METHOD
         /// </summary>
         public static string Decrypt(string encryptedText)
         {
+           // encryptedText = encryptedText.Split(new string[] { "%2C" }, StringSplitOptions.RemoveEmptyEntries)[0];
             byte[] initVectorBytes = Encoding.ASCII.GetBytes("yk0z8f39lgpu70gi"); // PLESE DO NOT CHANGE THIS KEY
             int keysize = 256;
-
-            byte[] cipherTextBytes = Convert.FromBase64String(encryptedText.Replace("%3D", "="));
+            encryptedText =  encryptedText.Replace("%3D", "=");
+            byte[] cipherTextBytes = Convert.FromBase64String(encryptedText);
             var passPhrase = Startup.StaticConfig.GetValue<string>("dotNetReport:privateApiToken").ToLower();
             using (PasswordDeriveBytes password = new PasswordDeriveBytes(passPhrase, null))
             {

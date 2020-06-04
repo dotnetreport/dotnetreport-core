@@ -267,7 +267,7 @@ var reportViewModel = function (options) {
 	options.userId = options.userSettings.currentUserId || "";
 	options.users = options.userSettings.users;
 	options.userRoles = options.userSettings.userRoles;
-
+	
 	self.currentUserId = options.userSettings.userId;
 	self.currentUserRole = (options.userSettings.currentUserRoles || []).join();
 	self.currentUserName = options.userSettings.currentUserName;
@@ -278,7 +278,7 @@ var reportViewModel = function (options) {
 	self.ReportDescription = ko.observable();
 	self.FolderID = ko.observable();
 	self.ReportID = ko.observable();
-
+	self.ChartData = ko.observable();
 	self.Tables = ko.observableArray([]);
 	self.SelectedTable = ko.observable();
 
@@ -1191,6 +1191,7 @@ var reportViewModel = function (options) {
 		}
 
 		chart.draw(data, options);
+		self.ChartData(chart.getImageURI());
 
 	};
 
