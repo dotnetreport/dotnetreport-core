@@ -19,12 +19,15 @@
 
     $(document).ready(function () {
         ajaxcall({ url: '@Url.Action("GetUsersAndRoles", "ReportApi")' }).done(function (data) {
+            var selectedDb = '@(Context.Request.Query["selectedDb"].Any() ? Context.Request.Query["selectedDb"].First() : "")' || localStorage.getItem('dotnetreport-selectedDb') || 'connection key 1';
+            localStorage.setItem('dotnetreport-selectedDb', selectedDb);
+            
             var vm = new reportViewModel({
                 runReportUrl: '@Url.Action("Report")',
                 reportWizard: $("#modal-reportbuilder"),
                 lookupListUrl: '@Url.Action("GetLookupList", "ReportApi")',
-                apiUrl: '@Url.Action("CallReportApi", "ReportApi")',
-                runReportApiUrl: '@Url.Action("RunReportApi", "ReportApi")',
+                apiUrl: '@Url.Action("CallReportApi", "ReportApi")' + "?dataConnect=" + selectedDb,
+                runReportApiUrl: '@Url.Action("RunReportApi", "ReportApi")' + "?dataConnect=" + selectedDb,
                 getUsersAndRolesUrl: '@Url.Action("GetUsersAndRoles", "ReportApi")',
                 reportId: @(Context.Request.Query["reportId"].Any() ? Context.Request.Query["reportId"].First() : "0"),
                 userSettings: data
@@ -32,13 +35,35 @@
             });
 
             vm.init(@(Context.Request.Query["folderId"].Any() ? Context.Request.Query["folderId"].First() : "0"), data.noAccount);
+
+            var switchVm = {
+                databases: [{ name: 'Connection 1', key: 'connection key 1' }, { name: 'Connection 2', key: 'connection key 2' }, { name: 'Connection 3', key: 'connection key 3' }], 
+                selectedDb: ko.observable(selectedDb)
+            }
+
+            switchVm.selectedDb.subscribe(function (newValue) {
+                if (newValue) {
+                    localStorage.setItem('dotnetreport-selectedDb', newValue);
+                    window.location.href = window.location.pathname;
+                }
+            });
+
+            vm.switchVm = switchVm;
+
             ko.applyBindings(vm);
         });
     });
 
     </script>
 }
-
+<div class="pull-right">
+    <div class="form-inline" data-bind="with: switchVm">
+        <div class="form-group">
+            <label>Switch Database:</label>
+            <select class="form-control" data-bind="options: databases, optionsText: 'name', optionsValue: 'key', value: selectedDb"></select>
+        </div>
+    </div>
+</div>
 <h3>Report Builder</h3>
 <p>
     Manage your Reports below. You can use the intuitive and user friendly Report Builder to create many types of Ad-hoc Reports.
