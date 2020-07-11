@@ -40,15 +40,13 @@
         $("#downloadXml").submit();
     }
 
-    var selectedDb = localStorage.getItem('dotnetreport-selectedDb') || 'connection key 1';
-    var apiUrl = '@Url.Action("CallReportApi")' + "?dataConnect=" + selectedDb;
     $(document).ready(function () {
         var vm = new reportViewModel({
             runReportUrl: "@Url.Action("Report")",
             execReportUrl: "@Url.Action("RunReport", "ReportApi")",
             reportWizard: $("#filter-panel"),
             lookupListUrl: "@Url.Action("GetLookupList", "ReportApi")",
-            apiUrl: apiUrl,
+            apiUrl: '@Url.Action("CallReportApi", "ReportApi")',
             runReportApiUrl: '@Url.Action("RunReportApi", "ReportApi")',
             reportFilter: htmlDecode('@System.Web.HttpUtility.UrlDecode(Model.ReportFilter)'),
             reportMode: "execute",
