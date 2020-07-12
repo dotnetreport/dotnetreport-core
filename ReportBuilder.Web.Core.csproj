@@ -1,9 +1,40 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.0</TargetFramework>
+    <PackageId>dotnetreport.core</PackageId>
+    <Version>3.0.9-beta</Version>
+    <Authors>Dotnet Report</Authors>
+    <Product>Dotnet Report</Product>
+    <Description>Ad hoc report builder that lets users create their own reports and dashboards</Description>
+    <PackageProjectUrl>https://www.dotnetreport.com</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/dotnetreport/Ad-Hoc-Report-Builder-.net-core</RepositoryUrl>
+    <PackageTags>reporting, ad hoc reporting, business analytics, reporting tool, dashboards</PackageTags>
+    <IsPackable>true</IsPackable>
+    <PackageType>Template</PackageType>
+    <IncludeContentInPack>true</IncludeContentInPack>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <ContentTargetFolders>content</ContentTargetFolders>
   </PropertyGroup>
+  <ItemGroup Label="Packaging">
+    <Content Include="build\PackageToGenerateFile.targets" PackagePath="build\PackageToGenerateFile.targets" />
+    <Content Include="wwwroot/img/report-logo.png">
+      <Pack>true</Pack>
+    </Content>
+    <Content Include="wwwroot/js/dotnetreport.js">
+      <Pack>true</Pack>
+    </Content>
+    <Content Include="wwwroot\js\dotnetreport-helper.js">
+      <Pack>true</Pack>
+    </Content>
+  </ItemGroup>
 
+  <ItemGroup>
+    <Content Include="readme.txt">
+      <Pack>true</Pack>
+      <PackagePath>\</PackagePath>
+    </Content>
+  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="EPPlus" Version="4.5.3.2" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.0.0" />
