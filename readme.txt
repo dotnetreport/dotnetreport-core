@@ -16,15 +16,16 @@ To start the Scheduler Job, add the following line to your Startup.cs:
 
 	JobScheduler.Start();
 
-For .net Core, dotnet Report uses npm packages for all the client side libraries, and uses gulp to place them in the wwwroot/js/lib folder. 
+For .Net Core, dotnet Report uses npm packages for all the client side libraries, and uses gulp to place them in the wwwroot/js/lib folder. 
 
-----------------------------------------------
------------------IMPORTANT--------------------
-----------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------IMPORTANT------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------
 
 With .net core nuget package, there are some additional steps to get dotnet Report running locally in your project. 
+It's always a good idea to checkin your code before adding the dotnetreport nuget package. 
 
-1. Need to get files locally in your project.
+1. Need to get files locally in your project. ***** THIS TAKES 3 STEPS *****
 
 First, add GeneratePathProperty="true" dotNetReport.core package reference:
 
@@ -32,35 +33,38 @@ First, add GeneratePathProperty="true" dotNetReport.core package reference:
     <PackageReference Include="dotNetReport.core" Version="x.x.x" GeneratePathProperty="true" />
   </ItemGroup>
 
-Next, add the following to your project to copy front end files included in your project directly rather than as a reference.
+Second, add the following to your project to copy front end files included in your project directly rather than as a reference.
 
   <PropertyGroup>
     <ContentFilesPath>$(PkgdotNetReport_core)\contentFiles\any\any\</ContentFilesPath>
   </PropertyGroup>
   <Target Name="CopyDotNetReportContent" BeforeTargets="PreBuildEvent">
-    <Copy SourceFiles="$(ContentFilesPath)gulpfile.dotnetreport.js" DestinationFiles="$(ProjectDir)\gulpfile.dotnetreport.js" SkipUnchangedFiles="true"></Copy>
-    <Copy SourceFiles="$(ContentFilesPath)package.dotnetreport.json" DestinationFiles="$(ProjectDir)\package.dotnetreport.json" SkipUnchangedFiles="true"></Copy>
-    <Copy SourceFiles="$(ContentFilesPath)wwwroot/img/report-logo.png" DestinationFiles="$(ProjectDir)\wwwroot/img/report-logo.png" SkipUnchangedFiles="true"></Copy>
-    <Copy SourceFiles="$(ContentFilesPath)wwwroot/js/dotnetreport.js" DestinationFiles="$(ProjectDir)\wwwroot/js/dotnetreport.js" SkipUnchangedFiles="true"></Copy>
-    <Copy SourceFiles="$(ContentFilesPath)wwwroot/js/dotnetreport-helper.js" DestinationFiles="$(ProjectDir)\wwwroot/js/dotnetreport-helper.js" SkipUnchangedFiles="true"></Copy>
-    <Copy SourceFiles="$(ContentFilesPath)wwwroot/css/dotnetreport.css" DestinationFiles="$(ProjectDir)\wwwroot/css/dotnetreport.css" SkipUnchangedFiles="true"></Copy>
-    <Copy SourceFiles="$(ContentFilesPath)Jobs/DotNetReportJob.cs" DestinationFiles="$(ProjectDir)Jobs/DotNetReportJob.cs" SkipUnchangedFiles="true"></Copy>
-    <Copy SourceFiles="$(ContentFilesPath)Models/DotNetReportModel.cs" DestinationFiles="$(ProjectDir)Models/DotNetReportModel.cs" SkipUnchangedFiles="true"></Copy>
-    <Copy SourceFiles="$(ContentFilesPath)Controllers/ReportApiController.cs" DestinationFiles="$(ProjectDir)Controllers/ReportApiController.cs" SkipUnchangedFiles="true"></Copy>
-    <Copy SourceFiles="$(ContentFilesPath)Controllers/ReportController.cs" DestinationFiles="$(ProjectDir)Controllers/ReportController.cs" SkipUnchangedFiles="true"></Copy>
-    <Copy SourceFiles="$(ContentFilesPath)Controllers/SetupController.cs" DestinationFiles="$(ProjectDir)Controllers/SetupController.cs" SkipUnchangedFiles="true"></Copy>
-    <Copy SourceFiles="$(ContentFilesPath)Views/Report/Dashboard.cshtml" DestinationFiles="$(ProjectDir)Views/Report/Dashboard.cshtml" SkipUnchangedFiles="true"></Copy>
-    <Copy SourceFiles="$(ContentFilesPath)Views/Report/Index.cshtml" DestinationFiles="$(ProjectDir)Views/Report/Index.cshtml" SkipUnchangedFiles="true"></Copy>
-    <Copy SourceFiles="$(ContentFilesPath)Views/Report/Report.cshtml" DestinationFiles="$(ProjectDir)Views/Report/Report.cshtml" SkipUnchangedFiles="true"></Copy>
-    <Copy SourceFiles="$(ContentFilesPath)Views/Setup/Index.cshtml" DestinationFiles="$(ProjectDir)Views/Setup/Index.cshtml" SkipUnchangedFiles="true"></Copy>
-    <Copy SourceFiles="$(ContentFilesPath)Views/Shared/_Layout.Report.cshtml" DestinationFiles="$(ProjectDir)Views/Shared/_Layout.Report.cshtml" SkipUnchangedFiles="true"></Copy>
+    <Copy SourceFiles="$(ContentFilesPath)gulpfile.dotnetreport.js" DestinationFiles="$(ProjectDir)\gulpfile.dotnetreport.js"></Copy>
+    <Copy SourceFiles="$(ContentFilesPath)package.dotnetreport.json" DestinationFiles="$(ProjectDir)\package.dotnetreport.json"></Copy>
+    <Copy SourceFiles="$(ContentFilesPath)wwwroot/img/report-logo.png" DestinationFiles="$(ProjectDir)\wwwroot/img/report-logo.png"></Copy>
+    <Copy SourceFiles="$(ContentFilesPath)wwwroot/js/dotnetreport.js" DestinationFiles="$(ProjectDir)\wwwroot/js/dotnetreport.js"></Copy>
+    <Copy SourceFiles="$(ContentFilesPath)wwwroot/js/dotnetreport-helper.js" DestinationFiles="$(ProjectDir)\wwwroot/js/dotnetreport-helper.js"></Copy>
+    <Copy SourceFiles="$(ContentFilesPath)wwwroot/js/dotnetreport-setup.js" DestinationFiles="$(ProjectDir)\wwwroot/js/dotnetreport-setup.js"></Copy>
+    <Copy SourceFiles="$(ContentFilesPath)wwwroot/css/dotnetreport.css" DestinationFiles="$(ProjectDir)\wwwroot/css/dotnetreport.css"></Copy>
+    <Copy SourceFiles="$(ContentFilesPath)Jobs/DotNetReportJob.cs" DestinationFiles="$(ProjectDir)Jobs/DotNetReportJob.cs"></Copy>
+    <Copy SourceFiles="$(ContentFilesPath)Models/DotNetReportModel.cs" DestinationFiles="$(ProjectDir)Models/DotNetReportModel.cs"></Copy>
+    <Copy SourceFiles="$(ContentFilesPath)Controllers/ReportApiController.cs" DestinationFiles="$(ProjectDir)Controllers/ReportApiController.cs"></Copy>
+    <Copy SourceFiles="$(ContentFilesPath)Controllers/ReportController.cs" DestinationFiles="$(ProjectDir)Controllers/ReportController.cs"></Copy>
+    <Copy SourceFiles="$(ContentFilesPath)Controllers/SetupController.cs" DestinationFiles="$(ProjectDir)Controllers/SetupController.cs"></Copy>
+    <Copy SourceFiles="$(ContentFilesPath)Views/Report/Dashboard.cshtml" DestinationFiles="$(ProjectDir)Views/Report/Dashboard.cshtml"></Copy>
+    <Copy SourceFiles="$(ContentFilesPath)Views/Report/Index.cshtml" DestinationFiles="$(ProjectDir)Views/Report/Index.cshtml"></Copy>
+    <Copy SourceFiles="$(ContentFilesPath)Views/Report/Report.cshtml" DestinationFiles="$(ProjectDir)Views/Report/Report.cshtml"></Copy>
+    <Copy SourceFiles="$(ContentFilesPath)Views/Setup/Index.cshtml" DestinationFiles="$(ProjectDir)Views/Setup/Index.cshtml"></Copy>
+    <Copy SourceFiles="$(ContentFilesPath)Views/Shared/_Layout.Report.cshtml" DestinationFiles="$(ProjectDir)Views/Shared/_Layout.Report.cshtml"></Copy>
   </Target>
+
+  Third, build the project, don't worry about errors, but you should notice that the references are gone and these files are now part of the project. Now remove the entire CopyDotNetReportContent block, otherwise the project will keep overwriting your file changes. We don't need it anymore.
 
 2. Client side packages need to be added to your package.json file. 
 
-The list of libraries dotnet Report uses from npm is included package.dotnetreport.json. Please manually merge the contents in to your project's actual package.json.
+The list of libraries dotnet Report uses from npm is included package.dotnetreport.json. Please manually merge the contents in to your project's actual package.json. If you don't have one, just rename this file to package.json.
 
-Then run gulpfile.dotnetreport.js. 
+Then run gulpfile.dotnetreport.js (merge it in with your gulpfile, if you don't have one, just rename this file to gulpfile.js). 
 
 3. Add Static Config to your Startup.cs
 
@@ -82,6 +86,8 @@ If your project is not using controller with Views, you would also need to add C
                 .AddNewtonsoftJson(options => options.UseMemberCasing());
 
 You should be able to build and run the project after the above changes. 
+
+Unfortunately this is a short, one time workaround for .net core till we figure out how to do this with powershell or options in nuget package to add this to do this automaticaily. 
 
 For more details and documentation, you can visit https://www.dotnetreport.com. 
 

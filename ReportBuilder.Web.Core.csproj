@@ -16,19 +16,6 @@
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <ContentTargetFolders>content</ContentTargetFolders>
   </PropertyGroup>
-  <ItemGroup Label="Packaging">
-    <Content Include="build\PackageToGenerateFile.targets" PackagePath="build\PackageToGenerateFile.targets" />
-    <Content Include="wwwroot/img/report-logo.png">
-      <Pack>true</Pack>
-    </Content>
-    <Content Include="wwwroot/js/dotnetreport.js">
-      <Pack>true</Pack>
-    </Content>
-    <Content Include="wwwroot\js\dotnetreport-helper.js">
-      <Pack>true</Pack>
-    </Content>
-  </ItemGroup>
-
   <ItemGroup>
     <Content Include="readme.txt">
       <Pack>true</Pack>
@@ -52,3 +39,4 @@
   </ItemGroup>
 
 </Project>
+

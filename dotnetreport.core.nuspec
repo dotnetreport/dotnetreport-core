@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
         <id>dotNetReport.core</id>
-        <version>3.0.3</version>
+        <version>3.1.1</version>
         <authors>dotnetReport Builder</authors>
         <owners>dotnetReport Builder</owners>
         <projectUrl>https://dotnetreport.com/</projectUrl>
@@ -20,15 +20,18 @@
             <dependency id="System.Data.SqlClient" version="4.7.0"></dependency>
         </dependencies>
       <contentFiles>
-        <files include="any/any/wwwroot/img/report-logo.png" buildAction="Content" />
-        <files include="any/any/wwwroot/js/dotnetreport*.js" buildAction="Content" />
-        <files include="any/any/wwwroot/css/dotnetreport.css" buildAction="Content" />
-        <files include="any/any/Views/Report/*.cshtml" buildAction="Content" />
-        <files include="any/any/Views/Setup/*.cshtml" buildAction="Content" />
-        <files include="any/any/Views/shared/_reportFilter.cshtml" buildAction="Content" />
-        <files include="any/any/Views/shared/_Layout.Report.cshtml" buildAction="Content" />
+        <files include="any/any/wwwroot/img/report-logo.png" buildAction="None" />
+        <files include="any/any/wwwroot/js/dotnetreport*.js" buildAction="None" />
+        <files include="any/any/wwwroot/css/dotnetreport.css" buildAction="None" />
+        <files include="any/any/Views/Report/*.cshtml" buildAction="None" />
+        <files include="any/any/Views/Setup/*.cshtml" buildAction="None" />
+        <files include="any/any/Views/shared/_reportFilter.cshtml" buildAction="None" />
+        <files include="any/any/Views/shared/_Layout.Report.cshtml" buildAction="None" />
         <files include="any/any/gulpfile*.*" buildAction="None" />
         <files include="any/any/package*.*" buildAction="None" />
+        <files include="any/any/Controllers/*.cs" buildAction="None" />
+        <files include="any/any/Models/*.cs" buildAction="None" />
+        <files include="any/any/Jobs/*.cs" buildAction="None" />
       </contentFiles>
     </metadata>
     <files>
