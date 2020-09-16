@@ -228,7 +228,8 @@
 		return joinsToSave;
 	}
 
-	self.SaveJoins = function () {				
+	self.SaveJoins = function () {
+
 		var joinsToSave = self.getJoinsToSave();
 
 		ajaxcall({
@@ -246,7 +247,7 @@
 
 
 	self.saveChanges = function () {
-		
+
 		var tablesToSave = $.map(self.Tables.model(), function (x) {
 			if (x.Selected()) {
 				return x;
@@ -267,7 +268,7 @@
 		})
 	}
 
-	self.download = function(content, fileName, contentType) {
+	self.download = function (content, fileName, contentType) {
 		var a = document.createElement("a");
 		var file = new Blob([content], { type: contentType });
 		a.href = URL.createObjectURL(file);
@@ -371,7 +372,7 @@ var tablesViewModel = function (options) {
 					}
 				});
 
-				
+
 				return;
 			}
 

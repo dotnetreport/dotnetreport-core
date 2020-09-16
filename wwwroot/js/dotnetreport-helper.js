@@ -2,8 +2,8 @@
 
 // Ajax call wrapper function
 function ajaxcall(options) {
-	var noBlocking = options.noBlocking === true ? true : false
-	if ($.blockUI && !noBlocking) {
+    var noBlocking = options.noBlocking === true ? true : false
+    if ($.blockUI && !noBlocking) {
         $.blockUI({ baseZ: 500 });
     }
 
@@ -14,7 +14,8 @@ function ajaxcall(options) {
         cache: options.cache || false,
         dataType: options.dataType || "json",
         contentType: options.contentType || "application/json; charset=utf-8",
-		headers: options.headers || {},
+        headers: options.headers || {},
+        async: options.async === false ? options.async : true
     }).done(function (data) {
         if ($.unblockUI) {
             $.unblockUI();
@@ -27,7 +28,7 @@ function ajaxcall(options) {
         delete options;
         var msg = jqxhr.responseJSON && jqxhr.responseJSON.Message ? "\n" + jqxhr.responseJSON.Message : "";
 
-		if (error == "Conflict") {
+        if (error == "Conflict") {
             toastr.error("Conflict detected. Please ensure the record is not a duplicate and that it has no related records." + msg);
         } else if (error == "Bad Request") {
             toastr.error("Validation failed for your request. Please make sure the data provided is correct." + msg);
@@ -119,18 +120,18 @@ ko.bindingHandlers.select2 = {
     },
     update: function (el, valueAccessor, allBindingsAccessor, viewModel) {
         var allBindings = allBindingsAccessor();
-		var select2 = $(el).data("select2");
-		if ("value" in allBindings) {
-			var newValue = "" + ko.unwrap(allBindings.value);
-			if ((allBindings.select2.multiple || el.multiple) && newValue.constructor !== Array) {
-				select2.val([newValue.split(",")]);
-			}
-			else {
-				select2.val([newValue]);
-			}
-		}
-		if ("selectedOptions" in allBindings && select2.val().length == 0) {
-			var newValue = ko.unwrap(allBindings.selectedOptions);
+        var select2 = $(el).data("select2");
+        if ("value" in allBindings) {
+            var newValue = "" + ko.unwrap(allBindings.value);
+            if ((allBindings.select2.multiple || el.multiple) && newValue.constructor !== Array) {
+                select2.val([newValue.split(",")]);
+            }
+            else {
+                select2.val([newValue]);
+            }
+        }
+        if ("selectedOptions" in allBindings && select2.val().length == 0) {
+            var newValue = ko.unwrap(allBindings.selectedOptions);
             if ((allBindings.select2.multiple || el.multiple) && newValue && newValue.constructor == Array) {
                 select2.val([newValue]);
             }
@@ -157,8 +158,8 @@ function redirectToReport(url, prm, newtab) {
     return false;
 }
 
-function htmlDecode(input){
-  var e = document.createElement('div');
-  e.innerHTML = input;
-  return e.childNodes.length === 0 ? "" : e.childNodes[0].nodeValue;
+function htmlDecode(input) {
+    var e = document.createElement('div');
+    e.innerHTML = input;
+    return e.childNodes.length === 0 ? "" : e.childNodes[0].nodeValue;
 }

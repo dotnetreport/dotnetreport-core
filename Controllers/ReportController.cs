@@ -39,6 +39,36 @@ namespace ReportBuilder.Web.Core.Controllers
             return View(model);
         }
 
+        public async Task<ActionResult> ReportLink(int reportId, int? filterId = null, string filterValue = "", bool adminMode = false)
+        {
+            var model = new DotNetReportModel();
+            var reportApi = new ReportApiController();
+            var settings = reportApi.GetSettings();
+
+            using (var client = new HttpClient())
+            {
+                var content = new FormUrlEncodedContent(new[]
+                {
+                    new KeyValuePair<string, string>("account", settings.AccountApiToken),
+                    new KeyValuePair<string, string>("dataConnect", settings.DataConnectApiToken),
+                    new KeyValuePair<string, string>("clientId", settings.ClientId),
+                    new KeyValuePair<string, string>("userId", settings.UserId),
+                    new KeyValuePair<string, string>("userRole", String.Join(",", settings.CurrentUserRole)),
+                    new KeyValuePair<string, string>("reportId", reportId.ToString()),
+                    new KeyValuePair<string, string>("filterId", filterId.HasValue ? filterId.ToString() : ""),
+                    new KeyValuePair<string, string>("filterValue", filterValue.ToString()),
+                    new KeyValuePair<string, string>("adminMode", adminMode.ToString()),
+                });
+
+                var response = await client.PostAsync(new Uri(settings.ApiUrl + $"/ReportApi/RunLinkedReport"), content);
+                var stringContent = await response.Content.ReadAsStringAsync();
+
+                model = JsonConvert.DeserializeObject<DotNetReportModel>(stringContent);
+            }
+
+            return View("Report", model);
+        }
+
         public async Task<IActionResult> Dashboard(int? id = null, bool adminMode = false)
         {
             var reportApi = new ReportApiController();
