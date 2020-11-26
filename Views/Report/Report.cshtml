@@ -26,12 +26,17 @@
                                 '</head><body>' + $('.report-inner').html() +
                                 '</body></html>');
 
-        setTimeout(function(){
+        setTimeout(function () {
+            printWindow.document.close();
+            printWindow.focus();
             printWindow.print();
             printWindow.close();
         }, 250);
     }
 
+    function downloadPdf() {
+        $("#downloadPdf").submit();
+    }
     function downloadExcel() {
         $("#downloadExcel").submit();
     }
@@ -52,11 +57,12 @@
             reportFilter: htmlDecode('@System.Web.HttpUtility.UrlDecode(Model.ReportFilter)'),
             reportMode: "execute",
             reportSql: "@Model.ReportSql",
-            reportConnect: "@Model.ConnectKey"
+            reportConnect: "@Model.ConnectKey",
+            ReportSeries : "@Model.ReportSeries"
         });
 
         ko.applyBindings(vm);
-        vm.LoadReport(@Model.ReportId, true);
+        vm.LoadReport(@Model.ReportId, true,"@Model.ReportSeries");
 
         $(window).resize(function(){
             vm.DrawChart();
@@ -83,6 +89,13 @@
             <input type="hidden" id="connectKey" name="connectKey" data-bind="value: currentConnectKey" />
             <input type="hidden" id="reportName" name="reportName" data-bind="value: ReportName" />
         }
+        @using (Html.BeginForm("DownloadPdf", "Report", FormMethod.Post, new { id = "downloadPdf" }))
+        {
+            <input type="hidden" id="chartdata" name="chartData" data-bind="value: ChartData" />
+            <input type="hidden" id="reportSql" name="reportSql" data-bind="value: currentSql" />
+            <input type="hidden" id="connectKey" name="connectKey" data-bind="value: currentConnectKey" />
+            <input type="hidden" id="reportName" name="reportName" data-bind="value: ReportName" />
+        }
 
         <div class="pull-right">
             <a href="@Url.Action("Index","Report")?folderId=@Model.SelectedFolder" class="btn btn-primary">
@@ -92,7 +105,7 @@
                 Edit Report
             </a>
             <button type="button" class="btn btn-secondary" onclick="printReport();">
-                <span class="glyphicon glyphicon-print" aria-hidden="true"></span> Print Report
+                <span class="fa fa-print" aria-hidden="true"></span> Print Report
             </button>
 
             <div class="btn-group">
@@ -100,12 +113,17 @@
                     <span class="fa fa-download"></span> Export <span class="caret"></span>
                 </button>
                 <ul class="dropdown-menu">
-                    <li>
+                    <li class="dropdown-item">
+                        <a href="#" onclick="downloadPdf();">
+                            <span class="fa fa-file-pdf-o"></span> Pdf
+                        </a>
+                    </li>
+                    <li class="dropdown-item">
                         <a href="#" onclick="downloadExcel();">
                             <span class="fa fa-file-excel-o"></span> Excel
                         </a>
                     </li>
-                    <li>
+                    <li class="dropdown-item">
                         <a href="#" onclick="downloadXml();">
                             <span class="fa fa-file-code-o"></span> Xml
                         </a>
@@ -119,11 +137,11 @@
         <br />
         <div data-bind="template: {name: 'fly-filter-template'}"></div>
         <div data-bind="if: canDrilldown">
+            <button class="btn btn-secondary btn-xs" data-bind="click: ExpandAll">Expand All</button>
+            <button class="btn btn-secondary btn-xs" data-bind="click: CollapseAll">Collapse All</button>
             <br />
-            <button class="btn btn-secondary btn-sm" data-bind="click: ExpandAll">Expand All</button>
-            <button class="btn btn-secondary btn-sm" data-bind="click: CollapseAll">Collapse All</button>
-        </div>           
-        <br />
+            <br />
+        </div>
         <div class="report-menubar">
             <div class="col-xs-12 col-centered" data-bind="with: pager">
                 <div class="form-inline" data-bind="visible: pages()">

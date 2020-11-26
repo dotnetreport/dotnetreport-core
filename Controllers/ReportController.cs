@@ -110,6 +110,7 @@ namespace ReportBuilder.Web.Core.Controllers
         [HttpPost]
         public IActionResult DownloadExcel(string reportSql, string connectKey, string reportName)
         {
+            reportSql = HttpUtility.HtmlDecode(reportSql);
             var excel = DotNetReportHelper.GetExcelFile(reportSql, connectKey, reportName);
             Response.Headers.Add("content-disposition", "attachment; filename=" + reportName + ".xlsx");
             Response.ContentType = "application/vnd.ms-excel";
@@ -117,9 +118,19 @@ namespace ReportBuilder.Web.Core.Controllers
             return File(excel, "application/vnd.ms-excel", reportName + ".xlsx");
         }
 
+
+        [HttpPost]
+        public IActionResult DownloadPdf(string reportSql, string connectKey, string reportName, string ChartData = null)
+        {
+            reportSql = HttpUtility.HtmlDecode(reportSql);
+            var pdf = DotNetReportHelper.GetPdfFile(reportSql, connectKey, reportName, ChartData);
+            return File(pdf, "application/pdf", reportName + ".pdf");
+        }
+
         [HttpPost]
         public IActionResult DownloadXml(string reportSql, string connectKey, string reportName)
         {
+            reportSql = HttpUtility.HtmlDecode(reportSql);
             var xml = DotNetReportHelper.GetXmlFile(reportSql, connectKey, reportName);
             Response.Headers.Add("content-disposition", "attachment; filename=" + reportName + ".xml");
             Response.ContentType = "application/xml";
