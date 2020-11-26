@@ -176,7 +176,7 @@ function linkFieldViewModel(args, options) {
 	}
 }
 
-function scheduleBuilder() {
+function scheduleBuilder(userId) {
 	var self = this;
 
 	self.options = ['day', 'week', 'month', 'year'];
@@ -241,7 +241,8 @@ function scheduleBuilder() {
 			SelectedHour: self.selectedHour(),
 			SelectedMinute: self.selectedMinute(),
 			SelectedAmPm: self.selectedAmPm(),
-			EmailTo: self.emailTo()
+			EmailTo: self.emailTo(),
+			UserId: userId
 		} : null;
 	};
 
@@ -255,8 +256,8 @@ function scheduleBuilder() {
 		};
 
 		self.selectedOption(data.SelectedOption);
-		self.selectedDays(_.map(data.SelectedDays.split(','), function (x) { return parseInt(x); }));
-		self.selectedMonths(_.map(data.SelectedMonths.split(','), function (x) { return parseInt(x); }));
+		self.selectedDays(data.SelectedDays.split(','));
+		self.selectedMonths(data.SelectedMonths.split(','));
 		self.selectedDates(_.map(data.SelectedDates.split(','), function (x) { return parseInt(x); }));
 		self.selectedHour(data.SelectedHour || '12');
 		self.selectedMinute(data.SelectedMinute || '00');
@@ -388,6 +389,8 @@ var reportViewModel = function (options) {
 	self.currentUserRole = (options.userSettings.currentUserRoles || []).join();
 	self.currentUserName = options.userSettings.currentUserName;
 	self.allowAdmin = ko.observable(options.userSettings.allowAdminMode);
+	self.userIdForSchedule = options.userSettings.userIdForSchedule || self.currentUserId;
+
 	self.ChartData = ko.observable();
 	self.ReportName = ko.observable();
 	self.ReportType = ko.observable("List");
@@ -434,6 +437,9 @@ var reportViewModel = function (options) {
 	self.CanSaveReports = ko.observable(true);
 	self.CanManageFolders = ko.observable(true);
 	self.CanEdit = ko.observable(true);
+
+	self.fieldFormatTypes = ['None', 'Number', 'Decimal', 'Currency', 'Percentage', 'Date', 'Date and Time', 'Time'];
+	self.fieldAlignments = ['Left', 'Right', 'Center'];
 
 	self.ReportResult = ko.observable({
 		HasError: ko.observable(false),
@@ -518,7 +524,7 @@ var reportViewModel = function (options) {
 		return _.filter(self.SelectedFields(), function (x) { return !x.disabled(); });
 	});
 
-	self.scheduleBuilder = new scheduleBuilder();
+	self.scheduleBuilder = new scheduleBuilder(self.userIdForSchedule);
 
 	self.ManageFolder = {
 		FolderName: ko.observable(),
@@ -1031,7 +1037,7 @@ var reportViewModel = function (options) {
 			FolderID: self.FolderID(),
 			SelectedFieldIDs: _.map(self.SelectedFields(), function (x) { return x.fieldId; }),
 			Filters: filters,
-			Series: _.map(self.AdditionalSeries(), function (e, i) {
+			Series: _.map(self.AdditionalSeries(), function (e) {
 				return {
 					SavedReportId: self.ReportID(),
 					FieldId: e.Field().fieldId,
@@ -1055,11 +1061,9 @@ var reportViewModel = function (options) {
 					Disabled: x.disabled(),
 					GroupInGraph: x.groupInGraph(),
 					HideInDetail: x.hideInDetail(),
-					LinkField: x.linkField(),
-					LinkFieldItem: ko.toJS(x.linkFieldItem),
 					IsCustom: x.isFormulaField(),
 					CustomLabel: x.fieldName,
-					DataFormat: x.fieldFormat,
+					DataFormat: x.fieldFormat() == 'None' ? null : x.fieldFormat(),
 					CustomFieldDetails: _.map(x.formulaItems(), function (f) {
 						return {
 							FieldId: f.fieldId(),
@@ -1070,7 +1074,12 @@ var reportViewModel = function (options) {
 						};
 					}),
 					LinkField: x.linkField(),
-					LinkFieldItem: x.linkField() ? x.linkFieldItem.toJs() : null
+					LinkFieldItem: x.linkField() ? x.linkFieldItem.toJs() : null,
+					FieldLabel: x.fieldLabel(),
+					FieldAlign: x.fieldAlign(),
+					FontColor: x.fontColor(),
+					BackColor: x.backColor(),
+					FontBold: x.fontBold()
 				};
 			}),
 			Schedule: self.scheduleBuilder.toJs(),
@@ -1092,11 +1101,11 @@ var reportViewModel = function (options) {
 			toastr.error("Please correct validation issues");
 			return;
 		}
-		let i = 0;
-		let isComparison = false;
-		let isExecuteReportQuery = false;
-		let _result = null;
-		let seriesCount = self.AdditionalSeries().length;
+		var i = 0;
+		var isComparison = false;
+		var isExecuteReportQuery = false;
+		var _result = null;
+		var seriesCount = self.AdditionalSeries().length;
 		do {
 			if (i > 0) {
 				isComparison = true;
@@ -1482,6 +1491,7 @@ var reportViewModel = function (options) {
 	};
 
 	self.editLinkField = ko.observable();
+	self.editFieldOptions = ko.observable();
 
 	self.setupField = function (e) {
 		e.selectedFieldName = e.tableName + " > " + e.fieldName;
@@ -1493,8 +1503,13 @@ var reportViewModel = function (options) {
 		e.fieldAggregateWithDrilldown = e.fieldAggregate.concat('Only in Detail');
 		e.linkField = ko.observable(e.linkField);
 		e.linkFieldItem = new linkFieldViewModel(e.linkFieldItem, options);
-
 		e.isFormulaField = ko.observable(e.isFormulaField);
+		e.fieldFormat = ko.observable(e.fieldFormat);
+		e.fieldLabel = ko.observable(e.fieldLabel);
+		e.fieldAlign = ko.observable(e.fieldAlign);
+		e.fontColor = ko.observable(e.fontColor);
+		e.backColor = ko.observable(e.backColor);
+		e.fontBold = ko.observable(e.fontBold);
 
 		var formulaItems = [];
 		_.forEach(e.formulaItems || [], function (e) {
@@ -1512,13 +1527,13 @@ var reportViewModel = function (options) {
 
 		e.setupLinkField = function () {
 			self.editLinkField(e);
-			options.linkModal.modal('show');
+			if (options.linkModal) options.linkModal.modal('show');
 		}
 
 		e.removeLinkField = function () {
 			e.linkField(false);
 			e.linkFieldItem.clear();
-			options.linkModal.modal('hide');
+			if (options.linkModal) options.linkModal.modal('hide');
 		}
 
 		e.saveLinkField = function () {
@@ -1527,8 +1542,36 @@ var reportViewModel = function (options) {
 				return;
 			}
 			e.linkField(true);
-			options.linkModal.modal('hide');
+			if (options.linkModal) options.linkModal.modal('hide');
 		}
+
+		e.setupFieldOptions = function () {
+			self.currentFieldOptions = {
+				fieldFormat: e.fieldFormat(),
+				fieldLabel: e.fieldLabel(),
+				fieldAlign: e.fieldAlign(),
+				fontColor: e.fontColor(),
+				backColor: e.backColor(),
+				fontBold: e.fontBold()
+			}
+			self.editFieldOptions(e);
+			if (options.fieldOptionsModal) options.fieldOptionsModal.modal('show');
+		}
+
+		e.saveFieldOptions = function () {
+			if (options.fieldOptionsModal) options.fieldOptionsModal.modal('hide');
+		}
+
+		e.cancelFieldOptions = function () {
+			e.fieldFormat(self.currentFieldOptions.fieldFormat);
+			e.fieldLabel(self.currentFieldOptions.fieldLabel);
+			e.fieldAlign(self.currentFieldOptions.fieldAlign);
+			e.fontColor(self.currentFieldOptions.fontColor);
+			e.backColor(self.currentFieldOptions.backColor);
+			e.fontBold(self.currentFieldOptions.fontBold);
+			if (options.fieldOptionsModal) options.fieldOptionsModal.modal('hide');
+		}
+
 		return e;
 	};
 
@@ -1540,7 +1583,8 @@ var reportViewModel = function (options) {
 				method: "/ReportApi/LoadReport",
 				model: JSON.stringify({
 					reportId: reportId,
-					adminMode: self.adminMode()
+					adminMode: self.adminMode(),
+					userIdForSchedule: self.userIdForSchedule
 				})
 			}
 		}).done(function (report) {
