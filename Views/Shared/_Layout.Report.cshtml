@@ -32,12 +32,12 @@
         @RenderBody()
         <!-- ########################## IMPORTANT - PLEASE DO NOT REMOVE WITHOUT PURCHASING LICENSE ########################### -->
 
-        <div style="padding-top: 30px;">Powered by <a href="http://www.dotNetReport.com" target="_blank">dotNetReport.com</a></div>
+        <div style="padding-top: 30px;">Powered by <a href="http://www.dotNetReport.com" target="_blank">dotnetReport.com</a></div>
 
         <!--########################## IMPORTANT - PLEASE DO NOT REMOVE WITHOUT PURCHASING LICENSE ########################### -->
         <hr />
         <footer>
-            <p>&copy; @DateTime.Now.Year .Net Report Builder<br /><a href="https://dotnetreport.com">www.dotnetreport.com</a></p>
+            <p>&copy; @DateTime.Now.Year dotnetReport Builder <a href="https://dotnetreport.com">www.dotnetreport.com</a></p>
         </footer>
     </div>
 
@@ -50,17 +50,23 @@
             <input class="form-control" data-bind="datepicker: $parent.Value" required />
             <!-- /ko -->
             <!-- ko if: ['between'].indexOf($parent.Operator()) != -1 -->
-            From <input required class="form-control" data-bind="datepicker: $parent.Value" /> to <input data-bind="datepicker: $parent.Value2" class="form-control" required />
+            From
+            <input required class="form-control" data-bind="datepicker: $parent.Value" />
+            to
+            <input data-bind="datepicker: $parent.Value2" class="form-control" required />
             <!-- /ko -->
             <!-- ko if: ['range'].indexOf($parent.Operator()) != -1 -->
             <select data-bind="value: $parent.Value" class="form-control">
                 <option>Today</option>
+                <option>Yesterday</option>
                 <option>This Week</option>
                 <option>Last Week</option>
                 <option>This Month</option>
                 <option>Last Month</option>
                 <option>This Year</option>
                 <option>Last Year</option>
+                <option>This Month To Date</option>
+                <option>This Year To Date</option>
                 <option>Last 30 Days</option>
             </select>
             <!-- /ko -->
@@ -70,7 +76,10 @@
             <input class="form-control" type="number" data-bind="value: $parent.Value" required />
             <!-- /ko -->
             <!-- ko if: ['between'].indexOf($parent.Operator()) != -1 -->
-            From <input class="form-control" type="number" data-bind="value: $parent.Value" required /> to <input class="form-control" type="number" data-bind="value: $parent.Value2" required />
+            From
+            <input class="form-control" type="number" data-bind="value: $parent.Value" required />
+            to
+            <input class="form-control" type="number" data-bind="value: $parent.Value2" required />
             <!-- /ko -->
             <!-- /ko -->
             <!-- ko if: fieldType=='Boolean' -->
@@ -79,19 +88,16 @@
                 <option value="0">No</option>
             </select>
             <!-- /ko -->
-            <!-- ko if: ['Int','Money','Float','Date','DateTime','Boolean'].indexOf(fieldType) == -1 -->
-            <!-- ko if: ['is blank', 'is not blank'].indexOf($parent.Operator()) < 0 -->
+            <!-- ko if: ['Int','Money','Float','Date','DateTime','Boolean'].indexOf(fieldType) == -1 && ['is blank', 'is not blank'].indexOf($parent.Operator()) == -1 -->
             <input class="form-control" type="text" data-bind="value: $parent.Value" required />
             <!-- /ko -->
             <!-- /ko -->
-            <!-- /ko -->
             <!-- ko if: hasForeignKey-->
-            @*Show lookup list*@
             <!-- ko if: $parent.Operator()=='='-->
-            <select required class="form-control" data-bind="select2: { placeholder: 'Please Choose', allowClear: true, multiple: false }, options: $parent.LookupList, optionsText:'text', optionsValue:'id', value: $parent.Value"></select>
+            <select required class="form-control" data-bind="options: $parent.LookupList, optionsText: 'text', optionsValue: 'id', value: $parent.Value, optionsCaption: 'Please Choose'"></select>
             <!-- /ko -->
             <!-- ko if: $parent.Operator()=='in' || $parent.Operator()=='not in'-->
-            <select multiple class="form-control" data-bind="select2: { placeholder: 'Please Choose', allowClear: true }, options: $parent.LookupList, optionsText:'text', optionsValue:'id', selectedOptions: $parent.ValueIn"></select>
+            <select multiple class="form-control" data-bind="select2: { placeholder: 'Please Choose', allowClear: true }, options: $parent.LookupList, optionsText: 'text', optionsValue: 'id', selectedOptions: $parent.ValueIn"></select>
             <!-- /ko -->
             <!-- /ko -->
         </div>
@@ -100,7 +106,7 @@
         <div class="pager-container">
             <a href="" title="first" data-bind="click: first, enable: !isFirstPage()"><i class="fa fa-backward report-pager-btn" style="font-size: 18px;"></i></a>&nbsp;
             <a href="" title="previous" data-bind="click: previous, enable: !isFirstPage()"><i class="fa fa-caret-left fa-2x report-pager-btn"></i></a>
-
+            <select class="form-control input-sm" data-bind="options: [30,50,100,150,200,500], value: pageSize"></select>
             <span class="pager-pageinfo">
                 <span>Page</span>&nbsp;
                 <input type="number" min="1" pattern="[0-9]*" class="text-center" data-bind="
@@ -126,11 +132,10 @@
                         <th></th>
                         <!-- /ko -->
                         <!-- ko foreach: Columns -->
-                        <th data-bind="attr: { id: 'col' + $index() }">
+                        <th data-bind="attr: { id: 'col' + $index() }, css: {'right-align': IsNumeric}">
                             <a href="" data-bind="click: function(){ $parentContext.$parentContext.$parent.changeSort(SqlField); }">
                                 <span data-bind="text: ColumnName"></span>
-                                <span data-bind="text: $parentContext.$parentContext.$parent.pager.sortColumn() === SqlField ? ($parentContext.$parentContext.$parent.pager.sortDescending() ? '&#9660;' : '&#9650;') : ''">
-                                </span>
+                                <span data-bind="text: $parentContext.$parentContext.$parent.pager.sortColumn() === SqlField ? ($parentContext.$parentContext.$parent.pager.sortDescending() ? '&#9660;' : '&#9650;') : ''"></span>
                             </a>
                         </th>
                         <!-- /ko -->
@@ -167,11 +172,10 @@
                                 <thead>
                                     <tr class="no-highlight">
                                         <!-- ko foreach: Columns -->
-                                        <th>
+                                        <th data-bind="css: {'right-align': IsNumeric}">
                                             <a href="" data-bind="click: function(){ $parents[1].changeSort(SqlField); }">
                                                 <span data-bind="text: ColumnName"></span>
-                                                <span data-bind="text: $parents[1].pager.sortColumn() === SqlField ? ($parents[1].pager.sortDescending() ? '&#9660;' : '&#9650;') : ''">
-                                                </span>
+                                                <span data-bind="text: $parents[1].pager.sortColumn() === SqlField ? ($parents[1].pager.sortDescending() ? '&#9660;' : '&#9650;') : ''"></span>
                                             </a>
                                         </th>
                                         <!-- /ko -->
@@ -186,7 +190,7 @@
                                     <!-- ko foreach: Rows  -->
                                     <tr>
                                         <!-- ko foreach: Items -->
-                                        <td data-bind="html: FormattedValue"></td>
+                                        <td data-bind="html: FormattedValue, css: {'right-align': Column.IsNumeric}"></td>
                                         <!-- /ko -->
                                     </tr>
                                     <!-- /ko -->
@@ -226,6 +230,18 @@
                     <!-- /ko -->
                     <!-- /ko -->
                 </tbody>
+                <!-- ko if: $parent.SubTotals().length == 1 -->
+                <tfoot data-bind="foreach: $parent.SubTotals">
+                    <tr>
+                        <!-- ko if: $parentContext.$parentContext.$parent.canDrilldown() && !$parent.IsDrillDown() -->
+                        <td></td>
+                        <!-- /ko -->
+                        <!-- ko foreach: Items -->
+                        <td data-bind="html: FormattedValue, css: {'right-align': Column.IsNumeric}"></td>
+                        <!-- /ko -->
+                    </tr>
+                </tfoot>
+                <!-- /ko -->
             </table>
         </div>
 
@@ -240,14 +256,14 @@
         </div>
 
         <div class="alert alert-info" data-bind="visible: adminMode">
-            <i class="fa fa-user-circle"></i> Admin Mode is turned on now, it allows you to setup and view Reports or Dashboards for all roles and users. You should remove the Admin mode toggle for non-admin users.<br />
+            <i class="fa fa-user-circle"></i>Admin Mode is turned on now, it allows you to setup and view Reports or Dashboards for all roles and users. You should remove the Admin mode toggle for non-admin users.<br />
         </div>
     </script>
     <script type="text/html" id="manage-access-template">
-        <h5><span class="fa fa-key"></span> Manage Access</h5>
+        <h5><span class="fa fa-key"></span>Manage Access</h5>
         <div class="panel panel-default panel-body" style="margin-left: 20px;">
             <div class="alert alert-info">
-                <span class="fa fa-lightbulb-o fa-2x"></span> &nbsp;User level rights over rule Role level rights. No selection for a rule implies report is available to all.
+                <span class="fa fa-lightbulb-o fa-2x"></span>&nbsp;User level rights over rule Role level rights. No selection for a rule implies report is available to all.
             </div>
             <b>Manage by User</b> (allow edit/delete)
             <div class="row container-fluid">
@@ -307,7 +323,7 @@
             <div class="card-header">
                 <h5 class="card-title">
                     <a data-toggle="collapse" data-target="#filter-panel" href="#">
-                        <i class="fa fa-filter"></i> Choose filter options
+                        <i class="fa fa-filter"></i>Choose filter options
                     </a>
                 </h5>
             </div>
@@ -347,8 +363,8 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title">Account not Setup</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Account not Setup</h4>
                 </div>
                 <div class="modal-body">
                     <p class="alert alert-danger">dotnet Report Account Configuration missing!</p>
@@ -361,6 +377,7 @@
             </div>
         </div>
     </div>
+
     @* Required Javascript Libraries *@
     <script src="~/lib/jquery/jquery.min.js"></script>
     <script src="~/lib/bootstrap/js/bootstrap.bundle.min.js"></script>
