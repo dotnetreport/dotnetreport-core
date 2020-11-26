@@ -23,13 +23,13 @@
                 runReportUrl: '@Url.Action("Report")',
                 reportWizard: $("#modal-reportbuilder"),
                 linkModal: $("#linkModal"),
+                fieldOptionsModal: $("#fieldOptionsModal"),
                 lookupListUrl: '@Url.Action("GetLookupList", "ReportApi")',
                 apiUrl: '@Url.Action("CallReportApi", "ReportApi")',
                 runReportApiUrl: '@Url.Action("RunReportApi", "ReportApi")',
                 getUsersAndRolesUrl: '@Url.Action("GetUsersAndRoles", "ReportApi")',
                 reportId: @(Context.Request.Query["reportId"].Any() ? Context.Request.Query["reportId"].First() : "0"),
                 userSettings: data
-                //dataFilters: { EmployeeId: '1,2' }, // You can also pass a list of Global Data filters using format { Column1: 'val1, val2, ...', Column2: '1,2,3,...', ...}
             });
 
             vm.init(@(Context.Request.Query["folderId"].Any() ? Context.Request.Query["folderId"].First() : "0"), data.noAccount);
@@ -50,7 +50,7 @@
     <div data-bind="if: currentUserRole">Current Roles: <span data-bind="text: currentUserRole"></span></div>
 </div>
 <div class="alert alert-warning">
-    You can integrate the Report Builder Builder in your Application using <a href="https://www.nuget.org/packages/dotNetReport/">this Nuget Package</a>. <br />
+    You can easily integrate the Report Builder in your Application. See how to <a href="https://dotnetreport.com/blog/2016/03/getting-started-with-dotnet-report/">Get Started here</a>. <br />
 </div>
 
 <div data-bind="template: {name: 'admin-mode-template'}, visible: allowAdmin" style="display: none;"></div>
@@ -63,7 +63,6 @@
 
 <!-- Folders/Report List -->
 <div id="report-start">
-
     <div class="card folder-panel">
         <div class="card-header">
             <nav class="navbar navbar-expand-lg navbar-light bg-light">
@@ -136,16 +135,21 @@
                                 <!-- ko if: $parent.adminMode -->
                                 <div class="small">
                                     <b>Report Access</b><br />
-                                    Manage by User <span class="label label-info" data-bind="text: userId ? userId : 'No User'"></span><br />
-                                    View only by User <span class="label label-info" data-bind="text: (viewOnlyUserId ? viewOnlyUserId : (userId ? userId : 'Any User'))"></span><br />
+                                    Manage by User <span class="label label-info" data-bind="text: userId ? userId : 'No User'"></span>
+                                    <br />
+                                    View only by User <span class="label label-info" data-bind="text: (viewOnlyUserId ? viewOnlyUserId : (userId ? userId : 'Any User'))"></span>
+                                    <br />
                                     <!-- ko if: userRole -->
-                                    Manage by Role <span class="label label-info" data-bind="text: userRole ? userRole : 'No Role'"></span><br />
+                                    Manage by Role <span class="label label-info" data-bind="text: userRole ? userRole : 'No Role'"></span>
+                                    <br />
                                     <!-- /ko -->
                                     <!-- ko if: viewOnlyUserRole -->
-                                    View only by Role <span class="label label-info" data-bind="text: viewOnlyUserRole ? viewOnlyUserRole : 'Any Role'"></span><br />
+                                    View only by Role <span class="label label-info" data-bind="text: viewOnlyUserRole ? viewOnlyUserRole : 'Any Role'"></span>
+                                    <br />
                                     <!-- /ko -->
                                     <!-- ko if: clientId -->
-                                    For Client <span class="label label-info" data-bind="text: clientId ? clientId : 'Any'"></span><br />
+                                    For Client <span class="label label-info" data-bind="text: clientId ? clientId : 'Any'"></span>
+                                    <br />
                                     <!-- /ko -->
                                 </div>
                                 <!-- /ko -->
@@ -155,17 +159,17 @@
                                     <br />
                                     <!-- ko if: $root.CanSaveReports() || $root.adminMode()-->
                                     <button class="btn btn-sm btn-secondary" data-bind="click: openReport, visible: canEdit" data-toggle="modal" data-target="#modal-reportbuilder">
-                                        <span class="fa fa-edit" aria-hidden="true"></span> Edit
+                                        <span class="fa fa-edit" aria-hidden="true"></span>Edit
                                     </button>
                                     <button class="btn btn-sm btn-secondary" data-bind="click: copyReport" data-toggle="modal" data-target="#modal-reportbuilder">
-                                        <span class="fa fa-copy" aria-hidden="true"></span> Copy
+                                        <span class="fa fa-copy" aria-hidden="true"></span>Copy
                                     </button>
                                     <!-- /ko -->
                                     <button class="btn btn-sm btn-primary" data-bind="click: runReport">
-                                        <span class="fa fa-gears" aria-hidden="true"></span> Run
+                                        <span class="fa fa-gears" aria-hidden="true"></span>Run
                                     </button>
                                     <button class="btn btn-sm btn-danger" data-bind="click: deleteReport, visible: canEdit">
-                                        <span class="fa fa-trash" aria-hidden="true"></span> Delete
+                                        <span class="fa fa-trash" aria-hidden="true"></span>Delete
                                     </button>
                                     <br />
                                 </div>
@@ -204,8 +208,8 @@
                 <h5 class="modal-title" id="myModalLabel">Design your Report</h5>
                 <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
             </div>
-            <div class="modal-body">
-                <h5><span class="fa fa-file"></span> Choose Report Type</h5>
+            <div class="modal-body needs-validation">
+                <h5><span class="fa fa-file"></span>Choose Report Type</h5>
                 <div class="row">
                     <div class="col-md-3 col-sm-3 col-xs-6">
                         <div class="button-box" tabindex="0" data-bind="click: function(){ setReportType('List'); }, css: {active: ReportType()=='List'}">
@@ -245,7 +249,7 @@
                     </div>
                 </div>
                 <hr />
-                <h5><span class="fa fa-database"></span> Choose Data for Report</h5>
+                <h5><span class="fa fa-database"></span>Choose Data for Report</h5>
                 <div class="row">
                     <div class="col-md-12">
                         <select class="form-control" data-bind="options: Tables, optionsCaption: 'Choose Section...', optionsText: 'tableName', value: SelectedTable, disable: isFormulaField"></select>
@@ -275,33 +279,37 @@
                             <div class="list-group-item">
                                 <div class="checkbox">
                                     <label>
-                                        <input type="checkbox" data-bind="checkedInArray: {array: $parent.isFormulaField() ? $parent.formulaFields : $parent.SelectedFields, value: $data}"> <span data-bind="text: fieldName"></span>
+                                        <input type="checkbox" data-bind="checkedInArray: {array: $parent.isFormulaField() ? $parent.formulaFields : $parent.SelectedFields, value: $data}">
+                                        <span data-bind="text: fieldName"></span>
                                     </label>
                                 </div>
                             </div>
                         </div>
                         <!-- /ko -->
                     </div>
-                    <div data-bind="if: isFormulaField">
-                        <br />
-                        <div class="col-xs-12 padded-div">
-                            <div class="small pull-left">
-                                Setup your Formula for calculating this Field
+                </div>
+
+                <div data-bind="if: isFormulaField">
+                    <br />
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-sm-6 small">
+                                    Setup your Formula for calculating this Field
+                                </div>
+                                <div class="col-sm-6 right-align">
+                                    <a href="#" class="btn btn-secondary btn-sm" data-bind="click: addFormulaParentheses">Add ( )</a>
+                                    <a href="#" class="btn btn-secondary btn-sm" title="Add a Constant Value" data-bind="click: addFormulaConstantValue">Add Value</a>
+                                    <a href="#" class="btn btn-secondary btn-sm" data-bind="click: clearFormulaField">Clear</a>
+                                </div>
                             </div>
-                            <div class="pull-right">
-                                <a href="#" class="btn btn-secondary btn-sm" data-bind="click: addFormulaParentheses">Add ( )</a>
-                                <a href="#" class="btn btn-secondary btn-sm" title="Add a Constant Value" data-bind="click: addFormulaConstantValue">Add Value</a>
-                                <a href="#" class="btn btn-secondary btn-sm" data-bind="click: clearFormulaField">Clear</a>
-                            </div>
-                        </div>
-                        <div class="form-horizontal">
-                            <div class="form-group">
+                            <div class="form-group row">
                                 <label class="col-sm-2 control-label">Field Label</label>
                                 <div class="col-sm-10">
                                     <input type="text" class="form-control form-control-sm" data-bind="value: formulaFieldLabel" required placeholder="Custom Field Label" />
                                 </div>
                             </div>
-                            <div class="form-group">
+                            <div class="form-group row">
                                 <label class="col-sm-2 control-label">Data Format</label>
                                 <div class="col-sm-10">
                                     <select class="form-control form-control-sm" data-bind="value: formulaDataFormat" required>
@@ -319,7 +327,7 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="form-group">
+                            <div class="form-group row">
                                 <label class="col-sm-2 control-label">Field Formula</label>
                                 <div class="col-sm-10">
                                     <!-- ko foreach: formulaFields -->
@@ -347,23 +355,21 @@
                                 </div>
                             </div>
                         </div>
-
-                        <div class="clearfix"></div>
-
                     </div>
+                    <div class="clearfix"></div>
                 </div>
                 <!-- ko if: SelectedFields().length>0 -->
                 <hr />
-                <h5><span class="fa fa-table"></span> Selected data for the Report</h5>
+                <h5><span class="fa fa-table"></span>Selected data for the Report</h5>
                 <div>
                     <div class="alert alert-info" data-bind="visible: ReportType()=='Bar'">
-                        <span class="fa fa-lightbulb-o fa-2x"></span> &nbsp;For Bar Graph, the first field below will show on the x-axis. All other fields will show on y-axis, but they must be numeric.
+                        <span class="fa fa-lightbulb-o fa-2x"></span>&nbsp;For Bar Graph, the first field below will show on the x-axis. All other fields will show on y-axis, but they must be numeric.
                     </div>
                     <div class="alert alert-info" data-bind="visible: ReportType()=='Line'">
-                        <span class="fa fa-lightbulb-o fa-2x"></span> &nbsp;For Line Graph, the first field below will show on the x-axis and it needs to be numeric.
+                        <span class="fa fa-lightbulb-o fa-2x"></span>&nbsp;For Line Graph, the first field below will show on the x-axis and it needs to be numeric.
                     </div>
                     <div class="alert alert-info" data-bind="visible: ReportType()=='Map'">
-                        <span class="fa fa-lightbulb-o fa-2x"></span> &nbsp;For Map Graph, the first field below has to be a Region, like a Country.
+                        <span class="fa fa-lightbulb-o fa-2x"></span>&nbsp;For Map Graph, the first field below has to be a Region, like a Country.
                     </div>
                     <ul class="list-group" data-bind="sortable: { data: SelectedFields, options: { handle: '.sortable', cursor: 'move', placeholder: 'drop-highlight' } }">
                         <li class="list-group-item">
@@ -372,7 +378,7 @@
                                     <span class="fa fa-columns"></span>
                                     <span data-bind="text: selectedFieldName"></span>
                                     <span data-bind="visible: !$root.isFieldValidForYAxis($index(), fieldType)">
-                                        <span class="label label-danger" data-bind="visible: !groupInGraph()">Will not show in <span data-bind="text: $root.ReportType"></span> Chart</span>
+                                        <span class="label label-danger" data-bind="visible: !groupInGraph()">Will not show in <span data-bind="text: $root.ReportType"></span>Chart</span>
                                     </span>
                                 </div>
                                 <div class="col">
@@ -405,13 +411,18 @@
                                             <span class="fa fa-link" aria-hidden="true" title="Link to another Report or Url"></span>
                                         </span>
                                     </div>
+                                    <div class="pull-right" style="padding-right: 15px;">
+                                        <span class="button-box no-padding" tabindex="0" data-bind="click: setupFieldOptions">
+                                            <span class="fa fa-gear" aria-hidden="true" title="More Options"></span>
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                         </li>
                     </ul>
                 </div>
                 <hr />
-                <h5><span class="fa fa-filter"></span> Choose filters</h5>
+                <h5><span class="fa fa-filter"></span>Choose filters</h5>
 
                 <div class="row" style="padding: 10px 10px; overflow-x: auto;">
                     <div data-bind="template: {name: 'filter-group'}" class="col"></div>
@@ -419,9 +430,9 @@
                 </div>
                 <!-- /ko -->
                 <hr />
-                <h5><span class="fa fa-hourglass"></span> Choose Schedule</h5>
+                <h5><span class="fa fa-hourglass"></span>Choose Schedule</h5>
 
-                <div style="padding: 10px 10px ">
+                <div style="padding: 10px 10px">
                     <div data-bind="template: {name: 'report-schedule'}"></div>
                 </div>
                 <hr />
@@ -441,8 +452,11 @@
                     </div>
                     <div class="form-group row">
                         <label class="col-sm-2 control-label">Sort By</label>
-                        <div class="col-sm-10">
-                            <select class="form-control" style="width: 100%;" required data-bind="options: enabledFields, optionsText: 'selectedFieldName', optionsValue: 'fieldId', value: SortByField"></select>
+                        <div class="col-sm-8">
+                            <select class="form-control" required data-bind="options: enabledFields, optionsText: 'selectedFieldName', optionsValue: 'fieldId', value: SortByField"></select>
+                        </div>
+                        <div class="col-sm-2">
+                            <button class="btn btn-sm btn-secondary" data-bind="text: !SortDesc() ? '▲ Sort Ascending' : 'Sort Descending ▼', click: function() { SortDesc(!SortDesc()); return false; }"></button>
                         </div>
                     </div>
                     <div class="checkbox">
@@ -465,7 +479,8 @@
                     </div>
                     <div class="checkbox" data-bind="visible: CanSaveReports() && ReportID()>0">
                         <label>
-                            <input type="checkbox" data-bind="checked: SaveReport"> Save Report
+                            <input type="checkbox" data-bind="checked: SaveReport">
+                            Save Report
                         </label>
                     </div>
                     <div class="form-group row" data-bind="visible: SaveReport">
@@ -485,6 +500,33 @@
                 <a href="#" class="btn btn-danger" data-bind="click: cancelCreateReport">Cancel editing Report</a>
                 <button class="btn btn-primary" type="button" data-bind="visible: SaveReport() && CanSaveReports(), click: SaveWithoutRun" style="padding-right: 10px;">Save Report</button>
                 <button class="btn btn-primary" type="button" data-bind="text: SaveReport() && CanSaveReports()? 'Save & Run Report': 'Run Report', click: RunReport">Run Report</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Folder Edit Modal -->
+<div class="modal" id="folderModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content" data-bind="with: ManageFolder">
+            <div class="modal-header">
+                <h5 class="modal-title">Manage Folder</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="col-sm-4 col-md-4 control-label">Folder Name</label>
+                    <div class="col-sm-8 col-md-8">
+                        <input type="text" class="form-control" id="folderName" required placeholder="Folder Name" data-bind="value: FolderName">
+                    </div>
+                </div>
+                <br />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" data-bind="click: saveFolder">Save</button>
             </div>
         </div>
     </div>
@@ -554,28 +596,54 @@
     </div>
 </div>
 
-<!-- Folder Edit Modal -->
-<div class="modal" id="folderModal" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content" data-bind="with: ManageFolder">
+<!-- Field Options Modal -->
+<div class="modal" id="fieldOptionsModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" style="max-width: 750px;">
+        <div class="modal-content" data-bind="with: editFieldOptions">
             <div class="modal-header">
-                <h5 class="modal-title">Manage Folder</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+                <h5 class="modal-title">Setup Additional Field Options</h5>
             </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label class="col-sm-4 col-md-4 control-label">Folder Name</label>
-                    <div class="col-sm-8 col-md-8">
-                        <input type="text" class="form-control" id="folderName" required placeholder="Folder Name" data-bind="value: FolderName">
+            <div class="modal-body needs-validation">
+                <div class="form-group row">
+                    <label class="col-sm-5 col-md-5 control-label">Pick Data Format</label>
+                    <div class="col-sm-7 col-md-7">
+                        <select class="form-control" required data-bind="options: $root.fieldFormatTypes, value: fieldFormat"></select>
                     </div>
                 </div>
-                <br />
+                <div class="form-group row">
+                    <label class="col-sm-5 col-md-5 control-label">Choose Column Label</label>
+                    <div class="col-sm-7 col-md-7">
+                        <input type="text" class="form-control" required data-bind="value: fieldLabel" />
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-sm-5 col-md-5 control-label">Choose Text Alignment</label>
+                    <div class="col-sm-7 col-md-7">
+                        <select class="form-control" required data-bind="options: $root.fieldAlignments, value: fieldAlign"></select>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-sm-5 col-md-5 control-label">Pick Text Color</label>
+                    <div class="col-sm-7 col-md-7">
+                        <input type="color" class="form-control" required data-bind="value: fontColor" />
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-sm-5 col-md-5 control-label">Pick Background Color</label>
+                    <div class="col-sm-7 col-md-7">
+                        <input type="color" class="form-control" required data-bind="value: backColor" />
+                    </div>
+                </div>
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox" data-bind="checked: fontBold" />
+                        Make Text Bold
+                    </label>
+                </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" data-bind="click: saveFolder">Save</button>
+                <button type="button" class="btn btn-danger" data-bind="click: cancelFieldOptions">Cancel</button>
+                <button type="button" class="btn btn-primary" data-bind="click: saveFieldOptions">Save Changes</button>
             </div>
         </div>
     </div>
@@ -632,8 +700,23 @@
                     </td>
                     <td>
                         <button class="btn btn-sm btn-secondary" data-bind="click: $parent.RemoveFilter">Remove</button>
+                        <!-- ko if: Field() && Field().fieldType == 'DateTime' && Operator() == 'range' && $root.canAddSeries() && $index()==0 -->
+                        <button class="btn btn-sm btn-secondary" data-bind="click: $root.AddSeries.bind($data)">Add Comparison</button>
+                        <!--/ko -->
                     </td>
                 </tr>
+                <!-- ko foreach: compareTo -->
+                <tr>
+                    <td></td>
+                    <td style="text-align: right"><button class="btn btn-xs" data-bind="click: $root.RemoveSeries"><span class="fa fa-trash-o"></span></button></td>
+                    <td>Compare To</td>
+                    <td>
+                        <div class="form-group">
+                            <select class="form-control" data-bind="options: Range, value: Value" required></select>
+                        </div>
+                    </td>
+                </tr>
+                <!-- /ko -->
             </tbody>
         </table>
     </div>
@@ -643,7 +726,6 @@
         <button class="btn btn-sm btn-link" data-bind="click: AddFilter">Add Filter</button>
     </div>
 </script>
-
 <script type="text/html" id="report-schedule">
     <div data-bind="with: scheduleBuilder">
         <div class="checkbox">
@@ -654,7 +736,6 @@
         </div>
         <div data-bind="if: hasSchedule">
             <div class="form-inline form-group">
-
                 Every&nbsp;<select class="form-control" required data-bind="options: options, value: selectedOption"></select>
                 <!-- ko if: showDays -->
                 &nbsp;on&nbsp;<select multiple class="form-control" required style="width: 30%;" data-bind="select2: { placeholder: 'Choose Days', allowClear: true }, options: days, selectedOptions: selectedDays"></select>
