@@ -320,126 +320,7 @@ namespace ReportBuilder.Web.Core.Controllers
             }
 
             return warning;
-        }
-
-        public static bool IsNumericType(Type type)
-        {
-
-            switch (Type.GetTypeCode(type))
-            {
-                case TypeCode.Int16:
-                case TypeCode.UInt16:
-                case TypeCode.Int32:
-                case TypeCode.UInt32:
-                case TypeCode.Int64:
-                case TypeCode.UInt64:
-                case TypeCode.Single:
-                case TypeCode.Double:
-                case TypeCode.Decimal:
-                    return true;
-
-                case TypeCode.Boolean:
-                case TypeCode.DateTime:
-                case TypeCode.String:
-                default:
-                    return false;
-            }
-        }
-
-        public static string GetLabelValue(DataColumn col, DataRow row)
-        {
-            if (@row[col] != null)
-            {
-                switch (Type.GetTypeCode(col.DataType))
-                {
-                    case TypeCode.Int16:
-                    case TypeCode.UInt16:
-                    case TypeCode.Int32:
-                    case TypeCode.UInt32:
-                    case TypeCode.Int64:
-                    case TypeCode.UInt64:
-                    case TypeCode.Single:
-                        return row[col].ToString();
-
-                    case TypeCode.Double:
-                    case TypeCode.Decimal:
-                        return @row[col].ToString();// "'" + (Convert.ToDouble(@row[col].ToString()).ToString("C")) + "'";
-
-                    case TypeCode.Boolean:
-                        return (Convert.ToBoolean(@row[col]) ? "Yes" : "No");
-
-                    case TypeCode.DateTime:
-                        try
-                        {
-                            return "'" + @Convert.ToDateTime(@row[col]).ToShortDateString() + "'";
-                        }
-                        catch
-                        {
-                            return "'" + @row[col] + "'";
-                        }
-
-                    case TypeCode.String:
-                    default:
-                        return "'" + @row[col].ToString().Replace("'", "") + "'";
-                }
-            }
-
-            return "";
-        }
-
-        public static string GetFormattedValue(DataColumn col, DataRow row)
-        {
-            if (@row[col] != null)
-            {
-                switch (Type.GetTypeCode(col.DataType))
-                {
-                    case TypeCode.Int16:
-                    case TypeCode.UInt16:
-                    case TypeCode.Int32:
-                    case TypeCode.UInt32:
-                    case TypeCode.Int64:
-                    case TypeCode.UInt64:
-                    case TypeCode.Single:
-                        return row[col].ToString();
-
-
-                    case TypeCode.Double:
-                    case TypeCode.Decimal:
-                        return col.ColumnName.Contains("%")
-                            ? (Convert.ToDouble(row[col].ToString()) / 100).ToString("P2")
-                            : Convert.ToDouble(row[col].ToString()).ToString("C");
-
-
-                    case TypeCode.Boolean:
-                        return (Convert.ToBoolean(row[col]) ? "Yes" : "No");
-
-
-                    case TypeCode.DateTime:
-                        try
-                        {
-                            return Convert.ToDateTime(row[col]).ToShortDateString();
-                        }
-                        catch
-                        {
-                            return row[col] != null ? row[col].ToString() : null;
-                        }
-
-                    case TypeCode.String:
-                    default:
-                        if (row[col].ToString() == "System.Byte[]")
-                        {
-
-                            return "<img src=\"data:image/png;base64," + Convert.ToBase64String((byte[])row[col], 0, ((byte[])row[col]).Length) + "\" style=\"max-width: 200px;\" />";
-                        }
-                        else
-                        {
-                            return row[col].ToString();
-                        }
-
-                }
-            }
-            return "";
-        }
+        }        
 
         private DotNetReportDataModel DataTableToDotNetReportDataModel(DataTable dt, List<string> sqlFields)
         {
@@ -458,7 +339,7 @@ namespace ReportBuilder.Web.Core.Controllers
                     SqlField = sqlField.Substring(0, sqlField.IndexOf("AS")).Trim(),
                     ColumnName = col.ColumnName,
                     DataType = col.DataType.ToString(),
-                    IsNumeric = IsNumericType(col.DataType)
+                    IsNumeric = DotNetReportHelper.IsNumericType(col.DataType)
                 });
 
             }
@@ -475,8 +356,8 @@ namespace ReportBuilder.Web.Core.Controllers
                     {
                         Column = model.Columns[i],
                         Value = row[col] != null ? row[col].ToString() : null,
-                        FormattedValue = GetFormattedValue(col, row),
-                        LabelValue = GetLabelValue(col, row)
+                        FormattedValue = DotNetReportHelper.GetFormattedValue(col, row),
+                        LabelValue = DotNetReportHelper.GetLabelValue(col, row)
                     });
                     i += 1;
                 }

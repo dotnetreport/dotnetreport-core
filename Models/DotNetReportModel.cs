@@ -4,7 +4,6 @@ using Microsoft.Extensions.Configuration;
 using OfficeOpenXml;
 using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
 using System.IO;
@@ -256,6 +255,125 @@ namespace ReportBuilder.Web.Core.Models
 
     public class DotNetReportHelper
     {
+        public static bool IsNumericType(Type type)
+        {
+
+            switch (Type.GetTypeCode(type))
+            {
+                case TypeCode.Int16:
+                case TypeCode.UInt16:
+                case TypeCode.Int32:
+                case TypeCode.UInt32:
+                case TypeCode.Int64:
+                case TypeCode.UInt64:
+                case TypeCode.Single:
+                case TypeCode.Double:
+                case TypeCode.Decimal:
+                    return true;
+
+                case TypeCode.Boolean:
+                case TypeCode.DateTime:
+                case TypeCode.String:
+                default:
+                    return false;
+            }
+        }
+
+        public static string GetLabelValue(DataColumn col, DataRow row)
+        {
+            if (@row[col] != null)
+            {
+                switch (Type.GetTypeCode(col.DataType))
+                {
+                    case TypeCode.Int16:
+                    case TypeCode.UInt16:
+                    case TypeCode.Int32:
+                    case TypeCode.UInt32:
+                    case TypeCode.Int64:
+                    case TypeCode.UInt64:
+                    case TypeCode.Single:
+                        return row[col].ToString();
+
+                    case TypeCode.Double:
+                    case TypeCode.Decimal:
+                        return @row[col].ToString();// "'" + (Convert.ToDouble(@row[col].ToString()).ToString("C")) + "'";
+
+                    case TypeCode.Boolean:
+                        return (Convert.ToBoolean(@row[col]) ? "Yes" : "No");
+
+                    case TypeCode.DateTime:
+                        try
+                        {
+                            return "'" + @Convert.ToDateTime(@row[col]).ToShortDateString() + "'";
+                        }
+                        catch
+                        {
+                            return "'" + @row[col] + "'";
+                        }
+
+                    case TypeCode.String:
+                    default:
+                        return "'" + @row[col].ToString().Replace("'", "") + "'";
+                }
+            }
+
+            return "";
+        }
+
+        public static string GetFormattedValue(DataColumn col, DataRow row)
+        {
+            if (@row[col] != null)
+            {
+                switch (Type.GetTypeCode(col.DataType))
+                {
+                    case TypeCode.Int16:
+                    case TypeCode.UInt16:
+                    case TypeCode.Int32:
+                    case TypeCode.UInt32:
+                    case TypeCode.Int64:
+                    case TypeCode.UInt64:
+                    case TypeCode.Single:
+                        return row[col].ToString();
+
+
+                    case TypeCode.Double:
+                    case TypeCode.Decimal:
+                        return col.ColumnName.Contains("%")
+                            ? (Convert.ToDouble(row[col].ToString()) / 100).ToString("P2")
+                            : Convert.ToDouble(row[col].ToString()).ToString("C");
+
+
+                    case TypeCode.Boolean:
+                        return (Convert.ToBoolean(row[col]) ? "Yes" : "No");
+
+
+                    case TypeCode.DateTime:
+                        try
+                        {
+                            return Convert.ToDateTime(row[col]).ToShortDateString();
+                        }
+                        catch
+                        {
+                            return row[col] != null ? row[col].ToString() : null;
+                        }
+
+                    case TypeCode.String:
+                    default:
+                        if (row[col].ToString() == "System.Byte[]")
+                        {
+
+                            return "<img src=\"data:image/png;base64," + Convert.ToBase64String((byte[])row[col], 0, ((byte[])row[col]).Length) + "\" style=\"max-width: 200px;\" />";
+                        }
+                        else
+                        {
+                            return row[col].ToString();
+                        }
+
+                }
+            }
+            return "";
+        }
+
         public static byte[] GetExcelFile(string reportSql, string connectKey, string reportName)
         {
             var sql = Decrypt(reportSql);
@@ -306,7 +424,7 @@ namespace ReportBuilder.Web.Core.Models
                 return xp.GetAsByteArray();
             }
         }
-        public static byte[] GetPdfFile(string reportSql, string connectKey, string reportName, string ChartData = null)
+        public static byte[] GetPdfFile(string reportSql, string connectKey, string reportName, string chartData = null)
         {
             var sql = Decrypt(reportSql);
             var dt = new DataTable();
@@ -334,7 +452,7 @@ namespace ReportBuilder.Web.Core.Models
                     cell.HorizontalAlignment = PdfPCell.ALIGN_CENTER;
                     cell.VerticalAlignment = PdfPCell.ALIGN_CENTER;
                     cell.BorderColor = BaseColor.LIGHT_GRAY;
-                    cell.BorderWidth = 1f;
+                    cell.BorderWidth = 0.5f;
                     // cell.BackgroundColor = new iTextSharp.text.BaseColor(51, 102, 102);
                     table.AddCell(cell);
                 }
@@ -343,19 +461,19 @@ namespace ReportBuilder.Web.Core.Models
                 {
                     for (int j = 0; j < dt.Columns.Count; j++)
                     {
-                        PdfPCell cell = new PdfPCell(new Phrase(dt.Rows[i][j].ToString()));
-                        //Align the cell in the center
-                        cell.HorizontalAlignment = PdfPCell.ALIGN_LEFT;
+                        var value = GetFormattedValue(dt.Columns[j], dt.Rows[i]);
+                        PdfPCell cell = new PdfPCell(new Phrase(value));
+                        cell.HorizontalAlignment = IsNumericType(dt.Columns[j].DataType) ? PdfPCell.ALIGN_RIGHT : PdfPCell.ALIGN_LEFT;
                         cell.VerticalAlignment = PdfPCell.ALIGN_LEFT;
                         cell.BorderColor = BaseColor.LIGHT_GRAY;
-                        cell.BorderWidth = 1f;
+                        cell.BorderWidth = 0.5f;
                         table.AddCell(cell);
                     }
                 }
                 //Create a PdfReader bound to that byte array
-                if (!string.IsNullOrEmpty(ChartData))
+                if (!string.IsNullOrEmpty(chartData))
                 {
-                    byte[] sPDFDecoded = Convert.FromBase64String(ChartData.Substring(ChartData.LastIndexOf(',') + 1));
+                    byte[] sPDFDecoded = Convert.FromBase64String(chartData.Substring(chartData.LastIndexOf(',') + 1));
                     var image = Image.GetInstance(sPDFDecoded);
                     if (image.Height > image.Width)
                     {
@@ -371,10 +489,7 @@ namespace ReportBuilder.Web.Core.Models
                         percentage = 540 / image.Width;
                         image.ScalePercent(percentage * 100);
                     }
-                    // If need to add boarder
-                    //   image.Border = iTextSharp.text.Rectangle.BOX;
-                    //  image.BorderColor = iTextSharp.text.BaseColor.BLACK;
-                    //  image.BorderWidth = 3f;
+
                     document.Add(image);
                 }
                 document.Add(table);
