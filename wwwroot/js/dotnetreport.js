@@ -2020,6 +2020,7 @@ var dashboardViewModel = function (options) {
 	};
 
 	self.updatePosition = function (item) {
+		if (!item || !item.id) return;
 		ajaxcall({
 			url: options.apiUrl,
 			noBlocking: true,
@@ -2031,7 +2032,7 @@ var dashboardViewModel = function (options) {
 					width: item.width,
 					height: item.height,
 					dashboardId: self.currentDashboard().id,
-					reportId: item.id
+					reportId: parseInt(item.id)
 				})
 			}
 		});
