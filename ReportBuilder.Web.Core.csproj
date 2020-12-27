@@ -33,6 +33,7 @@
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="3.0.0" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="3.0.0" />
+    <PackageReference Include="PuppeteerSharp" Version="2.0.4" />
     <PackageReference Include="Quartz" Version="3.0.7" />
     <PackageReference Include="System.Data.Common" Version="4.3.0" />
     <PackageReference Include="System.Data.OleDb" Version="4.7.0" />

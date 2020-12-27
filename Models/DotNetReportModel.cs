@@ -2,13 +2,17 @@
 using iTextSharp.text.pdf;
 using Microsoft.Extensions.Configuration;
 using OfficeOpenXml;
+using PuppeteerSharp;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.IO;
+using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading.Tasks;
+using System.Web;
 
 namespace ReportBuilder.Web.Core.Models
 {
@@ -424,8 +428,70 @@ namespace ReportBuilder.Web.Core.Models
                 return xp.GetAsByteArray();
             }
         }
-        public static byte[] GetPdfFile(string reportSql, string connectKey, string reportName, string chartData = null)
+        public static async Task<byte[]> GetPdfFile(int reportId, string reportSql, string connectKey, string reportName, string chartData = null)
         {
+            await new BrowserFetcher().DownloadAsync(BrowserFetcher.DefaultRevision);
+            var browser = await Puppeteer.LaunchAsync(new LaunchOptions
+            {
+                Headless = false
+            });
+            var page = await browser.NewPageAsync();
+            await page.SetRequestInterceptionAsync(true);
+
+            var formPosted = false;
+            var url = "http://localhost:64636/Report/Report";
+            var formData = new StringBuilder();
+            formData.AppendLine("<html><body>");
+            formData.AppendLine($"<form action=\"{url}\" method=\"post\">");
+            formData.AppendLine($"<input name=\"reportSql\" value=\"{HttpUtility.HtmlEncode(reportSql)}\" />");
+            formData.AppendLine($"<input name=\"connectKey\" value=\"{HttpUtility.HtmlEncode(connectKey)}\" />");
+            formData.AppendLine($"<input name=\"reportId\" value=\"{reportId}\" />");
+            formData.AppendLine($"<input name=\"pageNumber\" value=\"{1}\" />");
+            formData.AppendLine($"<input name=\"pageSize\" value=\"{99999}\" />");            
+            formData.AppendLine($"</form>"); 
+            formData.AppendLine("<script type=\"text/javascript\">document.getElementsByTagName('form')[0].submit();</script>");
+            formData.AppendLine("</body></html>");
+
+            page.Response += async (sender, e) =>
+            {
+                var r = e.Response.Url;
+            };
+
+            page.Request += async (sender, e) =>
+            {
+                if (formPosted)
+                {
+                    await e.Request.ContinueAsync();
+                    return;
+                }
+
+                var payload = new Payload
+                {
+                    Headers = e.Request.Headers,
+                    Url = url,
+                    Method = HttpMethod.Post,
+                    PostData = $"reportSql={HttpUtility.HtmlEncode(reportSql)}&connectKey={connectKey}&pageNumber=1,pageSize=999999"
+                };
+
+                await e.Request.RespondAsync(new ResponseData
+                {
+                    Status = System.Net.HttpStatusCode.OK,
+                    Body = formData.ToString()
+                });
+                formPosted = true;
+            };
+
+            await page.GoToAsync(url, new NavigationOptions
+            {
+                WaitUntil = new[] { WaitUntilNavigation.Networkidle0 }
+            });
+            await page.WaitForSelectorAsync(".report-inner", new WaitForSelectorOptions
+            {
+                Visible = true
+            });
+
+            await page.PdfAsync(Path.Combine(Path.GetTempPath(), "report.pdf"));
+
             var sql = Decrypt(reportSql);
             var dt = new DataTable();
             using (var conn = new SqlConnection(Startup.StaticConfig.GetConnectionString(connectKey)))

@@ -120,10 +120,10 @@ namespace ReportBuilder.Web.Core.Controllers
 
 
         [HttpPost]
-        public IActionResult DownloadPdf(string reportSql, string connectKey, string reportName, string ChartData = null)
+        public async Task<IActionResult> DownloadPdf(int reportId, string reportSql, string connectKey, string reportName, string ChartData = null)
         {
             reportSql = HttpUtility.HtmlDecode(reportSql);
-            var pdf = DotNetReportHelper.GetPdfFile(reportSql, connectKey, reportName, ChartData);
+            var pdf = await DotNetReportHelper.GetPdfFile(reportId, reportSql, connectKey, reportName, ChartData);
             return File(pdf, "application/pdf", reportName + ".pdf");
         }
 
