@@ -69,6 +69,27 @@ namespace ReportBuilder.Web.Core.Controllers
             return View("Report", model);
         }
 
+        public IActionResult ReportPrint(int reportId, string reportName, string reportDescription, bool includeSubTotal, bool showUniqueRecords,
+            bool aggregateReport, bool showDataWithGraph, string reportSql, string connectKey, string reportFilter, string reportType, int selectedFolder)
+        {
+            var model = new DotNetReportModel
+            {
+                ReportId = reportId,
+                ReportType = reportType,
+                ReportName = HttpUtility.UrlDecode(reportName),
+                ReportDescription = HttpUtility.UrlDecode(reportDescription),
+                ReportSql = reportSql,
+                ConnectKey = connectKey,
+                IncludeSubTotals = includeSubTotal,
+                ShowUniqueRecords = showUniqueRecords,
+                ShowDataWithGraph = showDataWithGraph,
+                SelectedFolder = selectedFolder,
+                ReportFilter = reportFilter // json data to setup filter correctly again
+            };
+
+            return View(model);
+        }
+
         public async Task<IActionResult> Dashboard(int? id = null, bool adminMode = false)
         {
             var reportApi = new ReportApiController();

@@ -1,14 +1,12 @@
-﻿using iTextSharp.text;
-using iTextSharp.text.pdf;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using OfficeOpenXml;
 using PuppeteerSharp;
+using PuppeteerSharp.Media;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.IO;
-using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -433,13 +431,13 @@ namespace ReportBuilder.Web.Core.Models
             await new BrowserFetcher().DownloadAsync(BrowserFetcher.DefaultRevision);
             var browser = await Puppeteer.LaunchAsync(new LaunchOptions
             {
-                Headless = false
+                Headless = true
             });
             var page = await browser.NewPageAsync();
             await page.SetRequestInterceptionAsync(true);
 
             var formPosted = false;
-            var url = "http://localhost:64636/Report/Report";
+            var url = "http://localhost:64636/Report/ReportPrint";
             var formData = new StringBuilder();
             formData.AppendLine("<html><body>");
             formData.AppendLine($"<form action=\"{url}\" method=\"post\">");
@@ -452,11 +450,6 @@ namespace ReportBuilder.Web.Core.Models
             formData.AppendLine("<script type=\"text/javascript\">document.getElementsByTagName('form')[0].submit();</script>");
             formData.AppendLine("</body></html>");
 
-            page.Response += async (sender, e) =>
-            {
-                var r = e.Response.Url;
-            };
-
             page.Request += async (sender, e) =>
             {
                 if (formPosted)
@@ -465,19 +458,12 @@ namespace ReportBuilder.Web.Core.Models
                     return;
                 }
 
-                var payload = new Payload
-                {
-                    Headers = e.Request.Headers,
-                    Url = url,
-                    Method = HttpMethod.Post,
-                    PostData = $"reportSql={HttpUtility.HtmlEncode(reportSql)}&connectKey={connectKey}&pageNumber=1,pageSize=999999"
-                };
-
                 await e.Request.RespondAsync(new ResponseData
                 {
                     Status = System.Net.HttpStatusCode.OK,
                     Body = formData.ToString()
                 });
+
                 formPosted = true;
             };
 
@@ -485,91 +471,20 @@ namespace ReportBuilder.Web.Core.Models
             {
                 WaitUntil = new[] { WaitUntilNavigation.Networkidle0 }
             });
+
             await page.WaitForSelectorAsync(".report-inner", new WaitForSelectorOptions
             {
                 Visible = true
             });
 
-            await page.PdfAsync(Path.Combine(Path.GetTempPath(), "report.pdf"));
-
-            var sql = Decrypt(reportSql);
-            var dt = new DataTable();
-            using (var conn = new SqlConnection(Startup.StaticConfig.GetConnectionString(connectKey)))
+            await page.PdfAsync(Path.Combine(Path.GetTempPath(), reportName), new PdfOptions
             {
-                conn.Open();
-                var command = new SqlCommand(sql, conn);
-                var adapter = new SqlDataAdapter(command);
-
-                adapter.Fill(dt);
-            }
-            Document document = new Document();
-            using (var ms = new MemoryStream())
-            {
-                PdfWriter writer = PdfWriter.GetInstance(document, ms);
-                document.Open();
-                document.Add(new Phrase(reportName));
-                PdfPTable table = new PdfPTable(dt.Columns.Count);
-                table.WidthPercentage = 100;
-                // table.DefaultCell.Border = 1;
-                //Set columns names in the pdf file
-                for (int k = 0; k < dt.Columns.Count; k++)
-                {
-                    PdfPCell cell = new PdfPCell(new Phrase(dt.Columns[k].ColumnName));
-                    cell.HorizontalAlignment = PdfPCell.ALIGN_CENTER;
-                    cell.VerticalAlignment = PdfPCell.ALIGN_CENTER;
-                    cell.BorderColor = BaseColor.LIGHT_GRAY;
-                    cell.BorderWidth = 0.5f;
-                    // cell.BackgroundColor = new iTextSharp.text.BaseColor(51, 102, 102);
-                    table.AddCell(cell);
-                }
-                //Add values of DataTable in pdf file
-                for (int i = 0; i < dt.Rows.Count; i++)
-                {
-                    for (int j = 0; j < dt.Columns.Count; j++)
-                    {
-                        var value = GetFormattedValue(dt.Columns[j], dt.Rows[i]);
-                        PdfPCell cell = new PdfPCell(new Phrase(value));
-                        cell.HorizontalAlignment = IsNumericType(dt.Columns[j].DataType) ? PdfPCell.ALIGN_RIGHT : PdfPCell.ALIGN_LEFT;
-                        cell.VerticalAlignment = PdfPCell.ALIGN_LEFT;
-                        cell.BorderColor = BaseColor.LIGHT_GRAY;
-                        cell.BorderWidth = 0.5f;
-                        table.AddCell(cell);
-                    }
-                }
-                //Create a PdfReader bound to that byte array
-                if (!string.IsNullOrEmpty(chartData))
-                {
-                    byte[] sPDFDecoded = Convert.FromBase64String(chartData.Substring(chartData.LastIndexOf(',') + 1));
-                    var image = Image.GetInstance(sPDFDecoded);
-                    if (image.Height > image.Width)
-                    {
-                        //Maximum height is 800 pixels.
-                        float percentage = 0.0f;
-                        percentage = 700 / image.Height;
-                        image.ScalePercent(percentage * 100);
-                    }
-                    else
-                    {
-                        //Maximum width is 600 pixels.
-                        float percentage = 0.0f;
-                        percentage = 540 / image.Width;
-                        image.ScalePercent(percentage * 100);
-                    }
-
-                    document.Add(image);
-                }
-                document.Add(table);
-                document.Close();
-                return ms.ToArray();
-            }
+                Format = PaperFormat.Letter,
+                MarginOptions = new MarginOptions() { Top = "0.75in", Bottom = "0.75in" }
+            });
+            return File.ReadAllBytes(Path.Combine(Path.GetTempPath(), reportName));
         }
-        private static byte[] Combine(byte[] a, byte[] b)
-        {
-            byte[] c = new byte[a.Length + b.Length];
-            System.Buffer.BlockCopy(a, 0, c, 0, a.Length);
-            System.Buffer.BlockCopy(b, 0, c, a.Length, b.Length);
-            return c;
-        }
+
         public static string GetXmlFile(string reportSql, string connectKey, string reportName)
         {
             var sql = Decrypt(reportSql);

@@ -91,6 +91,7 @@
         }
         @using (Html.BeginForm("DownloadPdf", "Report", FormMethod.Post, new { id = "downloadPdf" }))
         {
+            <input type="hidden" id="reportId" name="reportId" data-bind="value: ReportID" />
             <input type="hidden" id="chartdata" name="chartData" data-bind="value: ChartData" />
             <input type="hidden" id="reportSql" name="reportSql" data-bind="value: currentSql" />
             <input type="hidden" id="connectKey" name="connectKey" data-bind="value: currentConnectKey" />
