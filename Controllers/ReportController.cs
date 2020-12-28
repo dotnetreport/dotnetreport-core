@@ -139,12 +139,11 @@ namespace ReportBuilder.Web.Core.Controllers
             return File(excel, "application/vnd.ms-excel", reportName + ".xlsx");
         }
 
-
         [HttpPost]
-        public async Task<IActionResult> DownloadPdf(int reportId, string reportSql, string connectKey, string reportName, string ChartData = null)
+        public async Task<IActionResult> DownloadPdf(string printUrl, int reportId, string reportSql, string connectKey, string reportName)
         {
             reportSql = HttpUtility.HtmlDecode(reportSql);
-            var pdf = await DotNetReportHelper.GetPdfFile(reportId, reportSql, connectKey, reportName, ChartData);
+            var pdf = await DotNetReportHelper.GetPdfFile(printUrl, reportId, reportSql, connectKey, reportName);
             return File(pdf, "application/pdf", reportName + ".pdf");
         }
 

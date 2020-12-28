@@ -426,7 +426,7 @@ namespace ReportBuilder.Web.Core.Models
                 return xp.GetAsByteArray();
             }
         }
-        public static async Task<byte[]> GetPdfFile(int reportId, string reportSql, string connectKey, string reportName, string chartData = null)
+        public static async Task<byte[]> GetPdfFile(string printUrl, int reportId, string reportSql, string connectKey, string reportName)
         {
             await new BrowserFetcher().DownloadAsync(BrowserFetcher.DefaultRevision);
             var browser = await Puppeteer.LaunchAsync(new LaunchOptions
@@ -437,10 +437,9 @@ namespace ReportBuilder.Web.Core.Models
             await page.SetRequestInterceptionAsync(true);
 
             var formPosted = false;
-            var url = "http://localhost:64636/Report/ReportPrint";
             var formData = new StringBuilder();
             formData.AppendLine("<html><body>");
-            formData.AppendLine($"<form action=\"{url}\" method=\"post\">");
+            formData.AppendLine($"<form action=\"{printUrl}\" method=\"post\">");
             formData.AppendLine($"<input name=\"reportSql\" value=\"{HttpUtility.HtmlEncode(reportSql)}\" />");
             formData.AppendLine($"<input name=\"connectKey\" value=\"{HttpUtility.HtmlEncode(connectKey)}\" />");
             formData.AppendLine($"<input name=\"reportId\" value=\"{reportId}\" />");
@@ -467,7 +466,7 @@ namespace ReportBuilder.Web.Core.Models
                 formPosted = true;
             };
 
-            await page.GoToAsync(url, new NavigationOptions
+            await page.GoToAsync(printUrl, new NavigationOptions
             {
                 WaitUntil = new[] { WaitUntilNavigation.Networkidle0 }
             });
