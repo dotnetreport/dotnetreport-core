@@ -1355,9 +1355,9 @@ var reportViewModel = function (options) {
 		});
 	};
 
-	self.DrawChart = function () {
-
-		if (!self.isChart()) return;
+	self.skipDraw = options.skipDraw === true ? true : false;
+	self.DrawChart = function() {
+		if (!self.isChart() || self.skipDraw === true) return;
 		// Create the data table.
 		var reportData = self.ReportResult().ReportData();
 		var data = new google.visualization.DataTable();
@@ -1996,6 +1996,7 @@ var dashboardViewModel = function (options) {
 			reportConnect: x.connectKey,
 			users: options.users,
 			userRoles: options.userRoles,
+			skipDraw: true
 		});
 
 		report.x = ko.observable(x.x);
@@ -2015,6 +2016,7 @@ var dashboardViewModel = function (options) {
 
 	self.drawChart = function () {
 		_.forEach(self.reports(), function (x) {
+			x.skipDraw = false;
 			x.DrawChart();
 		});
 	};
