@@ -1852,6 +1852,45 @@ var reportViewModel = function (options) {
 		}
 	};
 
+	self.allowTableResize = function () {
+		var thElement;
+		var startOffset;
+
+		Array.prototype.forEach.call(
+			document.querySelectorAll(".report-inner table th"),
+			function (th) {
+				th.style.position = 'relative';
+
+				var grip = document.createElement('div');
+				grip.innerHTML = "&nbsp;";
+				grip.style.top = 0;
+				grip.style.right = 0;
+				grip.style.bottom = 0;
+				grip.style.width = '5px';
+				grip.style.position = 'absolute';
+				grip.style.cursor = 'col-resize';
+				grip.addEventListener('mousedown', function (e) {
+					thElement = th;
+					startOffset = th.offsetWidth - e.pageX;
+				});
+
+				th.appendChild(grip);
+			});
+
+		document.addEventListener('mousemove', function (e) {
+			if (thElement) {
+				thElement.style.width = startOffset + e.pageX + 'px';
+			}
+		});
+
+		document.addEventListener('mouseup', function () {
+			if (thElement) {
+				thElement.id;
+				thElement.width;
+            }
+			thElement = undefined;
+		});
+    }
 };
 
 var dashboardViewModel = function (options) {

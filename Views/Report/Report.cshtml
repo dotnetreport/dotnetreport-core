@@ -62,8 +62,11 @@
         });
 
         ko.applyBindings(vm);
-        vm.LoadReport(@Model.ReportId, true,"@Model.ReportSeries");
-
+        vm.LoadReport(@Model.ReportId, true, "@Model.ReportSeries");
+        setTimeout(function () {
+            vm.allowTableResize();
+        }, 2000);
+        
         $(window).resize(function(){
             vm.DrawChart();
         });
