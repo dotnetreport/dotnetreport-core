@@ -35,7 +35,6 @@ namespace ReportBuilder.Web.Core.Controllers
             settings.UserId = ""; // You can pass your current authenticated user id here to track their reports and folders            
             settings.UserName = "";
             settings.CurrentUserRole = new List<string>(); // Populate your current authenticated user's roles
-
             settings.Users = new List<string>(); // Populate all your application's user, ex  { "Jane", "John" }
             settings.UserRoles = new List<string>(); // Populate all your application's user roles, ex  { "Admin", "Normal" }       
             settings.CanUseAdminMode = true; // Set to true only if current user can use Admin mode to setup reports and dashboard
@@ -91,6 +90,7 @@ namespace ReportBuilder.Web.Core.Controllers
                     new KeyValuePair<string, string>("dataConnect", settings.DataConnectApiToken),
                     new KeyValuePair<string, string>("clientId", settings.ClientId),
                     new KeyValuePair<string, string>("userId", settings.UserId),
+                    new KeyValuePair<string, string>("userIdForSchedule", settings.UserIdForSchedule),
                     new KeyValuePair<string, string>("userRole", String.Join(",", settings.CurrentUserRole))
                 };
 
@@ -307,7 +307,8 @@ namespace ReportBuilder.Web.Core.Controllers
                 currentUserId = settings.UserId,
                 currentUserRoles = settings.UserRoles,
                 currentUserName = settings.UserName,
-                allowAdminMode = settings.CanUseAdminMode
+                allowAdminMode = settings.CanUseAdminMode,
+                userIdForSchedule = settings.UserIdForSchedule
             });
         }
 
