@@ -1079,7 +1079,10 @@ var reportViewModel = function (options) {
 					FieldAlign: x.fieldAlign(),
 					FontColor: x.fontColor(),
 					BackColor: x.backColor(),
-					FontBold: x.fontBold()
+					FontBold: x.fontBold(),
+					FieldWidth: x.fieldWidth(),
+					FieldConditionOp: x.fieldConditionOp(),
+					FieldConditionVal: x.fieldConditionVal()
 				};
 			}),
 			Schedule: self.scheduleBuilder.toJs(),
@@ -1153,6 +1156,7 @@ var reportViewModel = function (options) {
 		if (isExecuteReportQuery === false) {
 			if (saveOnly) {
 				toastr.success("Report Saved");
+				return;
 			}
 			redirectToReport(options.runReportUrl, {
 				reportId: _result.reportId,
@@ -1202,6 +1206,77 @@ var reportViewModel = function (options) {
 			reportResult.ReportSql(result.ReportSql);
 			self.ReportSeries = reportSeries;
 
+			function matchColumnName(src, dst) {
+				if (src == dst) return true;
+				if (dst.indexOf('(Count)') < 0 && dst.indexOf("(Avg)") < 0 && dst.indexOf("(Sum)") < 0)
+					return false;
+
+				dst = (dst || "")
+					.replace("(Count)", "")
+					.replace("(Avg)", "")
+					.replace("(Sum)", "")
+					.trim();
+
+				src = (src || "").trim()
+				src = (src.endsWith("Id") || src.endsWith("ID") ? src.slice(0, -2) : src).trim();
+				
+				return src == dst;
+            }
+
+			function processCols(cols) {
+				_.forEach(cols, function (e, i) {
+					var col = _.find(self.SelectedFields(), function (x) { return matchColumnName(x.fieldName, e.ColumnName); });
+					if (col && col.linkField()) {
+						e.linkItem = col.linkFieldItem.toJs();
+						e.linkField = true;
+					} else {
+						e.linkItem = {};
+						e.linkField = false;
+					}
+					col = ko.toJS(col);
+
+					e.backColor = col.backColor;
+					e.fieldAlign = col.fieldAlign;
+					e.fieldConditionOp = col.fieldConditionOp;
+					e.fieldConditionVal = col.fieldConditionVal;
+					e.fieldFormat = col.fieldFormat;
+					e.fieldLabel = col.fieldLabel;
+					e.fieldWidth = col.fieldWidth;
+					e.fontBold = col.fontBold;
+					e.fontColor = col.fontColor;
+
+				});
+			}
+
+			function processRow(row, columns) {
+				_.forEach(row, function (r, i) {
+					r.LinkTo = '';
+					var col = columns[i];
+					if (col && col.linkField) {
+						var linkItem = col.linkItem;
+						var link = '';
+						if (linkItem.LinksToReport) {
+							link = options.runLinkReportUrl + '?reportId=' + linkItem.LinkedToReportId;
+							if (linkItem.SendAsFilterParameter) {
+								link += '&filterId=' + linkItem.SelectedFilterId + '&filterValue=' + r.LabelValue;
+							}
+						}
+						else {
+							link = linkItem.LinkToUrl + (linkItem.SendAsQueryParameter ? ('?' + linkItem.QueryParameterName + '=' + r.LabelValue) : '');
+						}
+						r.LinkTo = link;
+					}
+
+					col = col || {};
+					r.backColor = col.backColor;
+					r.fieldAlign = col.fieldAlign;
+					r.fieldWidth = col.fieldWidth;
+					r.fontBold = col.fontBold;
+					r.fontColor = col.fontColor;
+				});
+            }
+
+			processCols(result.ReportData.Columns);
 			result.ReportData.IsDrillDown = ko.observable(false);
 			_.forEach(result.ReportData.Rows, function (e) {
 				e.DrillDownData = ko.observable(null);
@@ -1232,8 +1307,13 @@ var reportViewModel = function (options) {
 					}).done(function (ddData) {
 						if (ddData.d) { ddData = ddData.d; }
 						ddData.ReportData.IsDrillDown = ko.observable(true);
-						e.DrillDownData(ddData.ReportData);
 
+						processCols(ddData.ReportData.Columns);
+						_.forEach(ddData.ReportData.Rows, function (dr) {
+							processRow(dr.Items, ddData.ReportData.Columns);
+						});
+
+						e.DrillDownData(ddData.ReportData);
 						e.pager.totalRecords(ddData.Pager.TotalRecords);
 						e.pager.pages(ddData.Pager.TotalPages);
 					});
@@ -1271,24 +1351,7 @@ var reportViewModel = function (options) {
 					if (e.isExpanded()) e.collapse(); else e.expand();
 				};
 
-				_.forEach(e.Items, function (r, i) {
-					r.LinkTo = '';
-					var col = self.SelectedFields()[i];
-					if (col && col.linkField()) {
-						var linkItem = col.linkFieldItem.toJs();
-						var link = '';
-						if (linkItem.LinksToReport) {
-							link = options.runLinkReportUrl + '?reportId=' + linkItem.LinkedToReportId;
-							if (linkItem.SendAsFilterParameter) {
-								link += '&filterId=' + linkItem.SelectedFilterId + '&filterValue=' + r.LabelValue;
-							}
-						}
-						else {
-							link = linkItem.LinkToUrl + (linkItem.SendAsQueryParameter ? ('?' + linkItem.QueryParameterName + '=' + r.LabelValue) : '');
-						}
-						r.LinkTo = link;
-					}
-				});
+				processRow(e.Items, result.ReportData.Columns);
 			});
 
 			reportResult.ReportData(result.ReportData);
@@ -1510,6 +1573,9 @@ var reportViewModel = function (options) {
 		e.fontColor = ko.observable(e.fontColor);
 		e.backColor = ko.observable(e.backColor);
 		e.fontBold = ko.observable(e.fontBold);
+		e.fieldWidth = ko.observable(e.fieldWidth);
+		e.fieldConditionOp = ko.observable(e.fieldConditionOp);
+		e.fieldConditionVal = ko.observable(e.fieldConditionVal);
 
 		var formulaItems = [];
 		_.forEach(e.formulaItems || [], function (e) {
@@ -1552,7 +1618,10 @@ var reportViewModel = function (options) {
 				fieldAlign: e.fieldAlign(),
 				fontColor: e.fontColor(),
 				backColor: e.backColor(),
-				fontBold: e.fontBold()
+				fontBold: e.fontBold(),
+				fieldWidth: e.fieldWidth(),
+				fieldConditionOp: e.fieldConditionOp(),
+				fieldConditionVal: e.fieldConditionVal()
 			}
 			self.editFieldOptions(e);
 			if (options.fieldOptionsModal) options.fieldOptionsModal.modal('show');
@@ -1569,6 +1638,9 @@ var reportViewModel = function (options) {
 			e.fontColor(self.currentFieldOptions.fontColor);
 			e.backColor(self.currentFieldOptions.backColor);
 			e.fontBold(self.currentFieldOptions.fontBold);
+			e.fieldWidth(self.currentFieldOptions.fieldWidth);
+			e.fieldConditionOp(self.currentFieldOptions.fieldConditionOp);
+			e.fieldConditionVal(self.currentFieldOptions.fieldConditionVal);
 			if (options.fieldOptionsModal) options.fieldOptionsModal.modal('hide');
 		}
 
@@ -1885,8 +1957,7 @@ var reportViewModel = function (options) {
 
 		document.addEventListener('mouseup', function () {
 			if (thElement) {
-				thElement.id;
-				thElement.width;
+				
             }
 			thElement = undefined;
 		});
