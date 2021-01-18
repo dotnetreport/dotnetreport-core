@@ -44,7 +44,7 @@
     function downloadXml() {
         $("#downloadXml").submit();
     }
-
+          
     $(document).ready(function () {
         var vm = new reportViewModel({
             runReportUrl: "@Url.Action("Report")",
@@ -61,12 +61,15 @@
             ReportSeries : "@Model.ReportSeries"
         });
 
-        ko.applyBindings(vm);
-        vm.LoadReport(@Model.ReportId, true, "@Model.ReportSeries");
-        setTimeout(function () {
-            vm.allowTableResize();
-        }, 2000);
-        
+
+        vm.LoadReport(@Model.ReportId, true, "@Model.ReportSeries").done(function () {
+            ko.applyBindings(vm);
+            setTimeout(function () {
+                vm.allowTableResize();
+            }, 2000);
+
+        });
+
         $(window).resize(function(){
             vm.DrawChart();
         });
