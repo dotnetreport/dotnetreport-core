@@ -1208,12 +1208,13 @@ var reportViewModel = function (options) {
 
 			function matchColumnName(src, dst) {
 				if (src == dst) return true;
-				if (dst.indexOf('(Count)') < 0 && dst.indexOf("(Avg)") < 0 && dst.indexOf("(Sum)") < 0)
+				if (dst.indexOf('(Count)') < 0 && dst.indexOf("(Avg)") < 0 && dst.indexOf("(Sum)") < 0 && dst.indexOf("(Average)") < 0)
 					return false;
 
 				dst = (dst || "")
 					.replace("(Count)", "")
 					.replace("(Avg)", "")
+					.replace("(Average)", "")
 					.replace("(Sum)", "")
 					.trim();
 
@@ -1233,7 +1234,7 @@ var reportViewModel = function (options) {
 						e.linkItem = {};
 						e.linkField = false;
 					}
-					col = ko.toJS(col);
+					col = ko.toJS(col || {});
 
 					e.backColor = col.backColor;
 					e.fieldAlign = col.fieldAlign;
