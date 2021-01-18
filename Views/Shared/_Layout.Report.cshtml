@@ -134,7 +134,7 @@
                         <!-- ko foreach: Columns -->
                         <th data-bind="attr: { id: 'col' + $index() }, css: {'right-align': IsNumeric}">
                             <a href="" data-bind="click: function(){ $parentContext.$parentContext.$parent.changeSort(SqlField); }">
-                                <span data-bind="text: ColumnName"></span>
+                                <span data-bind="text: fieldLabel ? fieldLabel : ColumnName"></span>
                                 <span data-bind="text: $parentContext.$parentContext.$parent.pager.sortColumn() === SqlField ? ($parentContext.$parentContext.$parent.pager.sortDescending() ? '&#9660;' : '&#9650;') : ''"></span>
                             </a>
                         </th>
@@ -154,12 +154,12 @@
                         <!-- /ko -->
                         <!-- ko foreach: Items -->
                         <!-- ko if: LinkTo-->
-                        <td data-bind="css: {'right-align': Column.IsNumeric}">
+                        <td data-bind="css: {'right-align': Column.IsNumeric}, style: {'background-color': backColor, 'color': fontColor}">
                             <a data-bind="attr: {href: LinkTo}"><span data-bind="html: FormattedValue"></span></a>
                         </td>
                         <!-- /ko-->
                         <!-- ko ifnot: LinkTo-->
-                        <td data-bind="html: FormattedValue, css: {'right-align': Column.IsNumeric}"></td>
+                        <td data-bind="html: FormattedValue, css: {'right-align': Column.IsNumeric}, style: {'background-color': backColor, 'color': fontColor}"></td>
                         <!-- /ko-->
                         <!-- /ko -->
                     </tr>
@@ -174,7 +174,7 @@
                                         <!-- ko foreach: Columns -->
                                         <th data-bind="css: {'right-align': IsNumeric}">
                                             <a href="" data-bind="click: function(){ $parents[1].changeSort(SqlField); }">
-                                                <span data-bind="text: ColumnName"></span>
+                                                <span data-bind="text: fieldLabel ? fieldLabel : ColumnName"></span>
                                                 <span data-bind="text: $parents[1].pager.sortColumn() === SqlField ? ($parents[1].pager.sortDescending() ? '&#9660;' : '&#9650;') : ''"></span>
                                             </a>
                                         </th>
@@ -190,7 +190,14 @@
                                     <!-- ko foreach: Rows  -->
                                     <tr>
                                         <!-- ko foreach: Items -->
-                                        <td data-bind="html: FormattedValue, css: {'right-align': Column.IsNumeric}"></td>
+                                        <!-- ko if: LinkTo-->
+                                        <td data-bind="css: {'right-align': Column.IsNumeric}, style: {'background-color': backColor, 'color': fontColor}">
+                                            <a data-bind="attr: {href: LinkTo}"><span data-bind="html: FormattedValue"></span></a>
+                                        </td>
+                                        <!-- /ko-->
+                                        <!-- ko ifnot: LinkTo-->
+                                        <td data-bind="html: FormattedValue, css: {'right-align': Column.IsNumeric}, style: {'background-color': backColor, 'color': fontColor}"></td>
+                                        <!-- /ko-->
                                         <!-- /ko -->
                                     </tr>
                                     <!-- /ko -->
