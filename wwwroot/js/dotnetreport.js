@@ -1244,7 +1244,7 @@ var reportViewModel = function (options) {
 					e.fieldWidth = col.fieldWidth;
 					e.fontBold = col.fontBold;
 					e.fontColor = col.fontColor;
-
+					e.fieldId = col.fieldId;
 				});
 			}
 
@@ -1273,6 +1273,7 @@ var reportViewModel = function (options) {
 					r.fieldWidth = col.fieldWidth;
 					r.fontBold = col.fontBold;
 					r.fontColor = col.fontColor;
+					r.fieldId = col.fieldId;
 				});
             }
 
@@ -1403,6 +1404,9 @@ var reportViewModel = function (options) {
 				});
 			}
 
+			setTimeout(function () {
+				self.allowTableResize();
+			}, 2000);
 		});
 	};
 
@@ -1925,7 +1929,7 @@ var reportViewModel = function (options) {
 	};
 
 	self.allowTableResize = function () {
-		var thElement;
+		var thItem;
 		var startOffset;
 
 		Array.prototype.forEach.call(
@@ -1942,7 +1946,7 @@ var reportViewModel = function (options) {
 				grip.style.position = 'absolute';
 				grip.style.cursor = 'col-resize';
 				grip.addEventListener('mousedown', function (e) {
-					thElement = th;
+					thItem = th;
 					startOffset = th.offsetWidth - e.pageX;
 				});
 
@@ -1950,16 +1954,31 @@ var reportViewModel = function (options) {
 			});
 
 		document.addEventListener('mousemove', function (e) {
-			if (thElement) {
-				thElement.style.width = startOffset + e.pageX + 'px';
+			if (thItem) {
+				thItem.style.width = startOffset + e.pageX + 'px';
 			}
 		});
 
 		document.addEventListener('mouseup', function () {
-			if (thElement) {
-				
-            }
-			thElement = undefined;
+			if (thItem && thItem.id && thItem.style) {
+				var col = _.find(self.SelectedFields(), { fieldId: parseInt(thItem.id) });
+				if (col) {
+					col.fieldWidth(thItem.style.width);
+                }
+				ajaxcall({
+					url: options.apiUrl,
+					noBlocking: true,
+					data: {
+						method: '/ReportApi/UpdateReportColumnWidth',
+						model: JSON.stringify({
+							width: thItem.style.width,
+							fieldId: parseInt(thItem.id),
+							reportId: parseInt(self.ReportID())
+						})
+					}
+				});
+			}
+			thItem = undefined;
 		});
     }
 };

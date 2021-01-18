@@ -64,10 +64,6 @@
 
         vm.LoadReport(@Model.ReportId, true, "@Model.ReportSeries").done(function () {
             ko.applyBindings(vm);
-            setTimeout(function () {
-                vm.allowTableResize();
-            }, 2000);
-
         });
 
         $(window).resize(function(){

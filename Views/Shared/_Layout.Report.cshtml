@@ -129,10 +129,10 @@
                 <thead>
                     <tr class="no-highlight">
                         <!-- ko if: $parentContext.$parent.canDrilldown() && !IsDrillDown() -->
-                        <th></th>
+                        <th style="width: 30px;"></th>
                         <!-- /ko -->
                         <!-- ko foreach: Columns -->
-                        <th data-bind="attr: { id: 'col' + $index() }, css: {'right-align': IsNumeric}">
+                        <th data-bind="attr: { id: fieldId }, css: {'right-align': IsNumeric}, style: {'width': fieldWidth }">
                             <a href="" data-bind="click: function(){ $parentContext.$parentContext.$parent.changeSort(SqlField); }">
                                 <span data-bind="text: fieldLabel ? fieldLabel : ColumnName"></span>
                                 <span data-bind="text: $parentContext.$parentContext.$parent.pager.sortColumn() === SqlField ? ($parentContext.$parentContext.$parent.pager.sortDescending() ? '&#9660;' : '&#9650;') : ''"></span>
@@ -150,7 +150,7 @@
                     <!-- ko foreach: Rows  -->
                     <tr>
                         <!-- ko if: $parentContext.$parentContext.$parent.canDrilldown() && !$parent.IsDrillDown() -->
-                        <td><a href="#" data-bind="click: function(){ toggle(); }"><span class="fa" data-bind="css: {'fa-plus': !isExpanded(), 'fa-minus': isExpanded()}"></span></a></td>
+                        <td style="width: 30px;"><a href="#" data-bind="click: function(){ toggle(); }"><span class="fa" data-bind="css: {'fa-plus': !isExpanded(), 'fa-minus': isExpanded()}"></span></a></td>
                         <!-- /ko -->
                         <!-- ko foreach: Items -->
                         <!-- ko if: LinkTo-->
@@ -165,14 +165,14 @@
                     </tr>
                     <!-- ko if: isExpanded -->
                     <tr>
-                        <td></td>
-                        <td data-bind="attr:{colspan: $parent.Columns.length }">
+                        <td style="width: 30px;"></td>
+                        <td data-bind="attr:{colspan: $parent.Columns.length }" style="padding-left: 0px;">
                             <!-- ko if: DrillDownData -->
                             <table class="table table-hover table-condensed" data-bind="with: DrillDownData">
                                 <thead>
                                     <tr class="no-highlight">
                                         <!-- ko foreach: Columns -->
-                                        <th data-bind="css: {'right-align': IsNumeric}">
+                                        <th data-bind="css: {'right-align': IsNumeric}, style: {'width': fieldWidth }">
                                             <a href="" data-bind="click: function(){ $parents[1].changeSort(SqlField); }">
                                                 <span data-bind="text: fieldLabel ? fieldLabel : ColumnName"></span>
                                                 <span data-bind="text: $parents[1].pager.sortColumn() === SqlField ? ($parents[1].pager.sortDescending() ? '&#9660;' : '&#9650;') : ''"></span>
