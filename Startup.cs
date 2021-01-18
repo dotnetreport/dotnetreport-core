@@ -22,7 +22,8 @@ namespace ReportBuilder.Web.Core
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllersWithViews()
-                    .AddNewtonsoftJson(options => options.UseMemberCasing());
+                    .AddNewtonsoftJson(options => options.UseMemberCasing())
+                    .AddRazorRuntimeCompilation();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
