@@ -126,7 +126,7 @@
                     <div class="list-group-item">
                         <div class="row">
                             <div class="col-sm-7">
-                                <div class="fa fa-2x pull-left" data-bind="css: {'fa-file': reportType=='List', 'fa-th-list': reportType=='Summary', 'fa-bar-chart': reportType=='Bar', 'fa-pie-chart': reportType=='Pie',  'fa-line-chart': reportType=='Line', 'fa-globe': reportType =='Map'}"></div>
+                                <div class="fa fa-2x pull-left" data-bind="css: {'fa-file': reportType=='List', 'fa-th-list': reportType=='Summary', 'fa-bar-chart': reportType=='Bar', 'fa-pie-chart': reportType=='Pie',  'fa-line-chart': reportType=='Line', 'fa-globe': reportType =='Map', 'fa-window-maximize': reportType=='Single'}"></div>
                                 <div class="pull-left">
                                     <h4><a data-bind="text: reportName, click: runReport" style="cursor: pointer"></a></h4>
                                 </div>
@@ -252,7 +252,7 @@
                     </div>
                     <div class="col-md-3 col-sm-3 col-xs-6">
                         <div class="button-box" tabindex="0" data-bind="click: function(){ setReportType('Single'); }, css: {active: ReportType()=='Single'}">
-                            <span class="fa fa-2x fa-list"></span>
+                            <span class="fa fa-2x fa-window-maximize"></span>
                             <p>Single Value</p>
                         </div>
                     </div>
