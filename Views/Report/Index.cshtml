@@ -135,16 +135,16 @@
                                 <!-- ko if: $parent.adminMode -->
                                 <div class="small">
                                     <b>Report Access</b><br />
-                                    Manage by User <span class="label label-info" data-bind="text: userId ? userId : 'No User'"></span>
+                                    Manage by User <span class="badge badge-info" data-bind="text: userId ? userId : 'No User'"></span>
                                     <br />
-                                    View only by User <span class="label label-info" data-bind="text: (viewOnlyUserId ? viewOnlyUserId : (userId ? userId : 'Any User'))"></span>
+                                    View only by User <span class="badge badge-info" data-bind="text: (viewOnlyUserId ? viewOnlyUserId : (userId ? userId : 'Any User'))"></span>
                                     <br />
                                     <!-- ko if: userRole -->
-                                    Manage by Role <span class="label label-info" data-bind="text: userRole ? userRole : 'No Role'"></span>
+                                    Manage by Role <span class="badge badge-info" data-bind="text: userRole ? userRole : 'No Role'"></span>
                                     <br />
                                     <!-- /ko -->
                                     <!-- ko if: viewOnlyUserRole -->
-                                    View only by Role <span class="label label-info" data-bind="text: viewOnlyUserRole ? viewOnlyUserRole : 'Any Role'"></span>
+                                    View only by Role <span class="badge badge-info" data-bind="text: viewOnlyUserRole ? viewOnlyUserRole : 'Any Role'"></span>
                                     <br />
                                     <!-- /ko -->
                                     <!-- ko if: clientId -->
@@ -378,7 +378,7 @@
                                     <span class="fa fa-columns"></span>
                                     <span data-bind="text: selectedFieldName"></span>
                                     <span data-bind="visible: !$root.isFieldValidForYAxis($index(), fieldType)">
-                                        <span class="label label-danger" data-bind="visible: !groupInGraph()">Will not show in <span data-bind="text: $root.ReportType"></span>Chart</span>
+                                        <span class="badge badge-danger" data-bind="visible: !groupInGraph()">Will not show in <span data-bind="text: $root.ReportType"></span>Chart</span>
                                     </span>
                                 </div>
                                 <div class="col">
