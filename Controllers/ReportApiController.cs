@@ -123,7 +123,7 @@ namespace ReportBuilder.Web.Core.Controllers
             int pageSize = data.pageSize;
             string sortBy = data.sortBy;
             bool desc = data.desc;
-            string reportSeries = data.reportSeries;
+            string reportSeries = data.ReportSeries;
 
             var sql = "";
 
