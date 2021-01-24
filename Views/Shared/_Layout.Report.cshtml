@@ -124,16 +124,16 @@
     <script type="text/html" id="report-column-header">
         <!-- ko foreach: Columns -->
         <th data-bind="css: {'right-align': IsNumeric}, style: {'width': fieldWidth }">
-            <a href="" data-bind="click: function(){ $parents[1].pager ? $parents[1].changeSort(SqlField) : $root.changeSort(SqlField); }">
+            <a href="" data-bind="click: function(){ $parents[1].pager ? $parents[1].changeSort(SqlField) : $parents[2].changeSort(SqlField); }">
                 <span data-bind="text: fieldLabel ? fieldLabel : ColumnName"></span>
-                <span data-bind="text: ($parents[1].pager ? $parents[1].pager.sortColumn() : $root.pager.sortColumn()) === SqlField ? (($parents[1].pager ? $parents[1].pager.sortDescending() : $root.pager.sortDescending()) ? '&#9660;' : '&#9650;') : ''"></span>
+                <span data-bind="text: ($parents[1].pager ? $parents[1].pager.sortColumn() : $parents[2].pager.sortColumn()) === SqlField ? (($parents[1].pager ? $parents[1].pager.sortDescending() : $parents[2].pager.sortDescending()) ? '&#9660;' : '&#9650;') : ''"></span>
             </a>
         </th>
         <!-- /ko -->
     </script>
     <script type="text/html" id="report-column">
         <!-- ko foreach: Items -->        
-        <td data-bind="style: {'background-color': backColor, 'color': fontColor, 'text-align': $root.ReportType()=='Single' && !$parents[2].pager ? 'center' : Column.IsNumeric ? 'right' : 'left', 'font-size': $root.ReportType()=='Single' && !$parents[2].pager ? '64px' : ''}">
+        <td data-bind="style: {'background-color': backColor, 'color': fontColor, 'text-align': $parents[3].pager && $parents[3].ReportType()=='Single' ? 'center' : Column.IsNumeric ? 'right' : 'left', 'font-size':$parents[3].pager && $parents[3].ReportType()=='Single' ? '64px' : ''}">
             <!-- ko if: LinkTo-->
             <a data-bind="attr: {href: LinkTo}"><span data-bind="html: FormattedValue"></span></a>
             <!-- /ko-->
@@ -148,7 +148,7 @@
 
         <div class="table-responsive" data-bind="with: ReportData">
             <table class="table table-hover table-condensed">
-                <thead data-bind="if: $root.ReportType() != 'Single'">
+                <thead data-bind="if: $parents[1].ReportType() != 'Single'">
                     <tr class="no-highlight">
                         <!-- ko if: $parentContext.$parent.canDrilldown() && !IsDrillDown() -->
                         <th style="width: 30px;"></th>
