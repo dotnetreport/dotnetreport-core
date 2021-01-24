@@ -396,6 +396,11 @@
                                             <span class="fa fa-filter" aria-hidden="true" title="Filter by this field on the Report"></span>
                                         </span>
                                     </div>
+                                    <div class="pull-right" style="padding-right: 15px;">
+                                        <span class="button-box no-padding" tabindex="0" data-bind="click: toggleDisable, css: {active: disabled()==true}">
+                                            <span class="fa fa-close" aria-hidden="true" title="Do not show"></span>
+                                        </span>
+                                    </div>
                                     <div class="pull-right" style="padding-right: 15px;" data-bind="visible: $root.ReportType()=='Summary'">
                                         <span class="button-box no-padding" tabindex="0" data-bind="click: function(){ hideInDetail(!hideInDetail()); }, css: {active: hideInDetail()==true}">
                                             <span class="fa fa-eye-slash" aria-hidden="true" title="Hide in Details"></span>
