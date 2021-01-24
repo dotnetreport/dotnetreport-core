@@ -132,7 +132,16 @@
         <!-- /ko -->
     </script>
     <script type="text/html" id="report-column">
-
+        <!-- ko foreach: Items -->
+        <!-- ko if: LinkTo-->
+        <td data-bind="css: {'right-align': Column.IsNumeric}, style: {'background-color': backColor, 'color': fontColor}">
+            <a data-bind="attr: {href: LinkTo}"><span data-bind="html: FormattedValue"></span></a>
+        </td>
+        <!-- /ko-->
+        <!-- ko ifnot: LinkTo-->
+        <td data-bind="html: FormattedValue, css: {'right-align': Column.IsNumeric}, style: {'background-color': backColor, 'color': fontColor}"></td>
+        <!-- /ko-->
+        <!-- /ko-->
     </script>
 
     <script type="text/html" id="report-template">
@@ -160,16 +169,8 @@
                         <!-- ko if: $parentContext.$parentContext.$parent.canDrilldown() && !$parent.IsDrillDown() -->
                         <td style="width: 30px;"><a href="#" data-bind="click: function(){ toggle(); }"><span class="fa" data-bind="css: {'fa-plus': !isExpanded(), 'fa-minus': isExpanded()}"></span></a></td>
                         <!-- /ko -->
-                        <!-- ko foreach: Items -->
-                        <!-- ko if: LinkTo-->
-                        <td data-bind="css: {'right-align': Column.IsNumeric}, style: {'background-color': backColor, 'color': fontColor}">
-                            <a data-bind="attr: {href: LinkTo}"><span data-bind="html: FormattedValue"></span></a>
-                        </td>
+                        <!-- ko template: 'report-column', data: $data -->
                         <!-- /ko-->
-                        <!-- ko ifnot: LinkTo-->
-                        <td data-bind="html: FormattedValue, css: {'right-align': Column.IsNumeric}, style: {'background-color': backColor, 'color': fontColor}"></td>
-                        <!-- /ko-->
-                        <!-- /ko -->
                     </tr>
                     <!-- ko if: isExpanded -->
                     <tr>
@@ -191,16 +192,8 @@
                                     </tr>
                                     <!-- ko foreach: Rows  -->
                                     <tr>
-                                        <!-- ko foreach: Items -->
-                                        <!-- ko if: LinkTo-->
-                                        <td data-bind="css: {'right-align': Column.IsNumeric}, style: {'background-color': backColor, 'color': fontColor}">
-                                            <a data-bind="attr: {href: LinkTo}"><span data-bind="html: FormattedValue"></span></a>
-                                        </td>
+                                        <!-- ko template: 'report-column', data: $data -->
                                         <!-- /ko-->
-                                        <!-- ko ifnot: LinkTo-->
-                                        <td data-bind="html: FormattedValue, css: {'right-align': Column.IsNumeric}, style: {'background-color': backColor, 'color': fontColor}"></td>
-                                        <!-- /ko-->
-                                        <!-- /ko -->
                                     </tr>
                                     <!-- /ko -->
                                 </tbody>
