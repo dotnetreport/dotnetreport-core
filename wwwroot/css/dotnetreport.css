@@ -125,11 +125,7 @@
     position: relative;
     background-color: #fff;
     -webkit-background-clip: padding-box;
-    background-clip: padding-box;
-    border: 0;
-    border: 0;
-    border-radius: 0;
-    outline: 0;
+    background-clip: padding-box;    
     max-height: 100%;
     overflow: scroll;
 }

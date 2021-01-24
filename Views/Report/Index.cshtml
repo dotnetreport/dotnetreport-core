@@ -205,11 +205,14 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="myModalLabel">Design your Report</h5>
+                <h5 class="modal-title" id="myModalLabel">
+                    <a title="Need help setting up a report?" target="_blank" href="https://dotnetreport.com/kb/docs/designing-reports/">
+                        <span class="fa fa-question-circle"></span>
+                    </a>Design your Report</h5>                
                 <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
             </div>
             <div class="modal-body needs-validation">
-                <h5><span class="fa fa-file"></span>Choose Report Type</h5>
+                <h5><span class="fa fa-file"></span>&nbsp;Choose Report Type</h5>
                 <div class="row">
                     <div class="col-md-3 col-sm-3 col-xs-6">
                         <div class="button-box" tabindex="0" data-bind="click: function(){ setReportType('List'); }, css: {active: ReportType()=='List'}">
@@ -249,7 +252,7 @@
                     </div>
                 </div>
                 <hr />
-                <h5><span class="fa fa-database"></span>Choose Data for Report</h5>
+                <h5><span class="fa fa-database"></span>&nbsp;Choose Data for Report</h5>
                 <div class="row">
                     <div class="col-md-12">
                         <select class="form-control" data-bind="options: Tables, optionsCaption: 'Choose Section...', optionsText: 'tableName', value: SelectedTable, disable: isFormulaField"></select>
@@ -360,7 +363,7 @@
                 </div>
                 <!-- ko if: SelectedFields().length>0 -->
                 <hr />
-                <h5><span class="fa fa-table"></span>Selected data for the Report</h5>
+                <h5><span class="fa fa-table"></span>&nbsp;Selected data for the Report</h5>
                 <div>
                     <div class="alert alert-info" data-bind="visible: ReportType()=='Bar'">
                         <span class="fa fa-lightbulb-o fa-2x"></span>&nbsp;For Bar Graph, the first field below will show on the x-axis. All other fields will show on y-axis, but they must be numeric.
@@ -427,7 +430,7 @@
                     </ul>
                 </div>
                 <hr />
-                <h5><span class="fa fa-filter"></span>Choose filters</h5>
+                <h5><span class="fa fa-filter"></span>&nbsp;Choose filters</h5>
 
                 <div class="row" style="padding: 10px 10px; overflow-x: auto;">
                     <div data-bind="template: {name: 'filter-group'}" class="col"></div>
@@ -435,7 +438,7 @@
                 </div>
                 <!-- /ko -->
                 <hr />
-                <h5><span class="fa fa-hourglass"></span>Choose Schedule</h5>
+                <h5><span class="fa fa-hourglass"></span>&nbsp;Choose Schedule</h5>
 
                 <div style="padding: 10px 10px">
                     <div data-bind="template: {name: 'report-schedule'}"></div>
