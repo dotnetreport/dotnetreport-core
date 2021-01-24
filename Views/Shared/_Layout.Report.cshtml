@@ -121,6 +121,20 @@
         </div>
     </script>
 
+    <script type="text/html" id="report-column-header">
+        <!-- ko foreach: Columns -->
+        <th data-bind="css: {'right-align': IsNumeric}, style: {'width': fieldWidth }">
+            <a href="" data-bind="click: function(){ $parents[1].pager ? $parents[1].changeSort(SqlField) : $root.changeSort(SqlField); }">
+                <span data-bind="text: fieldLabel ? fieldLabel : ColumnName"></span>
+                <span data-bind="text: ($parents[1].pager ? $parents[1].pager.sortColumn() : $root.pager.sortColumn()) === SqlField ? (($parents[1].pager ? $parents[1].pager.sortDescending() : $root.pager.sortDescending()) ? '&#9660;' : '&#9650;') : ''"></span>
+            </a>
+        </th>
+        <!-- /ko -->
+    </script>
+    <script type="text/html" id="report-column">
+
+    </script>
+
     <script type="text/html" id="report-template">
         <div class="report-chart" data-bind="attr: {id: 'chart_div_' + $parent.ReportID()}, visible: $parent.isChart"></div>
 
@@ -131,14 +145,8 @@
                         <!-- ko if: $parentContext.$parent.canDrilldown() && !IsDrillDown() -->
                         <th style="width: 30px;"></th>
                         <!-- /ko -->
-                        <!-- ko foreach: Columns -->
-                        <th data-bind="attr: { id: fieldId }, css: {'right-align': IsNumeric}, style: {'width': fieldWidth }">
-                            <a href="" data-bind="click: function(){ $parentContext.$parentContext.$parent.changeSort(SqlField); }">
-                                <span data-bind="text: fieldLabel ? fieldLabel : ColumnName"></span>
-                                <span data-bind="text: $parentContext.$parentContext.$parent.pager.sortColumn() === SqlField ? ($parentContext.$parentContext.$parent.pager.sortDescending() ? '&#9660;' : '&#9650;') : ''"></span>
-                            </a>
-                        </th>
-                        <!-- /ko -->
+                        <!-- ko template: 'report-column-header', data: $data -->
+                        <!-- /ko-->
                     </tr>
                 </thead>
                 <tbody>
@@ -171,14 +179,8 @@
                             <table class="table table-hover table-condensed" data-bind="with: DrillDownData">
                                 <thead>
                                     <tr class="no-highlight">
-                                        <!-- ko foreach: Columns -->
-                                        <th data-bind="css: {'right-align': IsNumeric}, style: {'width': fieldWidth }">
-                                            <a href="" data-bind="click: function(){ $parents[1].changeSort(SqlField); }">
-                                                <span data-bind="text: fieldLabel ? fieldLabel : ColumnName"></span>
-                                                <span data-bind="text: $parents[1].pager.sortColumn() === SqlField ? ($parents[1].pager.sortDescending() ? '&#9660;' : '&#9650;') : ''"></span>
-                                            </a>
-                                        </th>
-                                        <!-- /ko -->
+                                        <!-- ko template: 'report-column-header', data: $data -->
+                                        <!-- /ko-->
                                     </tr>
                                 </thead>
                                 <tbody>
