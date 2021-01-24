@@ -132,16 +132,15 @@
         <!-- /ko -->
     </script>
     <script type="text/html" id="report-column">
-        <!-- ko foreach: Items -->
-        <!-- ko if: LinkTo-->
-        <td data-bind="css: {'right-align': Column.IsNumeric}, style: {'background-color': backColor, 'color': fontColor}">
+        <!-- ko foreach: Items -->        
+        <td data-bind="style: {'background-color': backColor, 'color': fontColor, 'text-align': $root.ReportType()=='Single' && !$parents[2].pager ? 'center' : Column.IsNumeric ? 'right' : 'left', 'font-size': $root.ReportType()=='Single' && !$parents[2].pager ? '64px' : ''}">
+            <!-- ko if: LinkTo-->
             <a data-bind="attr: {href: LinkTo}"><span data-bind="html: FormattedValue"></span></a>
+            <!-- /ko-->
+            <!-- ko ifnot: LinkTo-->
+            <span data-bind="html: FormattedValue"></span>
+            <!-- /ko-->
         </td>
-        <!-- /ko-->
-        <!-- ko ifnot: LinkTo-->
-        <td data-bind="html: FormattedValue, css: {'right-align': Column.IsNumeric}, style: {'background-color': backColor, 'color': fontColor}"></td>
-        <!-- /ko-->
-        <!-- /ko-->
     </script>
 
     <script type="text/html" id="report-template">
@@ -149,7 +148,7 @@
 
         <div class="table-responsive" data-bind="with: ReportData">
             <table class="table table-hover table-condensed">
-                <thead>
+                <thead data-bind="if: $root.ReportType() != 'Single'">
                     <tr class="no-highlight">
                         <!-- ko if: $parentContext.$parent.canDrilldown() && !IsDrillDown() -->
                         <th style="width: 30px;"></th>
@@ -167,7 +166,7 @@
                     <!-- ko foreach: Rows  -->
                     <tr>
                         <!-- ko if: $parentContext.$parentContext.$parent.canDrilldown() && !$parent.IsDrillDown() -->
-                        <td style="width: 30px;"><a href="#" data-bind="click: function(){ toggle(); }"><span class="fa" data-bind="css: {'fa-plus': !isExpanded(), 'fa-minus': isExpanded()}"></span></a></td>
+                        <td style="width: 30px; vertical-align: middle;"><a href="#" data-bind="click: function(){ toggle(); }"><span class="fa" data-bind="css: {'fa-plus': !isExpanded(), 'fa-minus': isExpanded()}"></span></a></td>
                         <!-- /ko -->
                         <!-- ko template: 'report-column', data: $data -->
                         <!-- /ko-->

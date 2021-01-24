@@ -819,7 +819,7 @@ var reportViewModel = function (options) {
 	};
 
 	self.isChart = ko.computed(function () {
-		return ["List", "Summary"].indexOf(self.ReportType()) < 0;
+		return ["List", "Summary", "Single"].indexOf(self.ReportType()) < 0;
 	});
 
 	self.isFieldValidForSubGroup = function (i, fieldType) {
