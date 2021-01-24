@@ -438,8 +438,8 @@ var reportViewModel = function (options) {
 	self.CanManageFolders = ko.observable(true);
 	self.CanEdit = ko.observable(true);
 
-	self.fieldFormatTypes = ['None', 'Number', 'Decimal', 'Currency', 'Percentage', 'Date', 'Date and Time', 'Time'];
-	self.fieldAlignments = ['Left', 'Right', 'Center'];
+	self.fieldFormatTypes = ['Auto', 'Number', 'Decimal', 'Currency', 'Percentage', 'Date', 'Date and Time', 'Time'];
+	self.fieldAlignments = ['Auto', 'Left', 'Right', 'Center'];
 
 	self.ReportResult = ko.observable({
 		HasError: ko.observable(false),
@@ -1099,6 +1099,13 @@ var reportViewModel = function (options) {
 
 		saveOnly = saveOnly === true ? true : false;
 		self.TotalSeries(self.AdditionalSeries().length);
+
+		if (self.ReportType() == 'Single') {
+			if (self.enabledFields().length != 1) {
+				toastr.error("All fields except one must be hidden for Single Value Report");
+				return;
+			}
+		}
 
 		if (!self.validateReport()) {
 			toastr.error("Please correct validation issues");
