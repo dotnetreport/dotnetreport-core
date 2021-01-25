@@ -428,11 +428,10 @@ namespace ReportBuilder.Web.Core.Models
         }
         public static async Task<byte[]> GetPdfFile(string printUrl, int reportId, string reportSql, string connectKey, string reportName)
         {
-            await new BrowserFetcher().DownloadAsync(BrowserFetcher.DefaultRevision);
-            var browser = await Puppeteer.LaunchAsync(new LaunchOptions
-            {
-                Headless = true
-            });
+            var installPath = AppContext.BaseDirectory + "\\App_Data\\local-chromium";
+            await new BrowserFetcher(new BrowserFetcherOptions { Path = installPath }).DownloadAsync(BrowserFetcher.DefaultRevision);
+            var executablePath = $"{Directory.GetDirectories(installPath)[0]}\\chrome-win\\chrome.exe";
+            var browser = await Puppeteer.LaunchAsync(new LaunchOptions { Headless = true, ExecutablePath = executablePath });
             var page = await browser.NewPageAsync();
             await page.SetRequestInterceptionAsync(true);
 
@@ -471,17 +470,15 @@ namespace ReportBuilder.Web.Core.Models
                 WaitUntil = new[] { WaitUntilNavigation.Networkidle0 }
             });
 
-            await page.WaitForSelectorAsync(".report-inner", new WaitForSelectorOptions
-            {
-                Visible = true
-            });
+            await page.WaitForSelectorAsync(".report-inner", new WaitForSelectorOptions { Visible = true });
 
-            await page.PdfAsync(Path.Combine(Path.GetTempPath(), reportName), new PdfOptions
+            var pdfFile = Path.Combine(AppContext.BaseDirectory, $"App_Data\\{reportName}.pdf");
+            await page.PdfAsync(pdfFile, new PdfOptions
             {
                 Format = PaperFormat.Letter,
                 MarginOptions = new MarginOptions() { Top = "0.75in", Bottom = "0.75in" }
             });
-            return File.ReadAllBytes(Path.Combine(Path.GetTempPath(), reportName));
+            return File.ReadAllBytes(pdfFile);
         }
 
         public static string GetXmlFile(string reportSql, string connectKey, string reportName)
