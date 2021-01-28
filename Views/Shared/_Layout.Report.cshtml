@@ -123,7 +123,7 @@
 
     <script type="text/html" id="report-column-header">
         <!-- ko foreach: Columns -->
-        <th data-bind="attr: { id: fieldId }, css: {'right-align': IsNumeric}, style: {'width': fieldWidth }">
+        <th data-bind="attr: { id: fieldId }, css: {'right-align': IsNumeric}, style: {'width': fieldWidth, 'background-color': headerBackColor, 'color': headerFontColor, 'font-bold': fontBold }">
             <a href="" data-bind="click: function(){ $parents[1].pager ? $parents[1].changeSort(SqlField) : $parents[2].changeSort(SqlField); }">
                 <span data-bind="text: fieldLabel ? fieldLabel : ColumnName"></span>
                 <span data-bind="text: ($parents[1].pager ? $parents[1].pager.sortColumn() : $parents[2].pager.sortColumn()) === SqlField ? (($parents[1].pager ? $parents[1].pager.sortDescending() : $parents[2].pager.sortDescending()) ? '&#9660;' : '&#9650;') : ''"></span>
@@ -133,7 +133,7 @@
     </script>
     <script type="text/html" id="report-column">
         <!-- ko foreach: Items -->        
-        <td data-bind="style: {'background-color': backColor, 'color': fontColor, 'text-align': $parents[3].pager && $parents[3].ReportType()=='Single' ? 'center' : Column.IsNumeric ? 'right' : 'left', 'font-size':$parents[3].pager && $parents[3].ReportType()=='Single' ? '64px' : ''}">
+        <td data-bind="style: {'background-color': backColor, 'color': fontColor, 'font-bold': fontBold, 'text-align': $parents[3].pager && $parents[3].ReportType()=='Single' ? 'center' : Column.IsNumeric ? 'right' : 'left', 'font-size':$parents[3].pager && $parents[3].ReportType()=='Single' ? '64px' : ''}">
             <!-- ko if: LinkTo-->
             <a data-bind="attr: {href: LinkTo}"><span data-bind="html: FormattedValue"></span></a>
             <!-- /ko-->

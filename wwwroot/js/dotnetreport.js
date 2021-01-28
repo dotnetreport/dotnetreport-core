@@ -439,6 +439,7 @@ var reportViewModel = function (options) {
 	self.CanEdit = ko.observable(true);
 
 	self.fieldFormatTypes = ['Auto', 'Number', 'Decimal', 'Currency', 'Percentage', 'Date', 'Date and Time', 'Time'];
+	self.decimalFormatTypes = ['Number', 'Decimal', 'Currency', 'Percentage'];
 	self.fieldAlignments = ['Auto', 'Left', 'Right', 'Center'];
 
 	self.ReportResult = ko.observable({
@@ -1076,9 +1077,12 @@ var reportViewModel = function (options) {
 					LinkField: x.linkField(),
 					LinkFieldItem: x.linkField() ? x.linkFieldItem.toJs() : null,
 					FieldLabel: x.fieldLabel(),
+					DecimalPlaces: x.decimalPlaces(),
 					FieldAlign: x.fieldAlign(),
 					FontColor: x.fontColor(),
 					BackColor: x.backColor(),
+					HeaderFontColor: x.headerFontColor(),
+					HeaderBackColor: x.headerBackColor(),
 					FontBold: x.fontBold(),
 					FieldWidth: x.fieldWidth(),
 					FieldConditionOp: x.fieldConditionOp(),
@@ -1243,7 +1247,7 @@ var reportViewModel = function (options) {
 					}
 					col = ko.toJS(col || {});
 
-					e.backColor = col.backColor;
+					e.decimalPlaces = col.decimalPlaces;
 					e.fieldAlign = col.fieldAlign;
 					e.fieldConditionOp = col.fieldConditionOp;
 					e.fieldConditionVal = col.fieldConditionVal;
@@ -1251,7 +1255,8 @@ var reportViewModel = function (options) {
 					e.fieldLabel = col.fieldLabel;
 					e.fieldWidth = col.fieldWidth;
 					e.fontBold = col.fontBold;
-					e.fontColor = col.fontColor;
+					e.headerFontColor = col.headerFontColor;
+					e.headerBackColor = col.headerBackColor;
 					e.fieldId = col.fieldId;
 				});
 			}
@@ -1581,9 +1586,12 @@ var reportViewModel = function (options) {
 		e.isFormulaField = ko.observable(e.isFormulaField);
 		e.fieldFormat = ko.observable(e.fieldFormat);
 		e.fieldLabel = ko.observable(e.fieldLabel);
+		e.decimalPlaces = ko.observable(e.decimalPlaces);
 		e.fieldAlign = ko.observable(e.fieldAlign);
 		e.fontColor = ko.observable(e.fontColor);
 		e.backColor = ko.observable(e.backColor);
+		e.headerFontColor = ko.observable(e.headerFontColor);
+		e.headerBackColor = ko.observable(e.headerBackColor);
 		e.fontBold = ko.observable(e.fontBold);
 		e.fieldWidth = ko.observable(e.fieldWidth);
 		e.fieldConditionOp = ko.observable(e.fieldConditionOp);
@@ -1632,9 +1640,12 @@ var reportViewModel = function (options) {
 			self.currentFieldOptions = {
 				fieldFormat: e.fieldFormat(),
 				fieldLabel: e.fieldLabel(),
+				decimalPlaces: e.decimalPlaces(),
 				fieldAlign: e.fieldAlign(),
 				fontColor: e.fontColor(),
 				backColor: e.backColor(),
+				headerFontColor: e.headerFontColor(),
+				headerBackColor: e.headerBackColor(),
 				fontBold: e.fontBold(),
 				fieldWidth: e.fieldWidth(),
 				fieldConditionOp: e.fieldConditionOp(),
@@ -1652,8 +1663,11 @@ var reportViewModel = function (options) {
 			e.fieldFormat(self.currentFieldOptions.fieldFormat);
 			e.fieldLabel(self.currentFieldOptions.fieldLabel);
 			e.fieldAlign(self.currentFieldOptions.fieldAlign);
+			e.decimalPlaces(self.currentFieldOptions.decimalPlaces);
 			e.fontColor(self.currentFieldOptions.fontColor);
 			e.backColor(self.currentFieldOptions.backColor);
+			e.headerFontColor(self.currentFieldOptions.headerFontColor);
+			e.headerBackColor(self.currentFieldOptions.headerBackColor);
 			e.fontBold(self.currentFieldOptions.fontBold);
 			e.fieldWidth(self.currentFieldOptions.fieldWidth);
 			e.fieldConditionOp(self.currentFieldOptions.fieldConditionOp);
