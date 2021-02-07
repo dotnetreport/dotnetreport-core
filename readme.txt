@@ -54,11 +54,13 @@ Second, add the following to your project to copy front end files included in yo
     <Copy SourceFiles="$(ContentFilesPath)Views/Report/Dashboard.cshtml" DestinationFiles="$(ProjectDir)Views/Report/Dashboard.cshtml"></Copy>
     <Copy SourceFiles="$(ContentFilesPath)Views/Report/Index.cshtml" DestinationFiles="$(ProjectDir)Views/Report/Index.cshtml"></Copy>
     <Copy SourceFiles="$(ContentFilesPath)Views/Report/Report.cshtml" DestinationFiles="$(ProjectDir)Views/Report/Report.cshtml"></Copy>
+    <Copy SourceFiles="$(ContentFilesPath)Views/Report/ReportPrint.cshtml" DestinationFiles="$(ProjectDir)Views/Report/ReportPrint.cshtml"></Copy>
     <Copy SourceFiles="$(ContentFilesPath)Views/Setup/Index.cshtml" DestinationFiles="$(ProjectDir)Views/Setup/Index.cshtml"></Copy>
     <Copy SourceFiles="$(ContentFilesPath)Views/Shared/_Layout.Report.cshtml" DestinationFiles="$(ProjectDir)Views/Shared/_Layout.Report.cshtml"></Copy>
   </Target>
 
-  Third, build the project, don't worry about errors, but you should notice that the references are gone and these files are now part of the project. Now remove the entire CopyDotNetReportContent block, otherwise the project will keep overwriting your file changes. We don't need it anymore.
+  Third, build the project, don't worry about errors, but you should notice that the references are gone and these files are now part of the project. 
+  Finally, remove the entire CopyDotNetReportContent block, otherwise the project will keep overwriting your file changes. We don't need it anymore.
 
 2. Client side packages need to be added to your package.json file. 
 
@@ -83,11 +85,21 @@ Your Starup.cs should look like this:
 If your project is not using controller with Views, you would also need to add Controller with Views and set NewtonSoft Json setting in your Startup.cs
 
 		services.AddControllersWithViews()
-                .AddNewtonsoftJson(options => options.UseMemberCasing());
+                .AddNewtonsoftJson(options => options.UseMemberCasing()); // <-- This is important otherwise javascript calls won't work
+
+Also, add dotnet report keys to your appsettings.json file:
+
+ "dotNetReport": {
+    "apiurl": "https://dotnetreport.com/api",
+    "accountApiToken": "Your Account API Key",
+    "dataconnectApiToken": "Your Data Connect Key",
+    "privateApiToken": "Your Private API Key"
+  },
+  "ConnectionStrings": {
+    "ConnectionKey": "Data Source=;Initial Catalog=;User ID=;Password=;"
+  },
 
 You should be able to build and run the project after the above changes. 
 
-Unfortunately this is a short, one time workaround for .net core till we figure out how to do this with powershell or options in nuget package to add this to do this automaticaily. 
-
-For more details and documentation, you can visit https://www.dotnetreport.com. 
+For more details and documentation, you can visit https://www.dotnetreport.com/kb. 
 

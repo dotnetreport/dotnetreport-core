@@ -2,19 +2,20 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
         <id>dotNetReport.core</id>
-        <version>4.0.1</version>
+        <version>4.1.0</version>
         <authors>dotnetReport Builder</authors>
         <owners>dotnetReport Builder</owners>
         <projectUrl>https://dotnetreport.com/</projectUrl>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>.Net Embedded Analytics and Report Generator that allows programmers to easily add Report building functionality to their ASP .NET Web Application</description>
-        <releaseNotes>dotnet Report version for .net core, ad hoc report builder</releaseNotes>
+        <releaseNotes>Added Single Value Report Type</releaseNotes>
         <copyright>(c) dotnet Report Builder</copyright>
         <tags>embedded analytics, report generator, .net core report builder, sql reporting tools, visual studio report designer, ad-hoc reporting, asp .net mvc report, report builder, ad hoc adhoc reports, viewer, reportviewer, sql builder mvc, web forms, query builder,mvc reporting,custom query,query maker, dotnetreport</tags>
         <dependencies>            
             <dependency id="EPPlus" version="4.5.3.2" />
             <dependency id="Microsoft.AspNetCore.Mvc.NewtonsoftJson" version="3.0.0" />            
             <dependency id="Quartz" version="3.0.7" />
+			<dependency id="PuppeteerSharp" version="2.0.4" />
             <dependency id="System.Data.Common" version="4.3.0"></dependency>
             <dependency id="System.Data.OleDb" version="4.7.0"></dependency>
             <dependency id="System.Data.SqlClient" version="4.7.0"></dependency>
@@ -45,7 +46,8 @@
         <file src="package.json" target="contentFiles\any\any\package.dotnetreport.json" />
         <file src="Views\Report\Index.cshtml" target="contentFiles\any\any\Views\Report\Index.cshtml" />
         <file src="Views\Report\Dashboard.cshtml" target="contentFiles\any\any\Views\Report\Dashboard.cshtml" />
-        <file src="Views\Report\Report.cshtml" target="contentFiles\any\any\Views\Report\Report.cshtml" />
+		<file src="Views\Report\Report.cshtml" target="contentFiles\any\any\Views\Report\Report.cshtml" />
+        <file src="Views\Report\ReportPrint.cshtml" target="contentFiles\any\any\Views\Report\ReportPrint.cshtml" />
         <file src="Views\Setup\Index.cshtml" target="contentFiles\any\any\Views\Setup\Index.cshtml" />
         <file src="Views\shared\_Layout.Report.cshtml" target="contentFiles\any\any\Views\shared\_Layout.Report.cshtml" />
         <file src="Controllers\ReportController.cs" target="contentFiles\any\any\Controllers\ReportController.cs" />
