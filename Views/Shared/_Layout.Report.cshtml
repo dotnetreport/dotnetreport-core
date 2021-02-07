@@ -123,8 +123,8 @@
 
     <script type="text/html" id="report-column-header">
         <!-- ko foreach: Columns -->
-        <th data-bind="attr: { id: fieldId }, css: {'right-align': IsNumeric}, style: {'width': fieldWidth, 'background-color': headerBackColor, 'color': headerFontColor, 'font-bold': fontBold }">
-            <a href="" data-bind="click: function(){ $parents[1].pager ? $parents[1].changeSort(SqlField) : $parents[2].changeSort(SqlField); }">
+        <th data-bind="attr: { id: fieldId }, css: {'right-align': IsNumeric}, style: {'width': fieldWidth, 'background-color': headerBackColor }" style="border-right: 1px solid;">
+            <a href="" data-bind="click: function(){ $parents[1].pager ? $parents[1].changeSort(SqlField) : $parents[2].changeSort(SqlField); }, style: {'color': headerFontColor, 'font-bold': fontBold }">
                 <span data-bind="text: fieldLabel ? fieldLabel : ColumnName"></span>
                 <span data-bind="text: ($parents[1].pager ? $parents[1].pager.sortColumn() : $parents[2].pager.sortColumn()) === SqlField ? (($parents[1].pager ? $parents[1].pager.sortDescending() : $parents[2].pager.sortDescending()) ? '&#9660;' : '&#9650;') : ''"></span>
             </a>
@@ -151,7 +151,7 @@
                 <thead data-bind="if: $parents[1].ReportType() != 'Single'">
                     <tr class="no-highlight">
                         <!-- ko if: $parentContext.$parent.canDrilldown() && !IsDrillDown() -->
-                        <th style="width: 30px;"></th>
+                        <th style="width: 30px; border-left: 1px solid;"></th>
                         <!-- /ko -->
                         <!-- ko template: 'report-column-header', data: $data -->
                         <!-- /ko-->
