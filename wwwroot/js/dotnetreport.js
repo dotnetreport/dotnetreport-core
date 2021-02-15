@@ -1102,6 +1102,25 @@ var reportViewModel = function (options) {
 		};
 	};
 
+	self.SaveFilterAndRunReport = function () {
+		if (!self.validateReport()) {
+			toastr.error("Please correct validation issues");
+			return;
+		}
+
+		ajaxcall({
+			url: options.runReportApiUrl,
+			type: "POST",
+			data: JSON.stringify({
+				method: "/ReportApi/SaveReportFilter",
+				SaveReport: false,
+				ReportJson: JSON.stringify(self.BuildReportData()),
+				adminMode: self.adminMode()
+			})
+		})
+		self.RunReport(false);
+    }
+
 	self.RunReport = function (saveOnly) {
 
 		saveOnly = saveOnly === true ? true : false;
