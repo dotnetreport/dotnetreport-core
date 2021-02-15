@@ -238,7 +238,9 @@
                         <td></td>
                         <!-- /ko -->
                         <!-- ko foreach: Items -->
+                        <!-- ko if: Value != 'NA' -->
                         <td data-bind="html: FormattedValue, css: {'right-align': Column.IsNumeric}"></td>
+                        <!-- /ko -->
                         <!-- /ko -->
                     </tr>
                 </tfoot>
