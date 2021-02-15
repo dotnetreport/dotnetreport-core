@@ -416,6 +416,7 @@ var reportViewModel = function (options) {
 	self.AggregateReport = ko.observable(false);
 	self.SortByField = ko.observable();
 	self.SortDesc = ko.observable(false);
+	self.EditFiltersOnReport = ko.observable(false);
 
 	self.FilterGroups = ko.observableArray();
 	self.FilterGroups.subscribe(function (newArray) {
@@ -638,6 +639,7 @@ var reportViewModel = function (options) {
 		self.SelectedField(null);
 
 		self.IncludeSubTotal(false);
+		self.EditFiltersOnReport(false);
 		self.ShowUniqueRecords(false);
 		self.AggregateReport(false);
 		self.SortByField(null);
@@ -1047,6 +1049,7 @@ var reportViewModel = function (options) {
 				};
 			}),
 			IncludeSubTotals: self.IncludeSubTotal(),
+			EditFiltersOnReport: self.EditFiltersOnReport(),
 			ShowUniqueRecords: self.ShowUniqueRecords(),
 			IsAggregateReport: drilldown.length > 0 ? false : self.AggregateReport(),
 			ShowDataWithGraph: self.ShowDataWithGraph(),
@@ -1722,6 +1725,7 @@ var reportViewModel = function (options) {
 			self.manageAccess.setupList(self.manageAccess.viewOnlyUsers, report.ViewOnlyUserId || '');
 
 			self.IncludeSubTotal(report.IncludeSubTotals);
+			self.EditFiltersOnReport(report.EditFiltersOnReport);
 			self.ShowUniqueRecords(report.ShowUniqueRecords);
 			self.AggregateReport(report.IsAggregateReport);
 			self.ShowDataWithGraph(report.ShowDataWithGraph);

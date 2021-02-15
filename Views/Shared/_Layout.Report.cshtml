@@ -132,7 +132,7 @@
         <!-- /ko -->
     </script>
     <script type="text/html" id="report-column">
-        <!-- ko foreach: Items -->        
+        <!-- ko foreach: Items -->
         <td data-bind="style: {'background-color': backColor, 'color': fontColor, 'font-bold': fontBold, 'text-align': $parents[3].pager && $parents[3].ReportType()=='Single' ? 'center' : Column.IsNumeric ? 'right' : 'left', 'font-size':$parents[3].pager && $parents[3].ReportType()=='Single' ? '64px' : ''}">
             <!-- ko if: LinkTo-->
             <a data-bind="attr: {href: LinkTo}"><span data-bind="html: FormattedValue"></span></a>
@@ -321,6 +321,21 @@
             </div>
         </div>
     </script>
+    <script type="text/html" id="filter-group">
+        <div data-bind="foreach: FilterGroups">
+            <div class="card" style="margin-left: 20px;">
+                <div class="card-body" data-bind="visible: !isRoot">
+                    <select data-bind="value: AndOr" class="form-control form-control-sm pull-left">
+                        <option>And</option>
+                        <option>Or</option>
+                    </select>
+                    <button class="btn btn-sm btn-secondary pull-left" data-bind="click: $parent.RemoveFilterGroup, visible: !isRoot">Remove Group</button>&nbsp;
+                    <hr />
+                </div>
+                <div data-bind="template: {name: 'filter-inner'}"></div>
+            </div>
+        </div>
+    </script>
     <script type="text/html" id="fly-filter-template">
         <div class="card" data-bind="visible: FlyFilters().length>0">
             <div class="card-header">
@@ -359,6 +374,68 @@
                     <button class="btn btn-primary" data-bind="click: RunReport">Refresh Report</button>
                 </div>
             </div>
+        </div>
+    </script>
+
+    <script type="text/html" id="filter-inner">
+        <div class="table-responsive">
+            <table class="table  table-hover table-borderless" data-bind="visible: Filters().length>0">
+                <thead>
+                    <tr>
+                        <th style="width: 10%"></th>
+                        <th style="width: 30%">Field</th>
+                        <th style="width: 10%"></th>
+                        <th style="width: 30%">Filter</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody data-bind="foreach: Filters">
+                    <tr>
+                        <td>
+                            <select data-bind="value: AndOr, visible: $index()>0" class="form-control">
+                                <option>And</option>
+                                <option>Or</option>
+                            </select>
+                        </td>
+                        <td>
+                            <div class="form-group">
+                                <select class="form-control" style="width: 100%;" data-bind="options: $root.selectedFieldsCanFilter, optionsText: 'selectedFieldName', optionsCaption: 'Please Choose', value: Field, attr: {required: Field()==null?'required':false}"></select>
+                            </div>
+                        </td>
+                        <td data-bind="with: Field">
+                            <div class="form-group">
+                                <select class="form-control" style="width: 100%;" data-bind="options: fieldFilter, value: $parent.Operator" required></select>
+                            </div>
+                        </td>
+                        <td data-bind="with: Field">
+                            <div data-bind="template: 'report-filter', data: $data"></div>
+                        </td>
+                        <td>
+                            <button class="btn btn-sm btn-secondary" data-bind="click: $parent.RemoveFilter">Remove</button>
+                            <!-- ko if: Field() && Field().fieldType == 'DateTime' && Operator() == 'range' && $root.canAddSeries() && $index()==0 -->
+                            <button class="btn btn-sm btn-secondary" data-bind="click: $root.AddSeries.bind($data)">Add Comparison</button>
+                            <!--/ko -->
+                        </td>
+                    </tr>
+                    <!-- ko foreach: compareTo -->
+                    <tr>
+                        <td></td>
+                        <td style="text-align: right"><button class="btn btn-xs" data-bind="click: $root.RemoveSeries"><span class="fa fa-trash-o"></span></button></td>
+                        <td>Compare To</td>
+                        <td>
+                            <div class="form-group">
+                                <select class="form-control" data-bind="options: Range, value: Value" required></select>
+                            </div>
+                        </td>
+                    </tr>
+                    <!-- /ko -->
+                </tbody>
+            </table>
+        </div>
+        <div data-bind="template: {name: 'filter-group'}"></div>
+        <div>
+            <button class="btn btn-sm btn-link" data-bind="click: AddFilterGroup">Add Group</button>&nbsp;
+            <button class="btn btn-sm btn-link" data-bind="click: AddFilter">Add Filter</button>
         </div>
     </script>
 

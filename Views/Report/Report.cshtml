@@ -138,7 +138,33 @@
         <br />
         <div style="clear: both;"></div>
         <br />
-        <div data-bind="template: {name: 'fly-filter-template'}"></div>
+        
+        <div data-bind="if: EditFiltersOnReport">            
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">
+                        <a data-toggle="collapse" data-target="#filter-panel" href="#">
+                            <i class="fa fa-filter"></i>Choose filter options
+                        </a>
+                    </h5>
+                </div>
+                <div id="filter-panel" class="card-body">
+                    <div>
+                        <div class="row">
+                            <div data-bind="template: {name: 'filter-group'}" class="col"></div>
+                        </div>
+
+                        <br />
+                        <button class="btn btn-primary" data-bind="click: RunReport">Update Filters</button>
+                    </div>
+                </div>
+            </div>
+            <br />
+        </div>
+        <div data-bind="ifnot: EditFiltersOnReport">
+            <div data-bind="template: {name: 'fly-filter-template'}"></div>
+            <br />
+        </div>
         <div data-bind="if: canDrilldown">
             <button class="btn btn-secondary btn-xs" data-bind="click: ExpandAll">Expand All</button>
             <button class="btn btn-secondary btn-xs" data-bind="click: CollapseAll">Collapse All</button>
