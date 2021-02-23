@@ -1028,7 +1028,7 @@ var reportViewModel = function (options) {
 	self.BuildReportData = function (drilldown, isComparison, index) {
 
 		drilldown = drilldown || [];
-
+		var hasGroupInDetail = _.find(self.SelectedFields(), function (x) { return x.selectedAggregate() == 'Group in Detail' }) != null;
 		var filters = isComparison ? self.SeriesDataIntoFilter(self.FilterGroups(), index) : self.BuildFilterData(self.FilterGroups());
 
 		return {
@@ -1048,7 +1048,7 @@ var reportViewModel = function (options) {
 			}),
 			IncludeSubTotals: self.IncludeSubTotal(),
 			ShowUniqueRecords: self.ShowUniqueRecords(),
-			IsAggregateReport: drilldown.length > 0 ? false : self.AggregateReport(),
+			IsAggregateReport: drilldown.length > 0 && !hasGroupInDetail ? false : self.AggregateReport(),
 			ShowDataWithGraph: self.ShowDataWithGraph(),
 			ShowOnDashboard: self.ShowOnDashboard(),
 			SortBy: self.SortByField(),
@@ -1588,7 +1588,7 @@ var reportViewModel = function (options) {
 		e.disabled = ko.observable(e.disabled);
 		e.groupInGraph = ko.observable(e.groupInGraph);
 		e.hideInDetail = ko.observable(e.hideInDetail);
-		e.fieldAggregateWithDrilldown = e.fieldAggregate.concat('Only in Detail');
+		e.fieldAggregateWithDrilldown = e.fieldAggregate.concat('Only in Detail').concat('Group in Detail');
 		e.linkField = ko.observable(e.linkField);
 		e.linkFieldItem = new linkFieldViewModel(e.linkFieldItem, options);
 		e.isFormulaField = ko.observable(e.isFormulaField);
