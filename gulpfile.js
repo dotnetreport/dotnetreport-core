@@ -78,6 +78,9 @@ var deps = {
 	},
 	"knockout-x-editable": {
 		"knockout.x-editable.min.js": ""
+	},
+	"fabric": {
+		"dist/fabric.min.js": ""
 	}
 };
 
