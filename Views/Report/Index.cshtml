@@ -93,7 +93,7 @@
                         </li>
                         <!-- /ko -->
                         <li class="nav-item active">
-                            <a href="#" class="nav-link" data-bind="click: function(){ designingHeader(!designingHeader()); }">Report Header</a>
+                            <a href="#" class="nav-link" data-bind="click: function(){ initHeaderDesigner(); }">Report Header</a>
                         </li>
                     </ul>
                 </div>
@@ -109,14 +109,16 @@
                     <div class="form-group">
                         <button class="btn btn-sm" title="Add Text" data-bind="click: addText"><span class="fa fa-font"></span></button>
                         <button class="btn btn-sm" title="Add Image"><span class="fa fa-image"></span></button>
-                        <button class="btn btn-sm" title="Add Line" data-bind="clicl: addLine"><span class="fa fa-arrows-h"></span></button>
+                        <button class="btn btn-sm" title="Add Line" data-bind="click: addLine"><span class="fa fa-arrows-h"></span></button>
                     </div>
-                    <!-- ko if: selectedObject() && getText() -->
+                    <!-- ko if: selectedObject() -->
                     <div class="form-group">
                         &nbsp;|&nbsp;
-                        <select class="form-control form-control-sm" title="Font Family">
-                            <option value="arial">Arial</option>
-                            <option value="helvetica" selected>Helvetica</option>
+                        <button class="btn btn-sm" data-bind="click: remove" title="Delete"><span class="fa fa-trash"></span></button>
+                        <!-- ko if: getText()-->
+                        <select class="form-control form-control-sm" title="Font Family" data-bind="event: {change: setFontFamily }, value: objectProperties.fontFamily">
+                            <option value="arial" selected>Arial</option>
+                            <option value="helvetica">Helvetica</option>
                             <option value="myriad pro">Myriad Pro</option>
                             <option value="delicious">Delicious</option>
                             <option value="verdana">Verdana</option>
@@ -143,6 +145,7 @@
                         <button class="btn btn-sm" title="Bold"><span class="fa fa-bold"></span></button>
                         <button class="btn btn-sm" title="Italic"><span class="fa fa-italic"></span></button>
                         <button class="btn btn-sm" title="Underline"><span class="fa fa-underline"></span></button>
+                        <!-- /ko -->
                     </div>
                     <!-- /ko-->
                 </div>
