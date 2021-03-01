@@ -376,6 +376,113 @@ var manageAccess = function (options) {
 	};
 };
 
+var headerDesigner = function (options) {
+	var self = this;
+	self.canvas = new fabric.Canvas(options.canvasId);
+	self.selectedObject = ko.observable();
+
+	self.init = function () {
+		var canvas = self.canvas;
+		var grid = 20;
+		var canvasWidth = canvas.getWidth();
+		var canvasHeight = canvas.getHeight();
+
+		// create grid
+		for (var i = 0; i <= (canvasWidth / grid); i++) {
+			canvas.add(new fabric.Line([i * grid, 0, i * grid, canvasHeight], { stroke: '#ccc', selectable: false }));
+		}
+		for (var i = 0; i <= (canvasHeight / grid); i++) {
+			canvas.add(new fabric.Line([0, i * grid, canvasWidth, i * grid], { stroke: '#ccc', selectable: false }))
+		}
+
+		// snap to grid
+		canvas.on('object:moving', function (options) {
+			options.target.set({
+				left: Math.round(options.target.left / grid) * grid,
+				top: Math.round(options.target.top / grid) * grid
+			});
+		});
+
+		// handle selection
+		canvas.on('selection:created', function (obj) {
+			self.selectedObject(obj);
+		});
+
+		canvas.on('selection:cleared', function (obj) {
+			self.selectedObject(null);
+		});
+	}
+
+	function getActiveStyle(styleName, object) {
+		object = object || self.canvas.getActiveObject();
+		if (!object) return '';
+
+		return (object.getSelectionStyles && object.isEditing)
+			? (object.getSelectionStyles()[styleName] || '')
+			: (object[styleName] || '');
+	};
+
+	function setActiveStyle(styleName, value, object) {
+		object = object || self.canvas.getActiveObject();
+		if (!object) return;
+
+		if (object.setSelectionStyles && object.isEditing) {
+			var style = {};
+			style[styleName] = value;
+			object.setSelectionStyles(style);
+			object.setCoords();
+		}
+		else {
+			object.set(styleName, value);
+		}
+
+		object.setCoords();
+		self.canvas.requestRenderAll();
+	};
+
+	function getActiveProp(name) {
+		var object = self.canvas.getActiveObject();
+		if (!object) return '';
+
+		return object[name] || '';
+	}
+
+	function setActiveProp(name, value) {
+		var object = self.canvas.getActiveObject();
+		if (!object) return;
+		object.set(name, value).setCoords();
+		self.canvas.renderAll();
+	}
+
+	self.addText = function () {
+		self.canvas.add(new fabric.Textbox("Enter Text", {
+			left: 50,
+			top: 50,
+			fontFamily: 'arial',
+			fontWeight: '',
+			originX: 'left',
+			hasRotatingPoint: true,
+			centerTransform: true,
+			width: 300
+		}));
+	}
+
+	self.addLine = function () {
+		self.canvas.add(new fabric.Line([50, 100, 50, 100], {
+			left: 20,
+			top: 20
+		}));
+	}
+
+	self.getText = function () {
+		return getActiveProp('text');
+	};
+	self.setText = function (value) {
+		setActiveProp('text', value);
+	};
+
+}
+
 var reportViewModel = function (options) {
 	var self = this;
 
@@ -442,6 +549,10 @@ var reportViewModel = function (options) {
 	self.fieldFormatTypes = ['Auto', 'Number', 'Decimal', 'Currency', 'Percentage', 'Date', 'Date and Time', 'Time'];
 	self.decimalFormatTypes = ['Number', 'Decimal', 'Currency', 'Percentage'];
 	self.fieldAlignments = ['Auto', 'Left', 'Right', 'Center'];
+	self.designingHeader = ko.observable(false);
+	self.headerDesigner = new headerDesigner({
+		canvasId: 'report-header-designer'
+	});
 
 	self.ReportResult = ko.observable({
 		HasError: ko.observable(false),
@@ -1998,6 +2109,8 @@ var reportViewModel = function (options) {
 		if (adminMode === 'true') {
 			self.adminMode(true);
 		}
+
+		self.headerDesigner.init();
 	};
 
 	self.allowTableResize = function () {
