@@ -1783,13 +1783,19 @@ var reportViewModel = function (options) {
 		e.decimalPlaces = ko.observable(e.decimalPlaces);
 		e.fieldAlign = ko.observable(e.fieldAlign);
 		e.fontColor = ko.observable(e.fontColor);
-		e.backColor = ko.observable(e.backColor);
+		e.backColor = ko.observable(e.backColor || '#ffffff');
 		e.headerFontColor = ko.observable(e.headerFontColor);
-		e.headerBackColor = ko.observable(e.headerBackColor);
+		e.headerBackColor = ko.observable(e.headerBackColor || '#ffffff');
 		e.fontBold = ko.observable(e.fontBold);
 		e.fieldWidth = ko.observable(e.fieldWidth);
 		e.fieldConditionOp = ko.observable(e.fieldConditionOp);
 		e.fieldConditionVal = ko.observable(e.fieldConditionVal);
+
+		e.applyAllHeaderFontColor = ko.observable(false);
+		e.applyAllHeaderBackColor = ko.observable(false);
+		e.applyAllFontColor = ko.observable(false);
+		e.applyAllBackColor = ko.observable(false);
+		e.applyAllBold = ko.observable(false);
 
 		e.toggleDisable = function () {
 			if (!e.disabled() && self.enabledFields().length < 2) return;
@@ -1850,6 +1856,14 @@ var reportViewModel = function (options) {
 		}
 
 		e.saveFieldOptions = function () {
+			_.forEach(self.SelectedFields(), function (f) {
+				if (e.applyAllHeaderFontColor()) f.headerFontColor(e.headerFontColor());
+				if (e.applyAllHeaderBackColor()) f.headerBackColor(e.headerBackColor());
+				if (e.applyAllFontColor()) f.fontColor(e.fontColor());
+				if (e.applyAllBackColor()) f.backColor(e.backColor());
+				if (e.applyAllBold()) f.fontBold(e.fontBold());
+			});
+
 			if (options.fieldOptionsModal) options.fieldOptionsModal.modal('hide');
 		}
 
