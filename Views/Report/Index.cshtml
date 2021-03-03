@@ -106,7 +106,7 @@
             </nav>
         </div>
         <div class="card-body">
-            <div data-bind="visible: designingHeader" style="display: none;" class="overflow-auto">
+            <div data-bind="visible: designingHeader, with: headerDesigner" style="display: none;" class="overflow-auto">
                 <div class="checkbox">
                     <label>
                         <input type="checkbox" data-bind="checked: UseReportHeader"> Use Report Headers
@@ -117,12 +117,12 @@
                         You can design the common report header below that will be applied to all reports where report headers are turned on.
                     </p>
                     <canvas id="report-header-designer" width="900" height="120" style="border: solid 1px #ccc"></canvas>
-                    <div class="form-inline" data-bind="with: headerDesigner">
+                    <div class="form-inline" >
                         <div class="form-group">
                             <button class="btn btn-sm" title="Add Text" data-bind="click: addText"><span class="fa fa-font"></span></button>
                             <label class="btn btn-sm" title="Add Image">
                                 <span class="fa fa-image"></span>
-                                <input type="file" hidden data-bind="event: { change: function() { uploadImage($element.files[0]) } }" />
+                                <input type="file" accept="image/*" hidden data-bind="event: { change: function() { uploadImage($element.files[0]) } }" />
                             </label>
                             <button class="btn btn-sm" title="Add Line" data-bind="click: addLine"><span class="fa fa-arrows-h"></span></button>
                         </div>
@@ -165,6 +165,7 @@
                         <!-- /ko-->
                     </div>
                 </div>
+                <button class="btn btn-primary" data-bind="click: saveCanvas">Save Changes</button>
             </div>
             <div data-bind="ifnot: designingHeader">
                 <div data-bind="visible: SelectedFolder()==null">

@@ -73,6 +73,13 @@ namespace ReportBuilder.Web.Core.Controllers
         }
 
         [HttpPost]
+        public async Task<IActionResult> PostReportApi(dynamic data)
+        {
+            string method = data.method;
+            return await CallReportApi(method, JsonConvert.SerializeObject(data));
+        }
+
+        [HttpPost]
         public async Task<IActionResult> RunReportApi(DotNetReportApiCall data)
         {
             return await CallReportApi(data.Method, JsonConvert.SerializeObject(data));

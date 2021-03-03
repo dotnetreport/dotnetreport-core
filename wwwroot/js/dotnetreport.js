@@ -381,6 +381,7 @@ var headerDesigner = function (options) {
 	self.canvas = new fabric.Canvas(options.canvasId);
 	self.initiated = false;
 	self.selectedObject = ko.observable();
+	self.UseReportHeader = ko.observable(options.useReportHeader === true ? true : false)
 	
 	self.init = function () {
 		if (self.initiated) return;
@@ -388,8 +389,6 @@ var headerDesigner = function (options) {
 
 		var canvas = self.canvas;
 		var grid = 20;
-		var canvasWidth = canvas.getWidth();
-		var canvasHeight = canvas.getHeight();
 
 		self.objectProperties = {
 			fontFamily: ko.observable(),
@@ -400,13 +399,6 @@ var headerDesigner = function (options) {
 			fontBold: ko.observable(),
 			fontItalic: ko.observable(),
 			fontUnderline: ko.observable()
-		}
-		// create grid
-		for (var i = 0; i <= (canvasWidth / grid); i++) {
-			canvas.add(new fabric.Line([i * grid, 0, i * grid, canvasHeight], { stroke: '#ccc', selectable: false }));
-		}
-		for (var i = 0; i <= (canvasHeight / grid); i++) {
-			canvas.add(new fabric.Line([0, i * grid, canvasWidth, i * grid], { stroke: '#ccc', selectable: false }))
 		}
 
 		// snap to grid
@@ -426,6 +418,8 @@ var headerDesigner = function (options) {
 		canvas.on('selection:cleared', function (obj) {
 			self.selectedObject(null);
 		});
+
+		self.loadCanvas();
 	}
 
 	function getActiveProp(name) {
@@ -440,6 +434,36 @@ var headerDesigner = function (options) {
 		if (!object) return;
 		object.set(name, value).setCoords();
 		self.canvas.renderAll();
+	}
+
+	self.saveCanvas = function () {
+		var data = self.canvas.toJSON();
+		return ajaxcall({
+			url: options.apiUrl.replace('CallReportApi', 'PostReportApi'),
+			type: "POST",
+			data: JSON.stringify({
+				method: "/ReportApi/SaveHeaderDesign",
+				headerDesign: data,
+				useReportHeader: self.UseReportHeader()
+			})
+		}).done(function (result) {
+			if (result.d) { result = result.d; }
+			toastr.success('Report Header changes saved')
+		});
+	}
+
+	self.loadCanvas = function () {
+		var canvas = self.canvas;
+		return ajaxcall({
+			url: options.apiUrl,
+			data: {
+				method: "/ReportApi/LoadHeaderDesign"
+			}
+		}).done(function (result) {
+			if (result.d) { result = result.d; }
+			canvas.loadFromJSON(result);
+			canvas.renderAll();
+		});
 	}
 
 	self.addText = function () {
@@ -575,7 +599,8 @@ var reportViewModel = function (options) {
 	self.fieldAlignments = ['Auto', 'Left', 'Right', 'Center'];
 	self.designingHeader = ko.observable(false);
 	self.headerDesigner = new headerDesigner({
-		canvasId: 'report-header-designer'
+		canvasId: 'report-header-designer',
+		apiUrl: options.apiUrl
 	});
 	self.initHeaderDesigner = function () {
 		self.headerDesigner.init();
