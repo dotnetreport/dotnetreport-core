@@ -463,6 +463,29 @@ var headerDesigner = function (options) {
 		}));
 	}
 
+	self.uploadImage = function (imgfile) {
+		if (imgfile.size > 1024000) {
+			toastr.error("Max file size is 1MB. Please choose a smaller image file. ");
+			return false;
+        }
+
+		var reader = new FileReader();
+		reader.onload = function (e) {
+			var img = new Image();
+			img.src = e.target.result;
+			img.onload = function () {
+				var image = new fabric.Image(img);
+				image.set({
+					angle: 0,
+				});
+				self.canvas.centerObject(image);
+				self.canvas.add(image);
+				self.canvas.renderAll();
+			}
+		}
+		reader.readAsDataURL(imgfile);
+    }
+
 	self.remove = function () {
 		var canvas = self.canvas;
 		canvas.remove(canvas.getActiveObject());
@@ -524,6 +547,7 @@ var reportViewModel = function (options) {
 	self.SortByField = ko.observable();
 	self.SortDesc = ko.observable(false);
 	self.EditFiltersOnReport = ko.observable(false);
+	self.UseReportHeader = ko.observable(false);
 
 	self.FilterGroups = ko.observableArray();
 	self.FilterGroups.subscribe(function (newArray) {

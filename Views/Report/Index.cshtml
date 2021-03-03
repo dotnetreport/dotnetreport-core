@@ -75,16 +75,20 @@
                     <ul class="navbar-nav mr-auto">
                         <!-- ko if: CanSaveReports() || adminMode() -->
                         <li class="nav-item active">
-                            <a href="#" class="nav-link" data-bind="click: createNewReport" data-toggle="modal" data-target="#modal-reportbuilder">Create a New Report</a>
+                            <a href="#" class="nav-link" data-bind="click: createNewReport" data-toggle="modal" data-target="#modal-reportbuilder">
+                                <span class="fa fa-plus"></span> Create a New Report
+                            </a>
                         </li>
                         <!-- /ko -->
                         <!-- ko if: CanManageFolders() || adminMode() -->
                         <li class="nav-item">
-                            <a href="#" class="nav-link" data-bind="click: ManageFolder.newFolder">Add a new Folder</a>
+                            <a href="#" class="nav-link" data-bind="click: ManageFolder.newFolder">
+                                <span class="fa fa-folder-o"></span> Add a new Folder
+                            </a>
                         </li>
                         <li class="nav-item dropdown" data-bind="visible: SelectedFolder()!=null">
                             <a href="#" class="nav-link dropdown-toggle" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                Folder Options
+                                <span class="fa fa-folder"></span> Folder Options
                             </a>
                             <div class="dropdown-menu">
                                 <a class="dropdown-item" href="#" data-bind="click: ManageFolder.editFolder">Edit Selected Folder</a>
@@ -93,61 +97,73 @@
                         </li>
                         <!-- /ko -->
                         <li class="nav-item active">
-                            <a href="#" class="nav-link" data-bind="click: function(){ initHeaderDesigner(); }">Report Header</a>
+                            <a href="#" class="nav-link" data-bind="click: function(){ initHeaderDesigner(); }">
+                                <span class="fa fa-arrow-up"> Report Header</span>
+                            </a>
                         </li>
                     </ul>
                 </div>
             </nav>
         </div>
         <div class="card-body">
-            <div data-bind="visible: designingHeader" style="display: none;">
-                <p>
-                    Please design the common report header below that will be applied to all reports where report headers are turned on.
-                </p>
-                <canvas id="report-header-designer" width="800" height="200" style="border: solid 1px #ccc"></canvas>
-                <div class="form-inline" data-bind="with: headerDesigner">
-                    <div class="form-group">
-                        <button class="btn btn-sm" title="Add Text" data-bind="click: addText"><span class="fa fa-font"></span></button>
-                        <button class="btn btn-sm" title="Add Image"><span class="fa fa-image"></span></button>
-                        <button class="btn btn-sm" title="Add Line" data-bind="click: addLine"><span class="fa fa-arrows-h"></span></button>
+            <div data-bind="visible: designingHeader" style="display: none;" class="overflow-auto">
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox" data-bind="checked: UseReportHeader"> Use Report Headers
+                    </label>
+                </div>
+                <div data-bind="visible: UseReportHeader">
+                    <p class="alert alert-info">
+                        You can design the common report header below that will be applied to all reports where report headers are turned on.
+                    </p>
+                    <canvas id="report-header-designer" width="900" height="120" style="border: solid 1px #ccc"></canvas>
+                    <div class="form-inline" data-bind="with: headerDesigner">
+                        <div class="form-group">
+                            <button class="btn btn-sm" title="Add Text" data-bind="click: addText"><span class="fa fa-font"></span></button>
+                            <label class="btn btn-sm" title="Add Image">
+                                <span class="fa fa-image"></span>
+                                <input type="file" hidden data-bind="event: { change: function() { uploadImage($element.files[0]) } }" />
+                            </label>
+                            <button class="btn btn-sm" title="Add Line" data-bind="click: addLine"><span class="fa fa-arrows-h"></span></button>
+                        </div>
+                        <!-- ko if: selectedObject() -->
+                        <div class="form-group">
+                            &nbsp;|&nbsp;
+                            <button class="btn btn-sm" data-bind="click: remove" title="Delete"><span class="fa fa-trash"></span></button>
+                            <!-- ko if: getText()-->
+                            <select class="form-control form-control-sm" title="Font Family" data-bind="event: {change: setFontFamily }, value: objectProperties.fontFamily">
+                                <option value="arial" selected>Arial</option>
+                                <option value="helvetica">Helvetica</option>
+                                <option value="myriad pro">Myriad Pro</option>
+                                <option value="delicious">Delicious</option>
+                                <option value="verdana">Verdana</option>
+                                <option value="georgia">Georgia</option>
+                                <option value="courier">Courier</option>
+                                <option value="comic sans ms">Comic Sans MS</option>
+                                <option value="impact">Impact</option>
+                                <option value="monaco">Monaco</option>
+                                <option value="optima">Optima</option>
+                                <option value="hoefler text">Hoefler Text</option>
+                                <option value="plaster">Plaster</option>
+                                <option value="engagement">Engagement</option>
+                            </select>
+                            &nbsp;
+                            <select class="form-control form-control-sm" title="Text Align">
+                                <option>Left</option>
+                                <option>Center</option>
+                                <option>Right</option>
+                                <option>Justify</option>
+                            </select>
+                            &nbsp;
+                            <input type="color" size="5" class="btn-object-action" title="Font Color">
+                            <input type="range" value="" min="1" max="120" step="1" id="text-font-size" class="btn-object-action" title="Font Size">
+                            <button class="btn btn-sm" title="Bold"><span class="fa fa-bold"></span></button>
+                            <button class="btn btn-sm" title="Italic"><span class="fa fa-italic"></span></button>
+                            <button class="btn btn-sm" title="Underline"><span class="fa fa-underline"></span></button>
+                            <!-- /ko -->
+                        </div>
+                        <!-- /ko-->
                     </div>
-                    <!-- ko if: selectedObject() -->
-                    <div class="form-group">
-                        &nbsp;|&nbsp;
-                        <button class="btn btn-sm" data-bind="click: remove" title="Delete"><span class="fa fa-trash"></span></button>
-                        <!-- ko if: getText()-->
-                        <select class="form-control form-control-sm" title="Font Family" data-bind="event: {change: setFontFamily }, value: objectProperties.fontFamily">
-                            <option value="arial" selected>Arial</option>
-                            <option value="helvetica">Helvetica</option>
-                            <option value="myriad pro">Myriad Pro</option>
-                            <option value="delicious">Delicious</option>
-                            <option value="verdana">Verdana</option>
-                            <option value="georgia">Georgia</option>
-                            <option value="courier">Courier</option>
-                            <option value="comic sans ms">Comic Sans MS</option>
-                            <option value="impact">Impact</option>
-                            <option value="monaco">Monaco</option>
-                            <option value="optima">Optima</option>
-                            <option value="hoefler text">Hoefler Text</option>
-                            <option value="plaster">Plaster</option>
-                            <option value="engagement">Engagement</option>
-                        </select>
-                        &nbsp;
-                        <select class="form-control form-control-sm" title="Text Align">
-                            <option>Left</option>
-                            <option>Center</option>
-                            <option>Right</option>
-                            <option>Justify</option>
-                        </select>
-                        &nbsp;
-                        <input type="color" size="5" class="btn-object-action" title="Font Color">
-                        <input type="range" value="" min="1" max="120" step="1" id="text-font-size" class="btn-object-action" title="Font Size">
-                        <button class="btn btn-sm" title="Bold"><span class="fa fa-bold"></span></button>
-                        <button class="btn btn-sm" title="Italic"><span class="fa fa-italic"></span></button>
-                        <button class="btn btn-sm" title="Underline"><span class="fa fa-underline"></span></button>
-                        <!-- /ko -->
-                    </div>
-                    <!-- /ko-->
                 </div>
             </div>
             <div data-bind="ifnot: designingHeader">
