@@ -426,6 +426,25 @@ namespace ReportBuilder.Web.Core.Models
                 return xp.GetAsByteArray();
             }
         }
+
+        /// <summary>
+        /// Customize this method with a login for dotnet report so that it can login to print pdf reports
+        /// </summary>
+        public static async Task PerformLogin(Page page, string printUrl)
+        {
+            var loginUrl = printUrl.Replace("/DotNetReport/ReportPrint", "/Account/Login"); // link to your login page
+            var loginEmail = "yourloginid@yourcompany.com"; // your login id
+            var loginPassword = "yourPassword"; // your login password
+
+            await page.GoToAsync(loginUrl, new NavigationOptions
+            {
+                WaitUntil = new[] { WaitUntilNavigation.Networkidle0 }
+            });
+            await page.TypeAsync("#Email", loginEmail); // Make sure #Email is replaced with the username form input id
+            await page.TypeAsync("#Password", loginPassword); // Make sure #Password is replaced with the password form input id
+            await page.ClickAsync("#LoginSubmit"); // Make sure #LoginSubmit is replaced with the login button form input id
+        }
+
         public static async Task<byte[]> GetPdfFile(string printUrl, int reportId, string reportSql, string connectKey, string reportName)
         {
             var installPath = AppContext.BaseDirectory + "\\App_Data\\local-chromium";
@@ -433,6 +452,7 @@ namespace ReportBuilder.Web.Core.Models
             var executablePath = $"{Directory.GetDirectories(installPath)[0]}\\chrome-win\\chrome.exe";
             var browser = await Puppeteer.LaunchAsync(new LaunchOptions { Headless = true, ExecutablePath = executablePath });
             var page = await browser.NewPageAsync();
+            // await PerformLogin(page, printUrl); // <-- uncomment and setup a login for dotnet report to be able to login to your system
             await page.SetRequestInterceptionAsync(true);
 
             var formPosted = false;
