@@ -378,14 +378,16 @@ var manageAccess = function (options) {
 
 var headerDesigner = function (options) {
 	var self = this;
-	self.canvas = new fabric.Canvas(options.canvasId);
+	self.canvas = null;
 	self.initiated = false;
 	self.selectedObject = ko.observable();
 	self.UseReportHeader = ko.observable(options.useReportHeader === true ? true : false)
 	
-	self.init = function () {
+	self.init = function (displayOnly) {
 		if (self.initiated) return;
 		self.initiated = true;
+		self.canvas = new fabric.Canvas(options.canvasId);
+		if (displayOnly === true) return;
 
 		var canvas = self.canvas;
 		var grid = 20;
@@ -422,6 +424,13 @@ var headerDesigner = function (options) {
 		self.loadCanvas();
 	}
 
+	self.dispose = function () {
+		if (self.canvas) {
+			self.canvas.dispose();
+			self.initiated = false;
+		}
+    }
+
 	function getActiveProp(name) {
 		var object = self.canvas.getActiveObject();
 		if (!object) return '';
@@ -452,7 +461,7 @@ var headerDesigner = function (options) {
 		});
 	}
 
-	self.loadCanvas = function () {
+	self.loadCanvas = function (displayOnly) {
 		var canvas = self.canvas;
 		return ajaxcall({
 			url: options.apiUrl,
@@ -463,8 +472,11 @@ var headerDesigner = function (options) {
 		}).done(function (result) {
 			if (result.d) { result = result.d; }
 			self.UseReportHeader(result.useReportHeader);
-			canvas.loadFromJSON(result.headerJson);
-			canvas.renderAll();
+			canvas.loadFromJSON(result.headerJson, canvas.renderAll.bind(canvas), function (o, obj) {
+				if (displayOnly === true)
+					obj.set('selectable', false);
+			});
+
 		});
 	}
 
@@ -1937,10 +1949,13 @@ var reportViewModel = function (options) {
 			self.FilterGroups([]);
 			self.AdditionalSeries([]);
 			self.scheduleBuilder.fromJs(report.Schedule);
-			self.useReportHeader(!report.HideReportHeader);
+			self.useReportHeader(report.UseReportHeader && !report.HideReportHeader);
 
 			if (self.useReportHeader()) {
-				self.headerDesigner.loadCanvas();
+				self.headerDesigner.init(true);
+				self.headerDesigner.loadCanvas(true);
+			} else {
+				self.headerDesigner.dispose();
             }
 
 			var filterFieldsOnFly = [];

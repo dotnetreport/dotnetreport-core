@@ -81,24 +81,24 @@
     <div class="report-view" data-bind="with: $root">
         @using (Html.BeginForm("DownloadExcel", "Report", FormMethod.Post, new { id = "downloadExcel" }))
         {
-            <input type="hidden" id="reportSql" name="reportSql" data-bind="value: currentSql" />
-            <input type="hidden" id="connectKey" name="connectKey" data-bind="value: currentConnectKey" />
-            <input type="hidden" id="reportName" name="reportName" data-bind="value: ReportName" />
+            <input type="hidden" name="reportSql" data-bind="value: currentSql" />
+            <input type="hidden" name="connectKey" data-bind="value: currentConnectKey" />
+            <input type="hidden" name="reportName" data-bind="value: ReportName" />
         }
 
         @using (Html.BeginForm("DownloadXml", "Report", FormMethod.Post, new { id = "downloadXml" }))
         {
-            <input type="hidden" id="reportSql" name="reportSql" data-bind="value: currentSql" />
-            <input type="hidden" id="connectKey" name="connectKey" data-bind="value: currentConnectKey" />
-            <input type="hidden" id="reportName" name="reportName" data-bind="value: ReportName" />
+            <input type="hidden" name="reportSql" data-bind="value: currentSql" />
+            <input type="hidden" name="connectKey" data-bind="value: currentConnectKey" />
+            <input type="hidden" name="reportName" data-bind="value: ReportName" />
         }
         @using (Html.BeginForm("DownloadPdf", "Report", FormMethod.Post, new { id = "downloadPdf" }))
         {
-            <input type="hidden" id="reportId" name="reportId" data-bind="value: ReportID" />
-            <input type="hidden" id="printUrl" name="printUrl" value="@Url.Action("ReportPrint", "Report", null, Context.Request.Scheme)" />
-            <input type="hidden" id="reportSql" name="reportSql" data-bind="value: currentSql" />
-            <input type="hidden" id="connectKey" name="connectKey" data-bind="value: currentConnectKey" />
-            <input type="hidden" id="reportName" name="reportName" data-bind="value: ReportName" />
+            <input type="hidden" name="reportId" data-bind="value: ReportID" />
+            <input type="hidden" name="printUrl" value="@Url.Action("ReportPrint", "Report", null, Context.Request.Scheme)" />
+            <input type="hidden" name="reportSql" data-bind="value: currentSql" />
+            <input type="hidden" name="connectKey" data-bind="value: currentConnectKey" />
+            <input type="hidden" name="reportName" data-bind="value: ReportName" />
         }
 
         <div class="pull-right">
