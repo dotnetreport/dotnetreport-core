@@ -595,13 +595,14 @@ var reportViewModel = function (options) {
 	self.CanSaveReports = ko.observable(true);
 	self.CanManageFolders = ko.observable(true);
 	self.CanEdit = ko.observable(true);
+	self.useReportHeader = ko.observable(false);
 
 	self.fieldFormatTypes = ['Auto', 'Number', 'Decimal', 'Currency', 'Percentage', 'Date', 'Date and Time', 'Time'];
 	self.decimalFormatTypes = ['Number', 'Decimal', 'Currency', 'Percentage'];
 	self.fieldAlignments = ['Auto', 'Left', 'Right', 'Center'];
 	self.designingHeader = ko.observable(false);
 	self.headerDesigner = new headerDesigner({
-		canvasId: 'report-header-designer',
+		canvasId: options.reportHeader,
 		apiUrl: options.apiUrl
 	});
 	self.initHeaderDesigner = function () {
@@ -1936,6 +1937,11 @@ var reportViewModel = function (options) {
 			self.FilterGroups([]);
 			self.AdditionalSeries([]);
 			self.scheduleBuilder.fromJs(report.Schedule);
+			self.useReportHeader(!report.HideReportHeader);
+
+			if (self.useReportHeader()) {
+				self.headerDesigner.loadCanvas();
+            }
 
 			var filterFieldsOnFly = [];
 
@@ -1992,6 +1998,12 @@ var reportViewModel = function (options) {
 			});
 
 			self.SaveReport(!filterOnFly && self.CanEdit());
+
+			if (!reportSeries && self.AdditionalSeries().length > 0) {
+				reportSeries = (_.map(self.AdditionalSeries(), function (e, i) {
+					return e.Value();
+				})).join(",");
+            }
 
 			if (self.ReportMode() == "execute" || self.ReportMode() == "dashboard") {
 				self.ExecuteReportQuery(options.reportSql, options.reportConnect, reportSeries);

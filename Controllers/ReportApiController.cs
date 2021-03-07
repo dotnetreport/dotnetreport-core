@@ -198,7 +198,7 @@ namespace ReportBuilder.Web.Core.Controllers
                         {
                             // merge in to dt
                             if (!string.IsNullOrEmpty(reportSeries))
-                                series = reportSeries.Split(new string[] { "%2C" }, StringSplitOptions.RemoveEmptyEntries);
+                                series = reportSeries.Split(new string[] { "%2C", "," }, StringSplitOptions.RemoveEmptyEntries);
 
                             var j = 1;
                             while (j < dtPagedRun.Columns.Count)

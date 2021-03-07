@@ -74,7 +74,8 @@ namespace ReportBuilder.Web.Core.Controllers
 
         [AllowAnonymous]
         public IActionResult ReportPrint(int reportId, string reportName, string reportDescription, bool includeSubTotal, bool showUniqueRecords,
-            bool aggregateReport, bool showDataWithGraph, string reportSql, string connectKey, string reportFilter, string reportType, int selectedFolder)
+            bool aggregateReport, bool showDataWithGraph, string reportSql, string connectKey, string reportFilter, string reportType, int selectedFolder,
+            string reportSeries)
         {
             var model = new DotNetReportModel
             {
@@ -88,6 +89,7 @@ namespace ReportBuilder.Web.Core.Controllers
                 ShowUniqueRecords = showUniqueRecords,
                 ShowDataWithGraph = showDataWithGraph,
                 SelectedFolder = selectedFolder,
+                ReportSeries = !string.IsNullOrEmpty(reportSeries) ? reportSeries.Replace("%20", " ") : string.Empty,
                 ReportFilter = reportFilter // json data to setup filter correctly again
             };
 

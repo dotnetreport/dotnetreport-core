@@ -23,6 +23,7 @@
                 runReportUrl: '@Url.Action("Report")',
                 reportWizard: $("#modal-reportbuilder"),
                 linkModal: $("#linkModal"),
+                reportHeader: "report-header",
                 fieldOptionsModal: $("#fieldOptionsModal"),
                 lookupListUrl: '@Url.Action("GetLookupList", "ReportApi")',
                 apiUrl: '@Url.Action("CallReportApi", "ReportApi")',
@@ -109,14 +110,14 @@
             <div data-bind="visible: designingHeader, with: headerDesigner" style="display: none;" class="overflow-auto">
                 <div class="checkbox">
                     <label>
-                        <input type="checkbox" data-bind="checked: UseReportHeader"> Use Report Headers
+                        <input type="checkbox" data-bind="checked: UseReportHeader"> Use Report Header
                     </label>
                 </div>
                 <div data-bind="visible: UseReportHeader">
                     <p class="alert alert-info">
                         You can design the common report header below that will be applied to all reports where report headers are turned on.
                     </p>
-                    <canvas id="report-header-designer" width="900" height="120" style="border: solid 1px #ccc"></canvas>
+                    <canvas id="report-header" width="900" height="120" style="border: solid 1px #ccc"></canvas>
                     <div class="form-inline">
                         <div class="form-group">
                             <button class="btn btn-sm" title="Add Text" data-bind="click: addText"><span class="fa fa-font"></span></button>
