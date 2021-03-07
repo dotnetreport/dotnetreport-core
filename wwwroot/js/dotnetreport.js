@@ -420,8 +420,6 @@ var headerDesigner = function (options) {
 		canvas.on('selection:cleared', function (obj) {
 			self.selectedObject(null);
 		});
-
-		self.loadCanvas();
 	}
 
 	self.dispose = function () {
@@ -586,6 +584,7 @@ var reportViewModel = function (options) {
 	self.SortDesc = ko.observable(false);
 	self.EditFiltersOnReport = ko.observable(false);
 	self.UseReportHeader = ko.observable(false);
+	self.HideReportHeader = ko.observable(false);
 
 	self.FilterGroups = ko.observableArray();
 	self.FilterGroups.subscribe(function (newArray) {
@@ -617,8 +616,10 @@ var reportViewModel = function (options) {
 		canvasId: options.reportHeader,
 		apiUrl: options.apiUrl
 	});
+
 	self.initHeaderDesigner = function () {
 		self.headerDesigner.init();
+		self.headerDesigner.loadCanvas(false);
 		self.designingHeader(true);
     }
 
@@ -1949,14 +1950,17 @@ var reportViewModel = function (options) {
 			self.FilterGroups([]);
 			self.AdditionalSeries([]);
 			self.scheduleBuilder.fromJs(report.Schedule);
+			self.HideReportHeader(report.HideReportHeader);
 			self.useReportHeader(report.UseReportHeader && !report.HideReportHeader);
 
-			if (self.useReportHeader()) {
-				self.headerDesigner.init(true);
-				self.headerDesigner.loadCanvas(true);
-			} else {
-				self.headerDesigner.dispose();
-            }
+			if (self.ReportMode() == "execute") {
+				if (self.useReportHeader()) {
+					self.headerDesigner.init(true);
+					self.headerDesigner.loadCanvas(true);
+				} else {
+					self.headerDesigner.dispose();
+				}
+			}
 
 			var filterFieldsOnFly = [];
 
