@@ -437,13 +437,13 @@ var headerDesigner = function (options) {
 	}
 
 	self.saveCanvas = function () {
-		var data = self.canvas.toJSON();
+		var data = JSON.stringify(self.canvas.toJSON());
 		return ajaxcall({
 			url: options.apiUrl.replace('CallReportApi', 'PostReportApi'),
 			type: "POST",
 			data: JSON.stringify({
-				method: "/ReportApi/SaveHeaderDesign",
-				headerDesign: data,
+				method: "/ReportApi/SaveReportHeader",
+				headerJson: data,
 				useReportHeader: self.UseReportHeader()
 			})
 		}).done(function (result) {
@@ -457,11 +457,13 @@ var headerDesigner = function (options) {
 		return ajaxcall({
 			url: options.apiUrl,
 			data: {
-				method: "/ReportApi/LoadHeaderDesign"
+				method: "/ReportApi/GetReportHeader",
+				model: JSON.stringify({})
 			}
 		}).done(function (result) {
 			if (result.d) { result = result.d; }
-			canvas.loadFromJSON(result);
+			self.UseReportHeader(result.useReportHeader);
+			canvas.loadFromJSON(result.headerJson);
 			canvas.renderAll();
 		});
 	}
