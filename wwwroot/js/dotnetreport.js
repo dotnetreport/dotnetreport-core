@@ -593,6 +593,17 @@ var reportViewModel = function (options) {
 		}
 	});
 
+	self.addSortField = function (fieldId, sort) {
+		var newField = {
+			sortByFieldId: ko.observable(fieldId),
+			sortDesc: ko.observable(sort === true ? true : false),
+			remove: function () {
+				self.SortFields.remove(newField);
+            }
+        }
+		self.SortFields.push(newField);
+    }
+	self.SortFields = ko.observableArray([]);
 	self.FilterGroups([]);
 
 	self.SaveReport = ko.observable(true);
@@ -828,6 +839,7 @@ var reportViewModel = function (options) {
 		self.ReportID(0);
 		self.SaveReport(self.CanSaveReports());
 		self.scheduleBuilder.clear();
+		self.SortFields([]);
 	};
 
 	self.SelectedTable.subscribe(function (table) {
@@ -1236,6 +1248,12 @@ var reportViewModel = function (options) {
 			ShowOnDashboard: self.ShowOnDashboard(),
 			SortBy: self.SortByField(),
 			SortDesc: self.SortDesc(),
+			SelectedSorts: _.map(self.SortFields(), function (x) {
+				return {
+					FieldId: x.sortByFieldId(),
+					Descending: x.sortDesc()
+				};
+            }),
 			ReportType: self.ReportType(),
 			GroupFunctionList: _.map(self.SelectedFields(), function (x) {
 				return {
@@ -1949,6 +1967,7 @@ var reportViewModel = function (options) {
 			self.CanEdit(((!options.clientId || report.ClientId == options.clientId) && (!options.userId || report.UserId == options.userId)) || self.adminMode());
 			self.FilterGroups([]);
 			self.AdditionalSeries([]);
+			self.SortFields([]);
 			self.scheduleBuilder.fromJs(report.Schedule);
 			self.HideReportHeader(report.HideReportHeader);
 			self.useReportHeader(report.UseReportHeader && !report.HideReportHeader);
@@ -2014,6 +2033,10 @@ var reportViewModel = function (options) {
 
 			_.forEach(report.Series, function (e) {
 				self.AddSeries(e);
+			});
+
+			_.forEach(report.SelectedSorts, function (e) {
+				self.addSortField(e.FieldId, e.Descending);
 			});
 
 			self.SaveReport(!filterOnFly && self.CanEdit());

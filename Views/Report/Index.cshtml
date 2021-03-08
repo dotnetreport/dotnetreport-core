@@ -548,13 +548,33 @@
                     </div>
                     <div class="form-group row">
                         <label class="col-sm-2 control-label">Sort By</label>
-                        <div class="col-sm-8">
+                        <div class="col-sm-6">
                             <select class="form-control" required data-bind="options: SelectedFields, optionsText: 'selectedFieldName', optionsValue: 'fieldId', value: SortByField"></select>
                         </div>
                         <div class="col-sm-2">
                             <button class="btn btn-sm btn-secondary" data-bind="text: !SortDesc() ? '▲ Sort Ascending' : 'Sort Descending ▼', click: function() { SortDesc(!SortDesc()); return false; }"></button>
                         </div>
+                        <div class="col-sm-2">
+                            <button class="btn btn-sm btn-secondary" data-bind="click: addSortField">Add Sort Field</button>
+                        </div>
                     </div>
+                    <!-- ko foreach: SortFields -->
+                    <div class="form-group row">
+                        <label class="col-sm-2 control-label">&nbsp;&nbsp;Then Sort By</label>
+                        <div class="col-sm-4">
+                            <select class="form-control" required data-bind="options: $parent.SelectedFields, optionsText: 'selectedFieldName', optionsValue: 'fieldId', value: sortByFieldId"></select>
+                        </div>
+                        <div class="col-sm-2">
+                            <button class="btn btn-sm btn-secondary" data-bind="click: remove">Remove Sort Field</button>
+                        </div>
+                        <div class="col-sm-2">
+                            <button class="btn btn-sm btn-secondary" data-bind="text: !sortDesc() ? '▲ Sort Ascending' : 'Sort Descending ▼', click: function() { sortDesc(!sortDesc()); return false; }"></button>
+                        </div>
+                        <div class="col-sm-2">
+                            <button class="btn btn-sm btn-secondary" data-bind="click: $parent.addSortField">Add Sort Field</button>
+                        </div>
+                    </div>
+                    <!-- /ko -->
                     <div class="checkbox">
                         <label>
                             <input type="checkbox" data-bind="checked: IncludeSubTotal" />
