@@ -382,7 +382,7 @@ var headerDesigner = function (options) {
 	self.initiated = false;
 	self.selectedObject = ko.observable();
 	self.UseReportHeader = ko.observable(options.useReportHeader === true ? true : false)
-	
+
 	self.init = function (displayOnly) {
 		if (self.initiated) return;
 		self.initiated = true;
@@ -427,7 +427,7 @@ var headerDesigner = function (options) {
 			self.canvas.dispose();
 			self.initiated = false;
 		}
-    }
+	}
 
 	function getActiveProp(name) {
 		var object = self.canvas.getActiveObject();
@@ -503,7 +503,7 @@ var headerDesigner = function (options) {
 		if (imgfile.size > 1024000) {
 			toastr.error("Max file size is 1MB. Please choose a smaller image file. ");
 			return false;
-        }
+		}
 
 		var reader = new FileReader();
 		reader.onload = function (e) {
@@ -520,7 +520,7 @@ var headerDesigner = function (options) {
 			}
 		}
 		reader.readAsDataURL(imgfile);
-    }
+	}
 
 	self.remove = function () {
 		var canvas = self.canvas;
@@ -565,7 +565,9 @@ var reportViewModel = function (options) {
 	self.ReportID = ko.observable();
 
 	self.Tables = ko.observableArray([]);
+	self.Procs = ko.observableArray([]);
 	self.SelectedTable = ko.observable();
+	self.SelectedProc = ko.observable();
 
 	self.ChooseFields = ko.observableArray([]); // List of fields to show in First List to choose from
 	self.ChosenFields = ko.observableArray([]); // List of fields selected by user in the First List
@@ -599,10 +601,10 @@ var reportViewModel = function (options) {
 			sortDesc: ko.observable(sort === true ? true : false),
 			remove: function () {
 				self.SortFields.remove(newField);
-            }
-        }
+			}
+		}
 		self.SortFields.push(newField);
-    }
+	}
 	self.SortFields = ko.observableArray([]);
 	self.FilterGroups([]);
 
@@ -632,7 +634,7 @@ var reportViewModel = function (options) {
 		self.headerDesigner.init();
 		self.headerDesigner.loadCanvas(false);
 		self.designingHeader(true);
-    }
+	}
 
 	self.ReportResult = ko.observable({
 		HasError: ko.observable(false),
@@ -644,6 +646,9 @@ var reportViewModel = function (options) {
 		SubTotals: ko.observableArray([])
 	});
 
+	self.useStoredProc = ko.observable(false);
+	self.StoredProcId = ko.observable();
+	self.Parameters = ko.observableArray([]);
 	self.pager = new pagerViewModel();
 	self.currentSql = ko.observable();
 	self.currentConnectKey = ko.observable();
@@ -653,6 +658,13 @@ var reportViewModel = function (options) {
 	self.y = ko.observable(0);
 	self.width = ko.observable(3);
 	self.height = ko.observable(2);
+
+	self.useStoredProc.subscribe(function () {
+		self.SelectedTable(null);
+		self.SelectedProc(null);
+		self.SelectedFields([]);
+		self.clearReport();
+	});
 
 	self.adminMode.subscribe(function (newValue) {
 		self.LoadAllSavedReports();
@@ -788,7 +800,7 @@ var reportViewModel = function (options) {
 				toastr.error("Cannot delete Default folder");
 				return;
 			}
-			bootbox.confirm("Are you sure you want to delete this Folder?\n\nWARNING: Deleting a folder will delete all reports and this action cannot be undone.", function (r) {
+			bootbox.confirm("Are you sure you want to delete this Folder?\n\nWARNING: Deleting a folder will delete all reports in the folder and this action cannot be undone.", function (r) {
 				if (r) {
 					ajaxcall({
 						url: options.apiUrl,
@@ -828,6 +840,7 @@ var reportViewModel = function (options) {
 		self.SelectedFields([]);
 		self.SelectFields([]);
 		self.SelectedField(null);
+		self.SelectedProc(null);
 
 		self.IncludeSubTotal(false);
 		self.EditFiltersOnReport(false);
@@ -842,7 +855,76 @@ var reportViewModel = function (options) {
 		self.SortFields([]);
 	};
 
+	self.SelectedProc.subscribe(function (proc) {
+		if (proc == null) {
+			return;
+		}
+		self.ChooseFields([]);
+		self.SelectedFields([]);
+
+		var selectedFields = _.map(proc.Columns, function (e) {
+			var match = ko.toJS(proc.SelectedFields && proc.SelectedFields.length ? _.find(proc.SelectedFields, { fieldName: e.ColumnName }) : null);
+			var field = match ?? self.getEmptyFormulaField();
+			field.fieldName = e.DisplayName;
+			field.tableName = proc.DisplayName;
+			field.procColumnId = e.Id
+			return self.setupField(field)
+		});
+
+		proc.SelectedFields = null;
+		self.SelectedFields(selectedFields);
+
+		var parameters = _.map(proc.Parameters, function (e) {
+			var match = ko.toJS(proc.SelectedParameters && proc.SelectedParameters.length ? _.find(proc.SelectedParameters, { ParameterName: e.ParameterName }) : null);
+			e.operators = ['='];
+			if (e.ParameterValue) e.operators.push('is default');
+			if (!e.Required) e.operators.push('is blank');
+			e.Operator = ko.observable(match ? match.Operator : '=');
+			e.Value = ko.observable(match ? match.Value : e.ParameterValue);
+			e.Field = {
+				hasForeignKey: e.ForeignKey,
+				fieldType: e.ParameterDataTypeString
+			}
+			e.Operator.subscribe(function (newValue) {
+				if (newValue == 'is default') {
+					e.Value(e.ParameterValue);
+				}
+			});
+
+			e.LookupList = ko.observableArray([]);
+			if (e.Value()) {
+				e.LookupList.push({ id: e.Value(), text: e.Value() });
+			}
+			if (e.ForeignKey) {
+				ajaxcall({
+					url: options.apiUrl,
+					data: {
+						method: "/ReportApi/GetPrmLookupList",
+						model: JSON.stringify({ parameterId: e.Id, procId: proc.Id })
+					}
+				}).done(function (result) {
+					if (result.d) { result = result.d; }
+					ajaxcall({
+						type: 'POST',
+						url: options.lookupListUrl,
+						data: JSON.stringify({ lookupSql: result.sql, connectKey: result.connectKey })
+					}).done(function (list) {
+						if (list.d) { list = list.d; }
+						e.LookupList(list);
+					});
+				});
+			}
+
+			return e;
+		});
+
+		proc.SelectedParameters = null;
+		self.Parameters(parameters);
+
+	});
+
 	self.SelectedTable.subscribe(function (table) {
+		self.SelectedProc(null);
 		if (table == null) {
 			self.ChooseFields([]);
 			return;
@@ -917,6 +999,7 @@ var reportViewModel = function (options) {
 
 		return result;
 	});
+
 	self.getEmptyFormulaField = function () {
 		return {
 			tableName: 'Custom',
@@ -1034,7 +1117,6 @@ var reportViewModel = function (options) {
 		return _.filter(self.SelectedFields(), function (x) { return x.fieldType == "DateTime"; });
 	});
 	self.TotalSeries = ko.observable(0);
-	self.AllSqlQuries = ko.observable("");
 
 	self.canAddSeries = ko.computed(function () {
 		var c1 = self.dateFields().length > 0 && ['Group', 'Bar', 'Line'].indexOf(self.ReportType()) >= 0 && self.SelectedFields()[0].fieldType == 'DateTime';
@@ -1253,8 +1335,10 @@ var reportViewModel = function (options) {
 					FieldId: x.sortByFieldId(),
 					Descending: x.sortDesc()
 				};
-            }),
+			}),
 			ReportType: self.ReportType(),
+			UseStoredProc: self.useStoredProc(),
+			StoredProcId: self.useStoredProc() ? self.SelectedProc().Id : null,
 			GroupFunctionList: _.map(self.SelectedFields(), function (x) {
 				return {
 					FieldID: x.fieldId,
@@ -1296,7 +1380,16 @@ var reportViewModel = function (options) {
 			ViewOnlyUserId: self.manageAccess.getAsList(self.manageAccess.viewOnlyUsers),
 			UserRoles: self.manageAccess.getAsList(self.manageAccess.userRoles),
 			ViewOnlyUserRoles: self.manageAccess.getAsList(self.manageAccess.viewOnlyUserRoles),
-			DataFilters: options.dataFilters
+			DataFilters: options.dataFilters,
+			SelectedParameters: self.useStoredProc() ? _.map(self.Parameters(), function (x) {
+				return {
+					UseDefault: x.Operator() == 'is default',
+					ParameterId: x.Id,
+					ParameterName: x.ParameterName,
+					Value: x.Value(),
+					Operator: x.Operator()
+				}
+			}) : []
 		};
 	};
 
@@ -1317,7 +1410,7 @@ var reportViewModel = function (options) {
 			})
 		})
 		self.RunReport(false);
-    }
+	}
 
 	self.RunReport = function (saveOnly) {
 
@@ -1451,9 +1544,9 @@ var reportViewModel = function (options) {
 
 				src = (src || "").trim()
 				src = (src.endsWith("Id") || src.endsWith("ID") ? src.slice(0, -2) : src).trim();
-				
+
 				return src == dst;
-            }
+			}
 
 			function processCols(cols) {
 				_.forEach(cols, function (e, i) {
@@ -1513,10 +1606,10 @@ var reportViewModel = function (options) {
 						switch (col.fieldFormat) {
 							case 'Currency': r.FormattedValue = '$' + r.FormattedValue; break;
 							case 'Percentage': r.FormattedValue = r.FormattedValue + '%'; break;
-                        }
-                    }
+						}
+					}
 				});
-            }
+			}
 
 			processCols(result.ReportData.Columns);
 			result.ReportData.IsDrillDown = ko.observable(false);
@@ -1664,7 +1757,7 @@ var reportViewModel = function (options) {
 	};
 
 	self.skipDraw = options.skipDraw === true ? true : false;
-	self.DrawChart = function() {
+	self.DrawChart = function () {
 		if (!self.isChart() || self.skipDraw === true) return;
 		// Create the data table.
 		var reportData = self.ReportResult().ReportData();
@@ -1934,18 +2027,28 @@ var reportViewModel = function (options) {
 			}
 		}).done(function (report) {
 			if (report.d) { report = report.d; }
+			self.useStoredProc(report.UseStoredProc);
+
 			self.ReportID(report.ReportID);
 			self.ReportType(report.ReportType);
 			self.ReportName(report.ReportName);
 			self.ReportDescription(report.ReportDescription);
 			self.FolderID(report.FolderID);
 
-			_.forEach(report.SelectedFields, function (e) {
-				e = self.setupField(e);
-			});
+			if (self.useStoredProc()) {
+				var proc = _.find(self.Procs(), { Id: report.StoredProcId });
+				if (proc) {
+					proc.SelectedFields = report.SelectedFields;
+					proc.SelectedParameters = report.SelectedParameters;
+					self.SelectedProc(proc);
+				}
+			} else {
+				_.forEach(report.SelectedFields, function (e) {
+					e = self.setupField(e);
+				});
 
-			self.SelectedFields(report.SelectedFields);
-
+				self.SelectedFields(report.SelectedFields);
+			}
 			self.ChosenFields([]);
 			self.SelectFields([]);
 			self.SelectedField(null);
@@ -2045,7 +2148,7 @@ var reportViewModel = function (options) {
 				reportSeries = (_.map(self.AdditionalSeries(), function (e, i) {
 					return e.Value();
 				})).join(",");
-            }
+			}
 
 			if (self.ReportMode() == "execute" || self.ReportMode() == "dashboard") {
 				self.ExecuteReportQuery(options.reportSql, options.reportConnect, reportSeries);
@@ -2149,7 +2252,7 @@ var reportViewModel = function (options) {
 		return false;
 	};
 
-	self.formatNumber = function(number, decPlaces, decSep, thouSep) {
+	self.formatNumber = function (number, decPlaces, decSep, thouSep) {
 		decPlaces = isNaN(decPlaces = Math.abs(decPlaces)) ? 2 : decPlaces,
 			decSep = typeof decSep === "undefined" ? "." : decSep;
 		thouSep = typeof thouSep === "undefined" ? "," : thouSep;
@@ -2201,6 +2304,21 @@ var reportViewModel = function (options) {
 		return isValid;
 	};
 
+	self.loadProcs = function () {
+		ajaxcall({
+			url: options.apiUrl,
+			data: {
+				method: "/ReportApi/GetProcedures",
+				model: JSON.stringify({
+					adminMode: self.adminMode()
+				})
+			}
+		}).done(function (procs) {
+			if (procs.d) { procs = procs.d; }
+			self.Procs(procs);
+		});
+	};
+
 	self.loadTables = function () {
 		// Load tables
 		ajaxcall({
@@ -2225,6 +2343,7 @@ var reportViewModel = function (options) {
 
 		self.loadFolders(folderId);
 		self.loadTables();
+		self.loadProcs();
 
 		var adminMode = false;
 		if (localStorage) adminMode = localStorage.getItem('reportAdminMode');
@@ -2270,7 +2389,7 @@ var reportViewModel = function (options) {
 				var col = _.find(self.SelectedFields(), { fieldId: parseInt(thItem.id) });
 				if (col) {
 					col.fieldWidth(thItem.style.width);
-                }
+				}
 				ajaxcall({
 					url: options.apiUrl,
 					noBlocking: true,
@@ -2286,7 +2405,7 @@ var reportViewModel = function (options) {
 			}
 			thItem = undefined;
 		});
-    }
+	}
 };
 
 var dashboardViewModel = function (options) {
