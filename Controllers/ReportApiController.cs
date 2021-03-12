@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.SqlClient;
+using System.Data.OleDb;
 using System.Linq;
 using System.Net.Http;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
@@ -54,11 +52,11 @@ namespace ReportBuilder.Web.Core.Controllers
             sql = sql.Replace("SELECT ", "SELECT TOP 500 ");
 
             var dt = new DataTable();
-            using (var conn = new SqlConnection(Startup.StaticConfig.GetConnectionString(connectKey)))
+            using (var conn = new OleDbConnection(DotNetReportHelper.GetConnectionString(connectKey)))
             {
                 conn.Open();
-                var command = new SqlCommand(sql, conn);
-                var adapter = new SqlDataAdapter(command);
+                var command = new OleDbCommand(sql, conn);
+                var adapter = new OleDbDataAdapter(command);
 
                 adapter.Fill(dt);
             }
@@ -146,45 +144,53 @@ namespace ReportBuilder.Web.Core.Controllers
                 var dtCols = 0;
 
                 List<string> fields = new List<string>();
+                List<string> sqlFields = new List<string>();
                 for (int i = 0; i < allSqls.Length; i++)
                 {
                     sql = DotNetReportHelper.Decrypt(HttpUtility.HtmlDecode(allSqls[i]));
-
-                    var sqlSplit = sql.Substring(0, sql.IndexOf("FROM")).Replace("SELECT", "").Trim();
-                    var sqlFields = Regex.Split(sqlSplit, "], (?![^\\(]*?\\))").Where(x => x != "CONVERT(VARCHAR(3)")
-                        .Select(x => x.EndsWith("]") ? x : x + "]")
-                        .ToList();
-
-                    if (!String.IsNullOrEmpty(sortBy))
+                    if (!sql.StartsWith("EXEC"))
                     {
-                        if (sortBy.StartsWith("DATENAME(MONTH, "))
+
+                        var sqlSplit = sql.Substring(0, sql.IndexOf("FROM")).Replace("SELECT", "").Trim();
+                        sqlFields = Regex.Split(sqlSplit, "], (?![^\\(]*?\\))").Where(x => x != "CONVERT(VARCHAR(3)")
+                            .Select(x => x.EndsWith("]") ? x : x + "]")
+                            .ToList();
+
+                        if (!String.IsNullOrEmpty(sortBy))
                         {
-                            sortBy = sortBy.Replace("DATENAME(MONTH, ", "MONTH(");
-                        }
-                        if (sortBy.StartsWith("MONTH(") && sortBy.Contains(")) +") && sql.Contains("Group By"))
-                        {
-                            sortBy = sortBy.Replace("MONTH(", "CONVERT(VARCHAR(3), DATENAME(MONTH, ");
-                        }
-                        if (!sql.Contains("ORDER BY"))
-                        {
-                            sql = sql + "ORDER BY " + sortBy + (desc ? " DESC" : "");
-                        }
-                        else
-                        {
-                            sql = sql.Substring(0, sql.IndexOf("ORDER BY")) + "ORDER BY " + sortBy + (desc ? " DESC" : "");
+                            if (sortBy.StartsWith("DATENAME(MONTH, "))
+                            {
+                                sortBy = sortBy.Replace("DATENAME(MONTH, ", "MONTH(");
+                            }
+                            if (sortBy.StartsWith("MONTH(") && sortBy.Contains(")) +") && sql.Contains("Group By"))
+                            {
+                                sortBy = sortBy.Replace("MONTH(", "CONVERT(VARCHAR(3), DATENAME(MONTH, ");
+                            }
+                            if (!sql.Contains("ORDER BY"))
+                            {
+                                sql = sql + "ORDER BY " + sortBy + (desc ? " DESC" : "");
+                            }
+                            else
+                            {
+                                sql = sql.Substring(0, sql.IndexOf("ORDER BY")) + "ORDER BY " + sortBy + (desc ? " DESC" : "");
+                            }
                         }
                     }
-
                     // Execute sql
                     var dtRun = new DataTable();
                     var dtPagedRun = new DataTable();
-                    using (var conn = new SqlConnection(Startup.StaticConfig.GetConnectionString(connectKey)))
+                    using (var conn = new OleDbConnection(DotNetReportHelper.GetConnectionString(connectKey)))
                     {
                         conn.Open();
-                        var command = new SqlCommand(sql, conn);
-                        var adapter = new SqlDataAdapter(command);
+                        var command = new OleDbCommand(sql, conn);
+                        var adapter = new OleDbDataAdapter(command);
                         adapter.Fill(dtRun);
                         dtPagedRun = (dtRun.Rows.Count > 0) ? dtPagedRun = dtRun.AsEnumerable().Skip((pageNumber - 1) * pageSize).Take(pageSize).CopyToDataTable() : dtRun;
+
+                        if (!sqlFields.Any())
+                        {
+                            foreach (DataColumn c in dtRun.Columns) { sqlFields.Add($"{c.ColumnName} AS {c.ColumnName}"); }
+                        }
 
                         string[] series = { };
                         if (i == 0)
