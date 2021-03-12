@@ -332,10 +332,20 @@
                     </div>
                 </div>
                 <hr />
-                <h5><span class="fa fa-database"></span>&nbsp;Choose Data for Report</h5>
+                <h5 class="pull-left"><span class="fa fa-database"></span>&nbsp;Choose Data for Report</h5>
+                <div class="pull-right btn-group btn-group-toggle btn-group-sm" data-toggle="buttons" role="group" data-bind="if: ReportID() <= 0">
+                    <label class="btn btn-primary active" style="margin-right: 0px;" title="You can change the Data source only when creating a new report, changing this will clear all selections">
+                        <input type="radio" name="dataoption" id="table" checked data-bind="checked: useStoredProc, checkedValue: false"> Dynamic
+                    </label>
+                    <label class="btn btn-primary">
+                        <input type="radio" name="dataoption" id="proc" value="1" data-bind="checked: useStoredProc, checkedValue: true"> Predefined
+                    </label>
+                </div>
+                <div class="clearfix"></div>
                 <div class="row">
                     <div class="col-md-12">
-                        <select class="form-control" data-bind="options: Tables, optionsCaption: 'Choose Section...', optionsText: 'tableName', value: SelectedTable, disable: isFormulaField"></select>
+                        <select class="form-control" data-bind="options: Procs, optionsCaption: 'Choose Section...', optionsText: 'DisplayName', value: SelectedProc, disable: isFormulaField, visible: useStoredProc"></select>
+                        <select class="form-control" data-bind="options: Tables, optionsCaption: 'Choose Section...', optionsText: 'tableName', value: SelectedTable, disable: isFormulaField, hidden: useStoredProc"></select>
                     </div>
 
                     <div class="col-md-12 padded-div" data-bind="visible: ChooseFields().length>0">
@@ -426,9 +436,9 @@
                                     <h3 class="pull-left" data-bind="visible: setupFormula.isParenthesesEnd" style="margin-top: 0;">)</h3>
                                     <div class="pull-left" style="margin-left: 15px;" data-bind="visible: $parent.showFormulaOperation($index())">
                                         <select class="form-control form-control-sm" style="max-width: 50px;" data-bind="value: setupFormula.formulaOperation">
-                                            <option>-</option>
-                                            <!-- ko if: ['Int','Money','Float'].indexOf(fieldType) != -1 -->
                                             <option>+</option>
+                                            <!-- ko if: ['Int','Money','Float'].indexOf(fieldType) != -1 -->
+                                            <option>-</option>
                                             <option>*</option>
                                             <option>/</option>
                                             <!-- /ko -->
@@ -466,25 +476,25 @@
                                 </div>
                                 <div class="col">
                                     <div class="pull-right" style="margin-top: -5px;">
-                                        <select class="form-control form-control-sm" data-bind="options: $root.canDrilldown() && $index()>0 ? fieldAggregateWithDrilldown : fieldAggregate, value: selectedAggregate, visible: $parent.AggregateReport"></select>
+                                        <select class="form-control form-control-sm" data-bind="options: $root.canDrilldown() && $index()>0 ? fieldAggregateWithDrilldown : fieldAggregate, value: selectedAggregate, visible: $parent.AggregateReport() && !$parent.useStoredProc()"></select>
                                     </div>
-                                    <div class="sortable pull-right" style="padding-right: 15px;">
+                                    <div class="sortable pull-right" style="padding-right: 15px;" data-bind="ifnot: $parent.useStoredProc">
                                         <span class="fa fa-arrows " aria-hidden="true" title="Drag to reorder"></span>
                                     </div>
-                                    <div class="pull-right" style="padding-right: 15px;">
+                                    <div class="pull-right" style="padding-right: 15px;" data-bind="ifnot: $parent.useStoredProc">
                                         <span class="fa fa-trash" style="cursor: pointer;" aria-hidden="true" title="Delete this Field" data-bind="click: $parent.RemoveField"></span>
                                     </div>
-                                    <div class="pull-right" style="padding-right: 15px;">
+                                    <div class="pull-right" style="padding-right: 15px;" data-bind="ifnot: $parent.useStoredProc">
                                         <span class="button-box no-padding" tabindex="0" data-bind="click: function(){ filterOnFly(!filterOnFly()); }, css: {active: filterOnFly()==true}">
                                             <span class="fa fa-filter" aria-hidden="true" title="Filter by this field on the Report"></span>
                                         </span>
                                     </div>
-                                    <div class="pull-right" style="padding-right: 15px;">
+                                    <div class="pull-right" style="padding-right: 15px;" data-bind="ifnot: $parent.useStoredProc">
                                         <span class="button-box no-padding" tabindex="0" data-bind="click: toggleDisable, css: {active: disabled()==true}">
                                             <span class="fa fa-close" aria-hidden="true" title="Do not include in Report"></span>
                                         </span>
                                     </div>
-                                    <div class="pull-right" style="padding-right: 15px;" data-bind="visible: $root.ReportType()!='List'">
+                                    <div class="pull-right" style="padding-right: 15px;" data-bind="visible: $root.ReportType()!='List' && !$parent.useStoredProc()">
                                         <span class="button-box no-padding" tabindex="0" data-bind="click: function(){ hideInDetail(!hideInDetail()); }, css: {active: hideInDetail()==true}">
                                             <span class="fa fa-eye-slash" aria-hidden="true" title="Hide in Details"></span>
                                         </span>
@@ -510,19 +520,21 @@
                     </ul>
                 </div>
                 <hr />
-                <h5><span class="fa fa-filter"></span>&nbsp;Choose filters</h5>
+                <div data-bind="if: useStoredProc">
+                    <h5><span class="fa fa-filter"></span>&nbsp;Choose filters</h5>
 
-                <div class="row" style="padding: 10px 10px; overflow-x: auto;">
-                    <div data-bind="template: {name: 'filter-group'}" class="col-12"></div>
-                    <br />
-                    <div class="checkbox col-12">
-                        <label>
-                            <input type="checkbox" data-bind="checked: EditFiltersOnReport" />
-                            Allow setting up and saving filters on Report
-                        </label>
+                    <div class="row" style="padding: 10px 10px; overflow-x: auto;">
+                        <div data-bind="template: {name: 'filter-parameters'}" class="col"></div>
+                        <br />
                     </div>
+                </div>
+                <div data-bind="ifnot: useStoredProc">
+                    <h5><span class="fa fa-filter"></span>&nbsp;Choose filters</h5>
 
-                    <br />
+                    <div class="row" style="padding: 10px 10px; overflow-x: auto;">
+                        <div data-bind="template: {name: 'filter-group'}" class="col"></div>
+                        <br />
+                    </div>
                 </div>
                 <!-- /ko -->
                 <hr />
@@ -546,6 +558,7 @@
                             <textarea class="form-control" style="width: 100%;" rows="3" placeholder="Optional Report Description" data-bind="value: ReportDescription"></textarea>
                         </div>
                     </div>
+                    <!-- ko ifnot: useStoredProc -->
                     <div class="form-group row">
                         <label class="col-sm-2 control-label">Sort By</label>
                         <div class="col-sm-6">
@@ -587,6 +600,7 @@
                             Show only Unique Records
                         </label>
                     </div>
+                    <!-- /ko -->
                     <div class="checkbox" data-bind="visible: isChart">
                         <label>
                             <input type="checkbox" data-bind="checked: ShowDataWithGraph" />

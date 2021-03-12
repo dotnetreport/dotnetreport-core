@@ -864,7 +864,7 @@ var reportViewModel = function (options) {
 
 		var selectedFields = _.map(proc.Columns, function (e) {
 			var match = ko.toJS(proc.SelectedFields && proc.SelectedFields.length ? _.find(proc.SelectedFields, { fieldName: e.ColumnName }) : null);
-			var field = match ?? self.getEmptyFormulaField();
+			var field = match || self.getEmptyFormulaField();
 			field.fieldName = e.DisplayName;
 			field.tableName = proc.DisplayName;
 			field.procColumnId = e.Id
@@ -1117,6 +1117,7 @@ var reportViewModel = function (options) {
 		return _.filter(self.SelectedFields(), function (x) { return x.fieldType == "DateTime"; });
 	});
 	self.TotalSeries = ko.observable(0);
+	self.AllSqlQuries = ko.observable("");
 
 	self.canAddSeries = ko.computed(function () {
 		var c1 = self.dateFields().length > 0 && ['Group', 'Bar', 'Line'].indexOf(self.ReportType()) >= 0 && self.SelectedFields()[0].fieldType == 'DateTime';
