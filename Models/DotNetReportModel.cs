@@ -5,7 +5,7 @@ using PuppeteerSharp.Media;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.SqlClient;
+using System.Data.OleDb;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
@@ -96,9 +96,29 @@ namespace ReportBuilder.Web.Core.Models
         public string AccountIdField { get; set; }
 
         public List<ColumnViewModel> Columns { get; set; }
+
+        public DataTable dataTable { get; set; }
+        public List<ParameterViewModel> Parameters { get; set; }
         public List<string> AllowedRoles { get; set; }
     }
 
+    public class ParameterViewModel
+    {
+        public string ParameterName { get; set; }
+        public string DisplayName { get; set; }
+        public string ParameterValue { get; set; }
+        public string ParameterDataTypeString { get; set; }
+        public Type ParameterDataTypeCLR { get; set; }
+        public OleDbType ParamterDataTypeOleDbType { get; set; }
+        public int ParamterDataTypeOleDbTypeInteger { get; set; }
+        public bool Required { get; set; }
+        public bool ForeignKey { get; set; }
+        public string ForeignTable { get; set; }
+        public string ForeignJoin { get; set; }
+        public string ForeignKeyField { get; set; }
+        public string ForeignValueField { get; set; }
+
+    }
     public class RelationModel
     {
         public int Id { get; set; }
@@ -153,7 +173,6 @@ namespace ReportBuilder.Web.Core.Models
         public string UserName { get; set; }
         public string Password { get; set; }
         public bool IntegratedSecurity { get; set; }
-
         public string ApiUrl { get; set; }
         public string AccountApiKey { get; set; }
         public string DatabaseApiKey { get; set; }
@@ -166,6 +185,7 @@ namespace ReportBuilder.Web.Core.Models
         public string DatabaseApiKey { get; set; }
 
         public List<TableViewModel> Tables { get; set; }
+        public List<TableViewModel> Procedures { get; set; }
     }
 
     public class DotNetReportApiCall
@@ -269,6 +289,7 @@ namespace ReportBuilder.Web.Core.Models
 
             return connString;
         }
+
         public static bool IsNumericType(Type type)
         {
 
@@ -394,11 +415,11 @@ namespace ReportBuilder.Web.Core.Models
 
             // Execute sql
             var dt = new DataTable();
-            using (var conn = new SqlConnection(Startup.StaticConfig.GetConnectionString(connectKey)))
+            using (var conn = new OleDbConnection(GetConnectionString(connectKey)))
             {
                 conn.Open();
-                var command = new SqlCommand(sql, conn);
-                var adapter = new SqlDataAdapter(command);
+                var command = new OleDbCommand(sql, conn);
+                var adapter = new OleDbDataAdapter(command);
 
                 adapter.Fill(dt);
             }
@@ -457,14 +478,14 @@ namespace ReportBuilder.Web.Core.Models
             await page.ClickAsync("#LoginSubmit"); // Make sure #LoginSubmit is replaced with the login button form input id
         }
 
-        public static async Task<byte[]> GetPdfFile(string printUrl, int reportId, string reportSql, string connectKey, string reportName)
+        public static async Task<byte[]> GetPdfFile(string printUrl, int reportId, string reportSql, string connectKey, string reportName,
+                    string userId = null, string clientId = null, string currentUserRole = null)
         {
             var installPath = AppContext.BaseDirectory + "\\App_Data\\local-chromium";
             await new BrowserFetcher(new BrowserFetcherOptions { Path = installPath }).DownloadAsync(BrowserFetcher.DefaultRevision);
             var executablePath = $"{Directory.GetDirectories(installPath)[0]}\\chrome-win\\chrome.exe";
             var browser = await Puppeteer.LaunchAsync(new LaunchOptions { Headless = true, ExecutablePath = executablePath });
             var page = await browser.NewPageAsync();
-            // await PerformLogin(page, printUrl); // <-- uncomment and setup a login for dotnet report to be able to login to your system
             await page.SetRequestInterceptionAsync(true);
 
             var formPosted = false;
@@ -475,8 +496,11 @@ namespace ReportBuilder.Web.Core.Models
             formData.AppendLine($"<input name=\"connectKey\" value=\"{HttpUtility.HtmlEncode(connectKey)}\" />");
             formData.AppendLine($"<input name=\"reportId\" value=\"{reportId}\" />");
             formData.AppendLine($"<input name=\"pageNumber\" value=\"{1}\" />");
-            formData.AppendLine($"<input name=\"pageSize\" value=\"{99999}\" />");            
-            formData.AppendLine($"</form>"); 
+            formData.AppendLine($"<input name=\"pageSize\" value=\"{99999}\" />");
+            formData.AppendLine($"<input name=\"userId\" value=\"{userId}\" />");
+            formData.AppendLine($"<input name=\"clientId\" value=\"{clientId}\" />");
+            formData.AppendLine($"<input name=\"currentUserRole\" value=\"{currentUserRole}\" />");
+            formData.AppendLine($"</form>");
             formData.AppendLine("<script type=\"text/javascript\">document.getElementsByTagName('form')[0].submit();</script>");
             formData.AppendLine("</body></html>");
 
@@ -513,6 +537,13 @@ namespace ReportBuilder.Web.Core.Models
             return File.ReadAllBytes(pdfFile);
         }
 
+        private static byte[] Combine(byte[] a, byte[] b)
+        {
+            byte[] c = new byte[a.Length + b.Length];
+            System.Buffer.BlockCopy(a, 0, c, 0, a.Length);
+            System.Buffer.BlockCopy(b, 0, c, a.Length, b.Length);
+            return c;
+        }
         public static string GetXmlFile(string reportSql, string connectKey, string reportName)
         {
             var sql = Decrypt(reportSql);
@@ -520,11 +551,11 @@ namespace ReportBuilder.Web.Core.Models
             // Execute sql
             var dt = new DataTable();
             var ds = new DataSet();
-            using (var conn = new SqlConnection(Startup.StaticConfig.GetConnectionString(connectKey)))
+            using (var conn = new OleDbConnection(GetConnectionString(connectKey)))
             {
                 conn.Open();
-                var command = new SqlCommand(sql, conn);
-                var adapter = new SqlDataAdapter(command);
+                var command = new OleDbCommand(sql, conn);
+                var adapter = new OleDbDataAdapter(command);
 
                 adapter.Fill(dt);
             }

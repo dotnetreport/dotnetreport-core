@@ -18,16 +18,17 @@ namespace ReportBuilder.Web.Core.Controllers
         {
             var connect = GetConnection(databaseApiKey);
             var tables = new List<TableViewModel>();
-
+            var procedures = new List<TableViewModel>();
             tables.AddRange(await GetTables("TABLE", connect.AccountApiKey, connect.DatabaseApiKey));
             tables.AddRange(await GetTables("VIEW", connect.AccountApiKey, connect.DatabaseApiKey));
-
+            procedures.AddRange(await GetApiProcs(connect.AccountApiKey, connect.DatabaseApiKey));
             var model = new ManageViewModel
             {
                 ApiUrl = connect.ApiUrl,
                 AccountApiKey = connect.AccountApiKey,
                 DatabaseApiKey = connect.DatabaseApiKey,
-                Tables = tables
+                Tables = tables,
+                Procedures = procedures
             };
 
             return View(model);
@@ -54,15 +55,7 @@ namespace ReportBuilder.Web.Core.Controllers
                 response.EnsureSuccessStatusCode();
 
                 var content = await response.Content.ReadAsStringAsync();
-                var connString = Startup.StaticConfig.GetConnectionString(content.Replace("\"", ""));
-                connString = connString.Replace("Trusted_Connection=True", "");
-
-                if (!connString.ToLower().StartsWith("provider"))
-                {
-                    connString = "Provider=sqloledb;" + connString;
-                }
-
-                return connString;
+                return DotNetReportHelper.GetConnectionString(content.Replace("\"", ""));
             }
 
         }
@@ -134,13 +127,10 @@ namespace ReportBuilder.Web.Core.Controllers
             using (var client = new HttpClient())
             {
                 var response = await client.GetAsync(String.Format("{0}/ReportApi/GetTables?account={1}&dataConnect={2}&clientId=", Startup.StaticConfig.GetValue<string>("dotNetReport:apiUrl"), accountKey, dataConnectKey));
-
+                
                 response.EnsureSuccessStatusCode();
-
                 var content = await response.Content.ReadAsStringAsync();
-
                 dynamic values = JsonConvert.DeserializeObject<dynamic>(content);
-
                 var tables = new List<TableViewModel>();
                 foreach (var item in values)
                 {
@@ -285,6 +275,157 @@ namespace ReportBuilder.Web.Core.Controllers
 
 
             return tables;
+        }
+
+        private async Task<List<TableViewModel>> GetApiProcs(string accountKey, string dataConnectKey)
+        {
+            using (var client = new HttpClient())
+            {
+                var response = await client.GetAsync(String.Format("{0}/ReportApi/GetProcedures?account={1}&dataConnect={2}&clientId=", Startup.StaticConfig.GetValue<string>("dotNetReport:apiUrl"), accountKey, dataConnectKey));
+                response.EnsureSuccessStatusCode();
+                var content = await response.Content.ReadAsStringAsync();
+                var tables = JsonConvert.DeserializeObject<List<TableViewModel>>(content);
+
+                return tables;
+            }
+        }
+
+        private Type GetType(FieldTypes type)
+        {
+            switch (type)
+            {
+                case FieldTypes.Boolean:
+                    return typeof(bool);
+                case FieldTypes.DateTime:
+                    return typeof(DateTime);
+                case FieldTypes.Double:
+                    return typeof(Double);
+                case FieldTypes.Int:
+                    return typeof(int);
+                case FieldTypes.Money:
+                    return typeof(decimal);
+                case FieldTypes.Varchar:
+                    return typeof(string);
+                default:
+                    return typeof(string);
+
+            }
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> SearchProcedure([FromBody] dynamic data)
+        {
+            string value = data.value;  string accountKey = data.accountKey;  string dataConnectKey = data.dataConnectKey;
+            return Json(await GetSearchProcedure(value, accountKey, dataConnectKey));
+        }
+
+        private async Task<List<TableViewModel>> GetSearchProcedure(string value = null, string accountKey = null, string dataConnectKey = null)
+        {
+            var tables = new List<TableViewModel>();
+            var connString = await GetConnectionString(GetConnection(dataConnectKey));
+            using (OleDbConnection conn = new OleDbConnection(connString))
+            {
+                // open the connection to the database 
+                conn.Open();
+                string spQuery = "SELECT ROUTINE_NAME, ROUTINE_DEFINITION FROM INFORMATION_SCHEMA.ROUTINES WHERE ROUTINE_DEFINITION LIKE '%" + value + "%' AND ROUTINE_TYPE = 'PROCEDURE'";
+                OleDbCommand cmd = new OleDbCommand(spQuery, conn);
+                cmd.CommandType = CommandType.Text;
+                DataTable dtProcedures = new DataTable();
+                dtProcedures.Load(cmd.ExecuteReader());
+                int count = 1;
+                foreach (DataRow dr in dtProcedures.Rows)
+                {
+                    string procName = dr["ROUTINE_NAME"].ToString();
+                    cmd = new OleDbCommand(procName, conn);
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    // Get the parameters.
+                    OleDbCommandBuilder.DeriveParameters(cmd);
+                    List<ParameterViewModel> parameterViewModels = new List<ParameterViewModel>();
+                    foreach (OleDbParameter param in cmd.Parameters)
+                    {
+                        if (param.Direction == ParameterDirection.Input)
+                        {
+                            var parameter = new ParameterViewModel
+                            {
+                                ParameterName = param.ParameterName,
+                                DisplayName = param.ParameterName,
+                                ParameterValue = param.Value != null ? param.Value.ToString() : "",
+                                ParamterDataTypeOleDbTypeInteger = Convert.ToInt32(param.OleDbType),
+                                ParamterDataTypeOleDbType = param.OleDbType,
+                                ParameterDataTypeString = GetType(ConvertToJetDataType(Convert.ToInt32(param.OleDbType))).Name
+                            };
+                            parameterViewModels.Add(parameter);
+                        }
+                    }
+                    DataTable dt = new DataTable();
+                    cmd = new OleDbCommand($"[{procName}]", conn);
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    foreach (var data in parameterViewModels)
+                    {
+                        cmd.Parameters.Add(new OleDbParameter { Value = data.ParameterValue, ParameterName = data.ParameterName, Direction = ParameterDirection.Input, IsNullable = true });
+                    }
+                    
+                    OleDbDataReader reader = cmd.ExecuteReader();
+                    dt = reader.GetSchemaTable();
+                    
+                    // Store the table names in the class scoped array list of table names
+                    List<ColumnViewModel> columnViewModels = new List<ColumnViewModel>();
+                    for (int i = 0; i < dt.Rows.Count; i++)
+                    {
+                        var column = new ColumnViewModel
+                        {
+                            ColumnName = dt.Rows[i].ItemArray[0].ToString(),
+                            DisplayName = dt.Rows[i].ItemArray[0].ToString(),
+                            FieldType = ConvertToJetDataType((int)dt.Rows[i]["ProviderType"]).ToString()
+                        };
+                        columnViewModels.Add(column);
+                    }
+                    tables.Add(new TableViewModel
+                    {
+                        TableName = procName,
+                        DisplayName = procName,
+                        Parameters = parameterViewModels,
+                        Columns = columnViewModels
+                    });
+                    count++;
+                }
+                conn.Close();
+                conn.Dispose();
+            }
+            return tables;
+        }
+
+        private async Task<DataTable> GetStoreProcedureResult(TableViewModel model, string accountKey = null, string dataConnectKey = null)
+        {
+            DataTable dt = new DataTable();
+            var connString = await GetConnectionString(GetConnection(dataConnectKey));
+            using (OleDbConnection conn = new OleDbConnection(connString))
+            {
+                // open the connection to the database 
+                conn.Open();
+                OleDbCommand cmd = new OleDbCommand(model.TableName, conn);
+                cmd.CommandType = CommandType.StoredProcedure;
+                foreach (var para in model.Parameters)
+                {
+                    if (string.IsNullOrEmpty(para.ParameterValue))
+                    {
+                        if (para.ParamterDataTypeOleDbType == OleDbType.DBTimeStamp || para.ParamterDataTypeOleDbType == OleDbType.DBDate)
+                        {
+                            para.ParameterValue = DateTime.Now.ToShortDateString();
+                        }
+                    }
+                    cmd.Parameters.AddWithValue("@" + para.ParameterName, para.ParameterValue);
+                    //cmd.Parameters.Add(new OleDbParameter { 
+                    //    Value =  string.IsNullOrEmpty(para.ParameterValue) ? DBNull.Value : (object)para.ParameterValue , 
+                    //    ParameterName = para.ParameterName, 
+                    //    Direction = ParameterDirection.Input, 
+                    //    IsNullable = true });
+                }
+                dt.Load(cmd.ExecuteReader());
+                conn.Close();
+                conn.Dispose();
+            }
+            return dt;
         }
 
         #endregion

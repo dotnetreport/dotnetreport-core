@@ -1,11 +1,29 @@
 ﻿@using Newtonsoft.Json;
 @{
     ViewData["Title"] = "Index";
-    Layout = "~/Views/Shared/_Layout.Report.cshtml";
+    Layout = "~/Views/shared/_Layout.Report.cshtml";
 }
 
-@section head {
+@section head{
     <link href="~/lib/x-editable-bs4/css/bootstrap-editable.css" rel="stylesheet" />
+    <style type="text/css">
+        .glyphicon-ok:before {
+            content: "\f00c";
+        }
+
+        .glyphicon-remove:before {
+            content: "\f00d";
+        }
+
+        .glyphicon {
+            display: inline-block;
+            font: normal normal normal 14px/1 FontAwesome;
+            font-size: inherit;
+            text-rendering: auto;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+    </style>
 }
 @section scripts{
     <script src="~/js/dotnetreport-setup.js"></script>
@@ -18,12 +36,12 @@
     $('.helptip').tooltip();
 
     function closeall() {
-        $('.panel-collapse')
+        $('.panel-collapse.in')
             .collapse('hide');
     };
 
     function openall() {
-        $('.panel-collapse')
+        $('.panel-collapse:not(".in")')
             .collapse('show');
     };
 
@@ -37,6 +55,8 @@
             getDataConnectionsUrl: '@Model.ApiUrl/ReportApi/GetDataConnections',
             saveRelationsUrl: '@Model.ApiUrl/ReportApi/SaveRelations',
             addDataConnectionUrl: '@Model.ApiUrl/ReportApi/AddDataConnection',
+            saveProcUrl: '@Model.ApiUrl/ReportApi/SaveProcedure',
+            deleteProcUrl: '@Model.ApiUrl/ReportApi/DeleteProcedure',
         };
 
         var vm = new manageViewModel(options);
@@ -56,7 +76,7 @@
     <div class="alert alert-danger">
         Do not expose this Setup Tool to end users who should not have access to it. Ideally, only Developers should be given access to this utility.
     </div>
-    <div class="form-inline">
+    <div class="form-row">
         <div class="form-group">
             <div class="control-group">
                 <select class="form-control" data-bind="options: DataConnections, optionsText: 'DataConnectName', optionsValue: 'DataConnectGuid', value: currentConnectionKey"></select>
@@ -88,6 +108,7 @@
         <ul class="nav nav-tabs" role="tablist">
             <li role="presentation" class="nav-item"><a class="nav-link active" href="#tablesfields" aria-controls="home" role="tab" data-toggle="tab">Tables and Fields</a></li>
             <li role="presentation" class="nav-item"><a class="nav-link" href="#relations" aria-controls="profile" role="tab" data-toggle="tab">Relations</a></li>
+            <li role="presentation" class="nav-item"><a class="nav-link" href="#procedure" aria-controls="procedure" role="tab" data-toggle="tab">Stored Procs</a></li>
         </ul>
     </div>
     <br />
@@ -116,7 +137,7 @@
                             <label>
                                 <input type="checkbox" data-bind="checked: Selected">
                                 <span data-bind="text: TableName"></span>
-                                <span data-bind="visible: IsView" class="label-xs">(view)</span>
+                                <span data-bind="visible: IsView" class="label-sm">(view)</span>
                             </label>
                             <button class="btn btn-sm" title="Save this Table" data-bind="click: function(){$data.saveTable($root.keys.AccountApiKey, $root.keys.DatabaseApiKey);}"><i class="fa fa-floppy-o"></i></button>
                             <button class="btn btn-sm" title="Manage Role Access" data-toggle="modal" data-target="#role-access-modal" data-bind="click: $root.selectAllowedRoles">
@@ -129,22 +150,26 @@
                     </div>
                     <div data-bind="attr: {id: 'table'+$index()}" class="panel-collapse collapse in">
                         <div class="card-body">
-                            <p><label class="label-xs">Display Name</label><br /><span data-bind="editable: DisplayName"></span></p>
-                            <p><label class="label-xs">Account Id Field</label><br /><span data-bind="editable: AccountIdField"></span></p>
+                            <p>
+                                <label class="label-sm">Display Name</label><br />
+                                <span data-bind="editable: DisplayName"></span>
+                            </p>
+                            <p>
+                                <label class="label-sm">Account Id Field</label><br />
+                                <span data-bind="editable: AccountIdField"></span>
+                            </p>
                         </div>
 
                         <label style="padding-left: 15px;" class="label-sm"><span data-bind="text: Columns().length"></span> Columns</label>
                         <button class="btn btn-sm btn-link label-sm" data-bind="click: $parent.unselectAllColumns, visible: Selected">Unselect All</button>
                         <button class="btn btn-sm btn-link label-sm" data-bind="click: $parent.selectAllColumns, visible: Selected">Select All</button>
                         <div class="list-group" data-bind="sortable: { data: Columns, options: { handle: '.sortable', cursor: 'move' }, afterMove: $parent.columnSorted }">
-                            @*<!-- ko foreach: Columns -->*@
+                            <!-- ko foreach: Columns -->
                             <div class="list-group-item">
                                 <div class="checkbox">
                                     <label>
                                         <input type="checkbox" data-bind="checked: Selected, enable: $parent.Selected()">
-                                        @*<span data-bind="text: ColumnName"></span> <br />*@
                                         <span data-bind="editable: DisplayName"></span>
-                                        @*<span data-bind="text: DisplayOrder"></span>*@
                                         <label data-bind="visible: PrimaryKey" class="badge badge-primary">Primary</label>
                                         <label data-bind="visible: ForeignKey" class="badge badge-info">Foreign</label>
                                     </label>
@@ -231,13 +256,6 @@
                             <td>
                                 <select class="form-control input-medium" data-bind="options: OtherTables, optionsText: 'DisplayName', value: OtherTable"></select>
                             </td>
-                            @*
-                                <td>
-                                    <input class="form-control" type="text" data-bind="value: FieldName" placeholder="Enter Field Name" />
-                                </td>
-                                <td>
-                                    <input class="form-control" type="text" data-bind="value: JoinFieldName" placeholder="Enter Field Name" />
-                                </td>*@
 
                             <td data-bind="with: OtherTable">
                                 <select class="form-control" data-bind="options: availableColumns, optionsText: 'DisplayName', optionsValue: 'ColumnName', value: $parent.JoinFieldName"></select>
@@ -253,6 +271,76 @@
             </form>
 
         </div>
+        <div id="procedure" class="tab-pane">
+            <button class="btn btn-primary" data-toggle="modal" data-target="#procedure-modal">Add Stored Procs from database</button>
+            <br />
+            <br />
+            <div class="menu row" data-bind="with: Procedures" style="margin-left: 20px;">
+                <div data-bind="if: savedProcedures().length == 0">
+                    No Stored Procedures have been setup yet.
+                </div>
+                <!-- ko foreach: savedProcedures -->
+
+                <div class="menu-category card">
+
+                    <div class="card-header clearfix" style="">
+                        <div class="pull-left">
+                            <label>
+                                <span data-bind="text: TableName"></span>
+                                <span class="label-xs">Procedure</span>
+                            </label>
+
+                            <button class="btn btn-sm" title="Save this Procedure" data-bind="click: function(){$root.saveProcedure($data.TableName, false);}">
+                                <span class="fa fa-save"></span>
+                            </button>
+                            <button class="btn btn-sm" title="Delete this Procedure" data-bind="click: function(){$data.deleteTable($root.keys.AccountApiKey, $root.keys.DatabaseApiKey);}">
+                                <span class="fa fa-trash"></span>
+                            </button>
+
+                        </div>
+                        <a class="pull-right" data-toggle="collapse" data-bind="attr: {'data-target': '#table'+$index()}">
+                            <span class="fa fa-chevron-down"></span>
+                        </a>
+                    </div>
+                    <div data-bind="attr: {id: 'table'+$index()}" class="panel-collapse collapse in">
+                        <div class="card-body">
+                            <p>
+                                <label class="label-sm">Display Name</label><br />
+                                <span data-bind="editable: DisplayName"></span>
+                            </p>
+                            <label class="small">Columns</label>
+
+                            <div class="list-group">
+                                <!-- ko foreach: Columns -->
+                                <div class="list-group-item">
+                                    <label>
+                                        <span data-bind="editable: DisplayName"></span>
+                                        <span class="badge badge-info" data-bind="text: FieldType"></span>
+                                    </label>
+                                </div>
+                                <!-- /ko -->
+                            </div>
+                            <label class="small">Parameters</label>
+
+                            <div class="list-group">
+                                <!-- ko foreach: Parameters -->
+                                <div class="list-group-item">
+                                    <label>
+                                        <span data-bind="editable: DisplayName"></span>
+                                        <span class="badge badge-info" data-bind="text: ParameterDataTypeString"></span>
+                                        &nbsp;
+                                        &nbsp;
+                                        <button class="btn btn-sm btn-primary pull-right" data-toggle="modal" data-target="#parameter-modal" title="All Parameter options" data-bind="click: $root.editParameter">...</button>
+                                    </label>
+                                </div>
+                                <!-- /ko -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /ko -->
+            </div>
+        </div>
     </div>
 </div>
 
@@ -261,7 +349,10 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content" data-bind="with: editColumn()">
             <div class="modal-header">
-                <h4 class="modal-title" id="myModalLabel">Manage <label data-bind="text: ColumnName"></label></h4>
+                <h4 class="modal-title" id="myModalLabel">
+                    Manage
+                    <label data-bind="text: ColumnName"></label>
+                </h4>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
             </div>
             <div class="modal-body">
@@ -278,17 +369,6 @@
                             </div>
                         </div>
                     </div>
-                    @*<div class="control-group">
-                            <div class="form-group">
-                                <label class="col-md-3 col-sm-3 control-label" for="Display_Order" data-bind="">Display Order</label>
-                                <div class="col-md-6 col-sm-6">
-                                    <input class="form-control text-box single-line" data-val="true" data-val-number="The field DisplayOrder must be a number." data-val-required="The DisplayOrder field is required." id="DisplayOrder" name="DisplayOrder" type="number" value="0" data-bind="value: DisplayOrder">
-                                </div>
-                                <div class="col-md-3 col-sm-3">
-                                    <span class="field-validation-valid help-inline indent" data-valmsg-for="DisplayOrder" data-valmsg-replace="true"></span>
-                                </div>
-                            </div>
-                        </div>*@
                     <div class="control-group">
                         <div class="form-group row">
                             <label class="col-md-3 col-sm-3 control-label" for="Field_Type" data-bind="">Field Type</label>
@@ -306,7 +386,8 @@
                                 <span class="field-validation-valid help-inline indent" data-valmsg-for="FieldType" data-valmsg-replace="true"></span>
                             </div>
                         </div>
-                    </div><div class="control-group">
+                    </div>
+                    <div class="control-group">
                         <div class="form-group row">
                             <label class="col-md-3 col-sm-3 control-label" for="Primary_Key" data-bind="">Primary Key</label>
                             <div class="col-md-6 col-sm-6">
@@ -396,7 +477,7 @@
                                 <select class="form-control" id="ForeignValueField" name="ForeignValueField" data-bind="options: JoinTable().Columns, optionsText: 'ColumnName', optionsValue: 'ColumnName', value: ForeignValueField, visible:ForeignKey(), attr: {required: ForeignKey()?'True':null}" placeholder="Ex EmployeeName" style="display: none;"></select>
                             </div>
                             <div class="col-md-3 col-sm-3">
-                                <span data-bind="visible:ForeignKey()" data-toggle="tooltip" data-placement="right" class="fa fa-question-circle helptip" style="display: none;" title="Foreign Value field is a Column from the Foreign table which is used to display the value to the User in the Wizard"></span>
+                                <span data-bind="visible:ForeignKey()" data-toggle="tooltip" data-placement="right" class="fa fa-question-circle helptip" style="display: none;" title="Foreign Value field is a Column from the Foreign table which is used to display the value to the User in the Report Designer"></span>
                             </div>
                         </div>
                     </div>
@@ -405,7 +486,7 @@
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" title="Manage Role Access" data-toggle="modal" data-target="#role-access-modal" data-bind="click: $root.selectAllowedRoles">
-                    <i class="fa fa-user"></i> Manage Role Access
+                    <i class="fa fa-user"></i>Manage Role Access
                 </button>
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Done</button>
             </div>
@@ -413,7 +494,185 @@
     </div>
 </div>
 
-<div class="modal" id="role-access-modal" role="dialog" tabindex="-2">
+<div class="modal" id="procedure-modal" role="dialog" tabindex="-2">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content ">
+            <div class="modal-header">
+                <h4 class="modal-title">Add Stored Proc</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <label class="col-md-2 control-label">
+                        Search for
+                    </label>
+                    <div class="col-md-6">
+                        <input type="text" class="form-control" data-bind="value: searchProcedureTerm" placeholder="Search stored procedures by name" />
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-primary" data-bind="click: searchStoredProcedure">Search</button>
+                    </div>
+                </div>
+                <br />
+                <div class="menu row" style="margin-left: 20px;">
+                    <!-- ko foreach: foundProcedures -->
+                    <div class="menu-category card">
+                        <div class="card-header clearfix" style="">
+                            <div class="pull-left">
+                                <label>
+                                    <span data-bind="text: TableName"></span>
+                                    <span class="label-xs">Procedure</span>
+                                </label>
+                                <button class="btn btn-sm" title="Save this Procedure" data-bind="click: function(){$root.saveProcedure($data.TableName, true);}">
+                                    <span class="fa fa-save"></span>
+                                </button>
+                            </div>
+                            <a class="pull-right" data-toggle="collapse" data-bind="attr: {'data-target': '#sp_'+$index()}">
+                                <span class="fa fa-chevron-down"></span>
+                            </a>
+                        </div>
+                        <div data-bind="attr: {id: 'sp_'+$index()}" class="panel-collapse collapse in">
+                            <div class="card-body">
+                                Display Name<br />
+                                <span data-bind="editable: DisplayName"></span>
+                                <label class="small">Columns</label>
+
+                                <div class="list-group">
+                                    <!-- ko foreach: Columns -->
+                                    <div class="list-group-item">
+                                        <span data-bind="editable: DisplayName"></span>
+                                        <span class="badge badge-info" data-bind="text: FieldType"></span>
+                                    </div>
+                                    <!-- /ko -->
+                                </div>
+                                <label class="small">Paramters</label>
+
+                                <div class="list-group">
+                                    <!-- ko foreach: Parameters -->
+                                    <div class="list-group-item">
+                                        <span data-bind="editable: DisplayName"></span>
+                                        <span class="badge badge-info" data-bind="text: ParameterDataTypeString"></span><br />
+                                        Default Value: <span data-bind="editable: ParameterValue"></span>
+                                    </div>
+                                    <!-- /ko -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /ko -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Done</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="parameter-modal" role="dialog" tabindex="-1">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" data-bind="with: editParameter()">
+            <div class="modal-header">
+                <h4 class="modal-title" id="myModalLabel">
+                    Manage
+                    <label data-bind="text: ParameterName"></label>
+                </h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <p>Choose options that will determine how users interact with this parameter on Reports</p>
+                <div class="form-horizontal">
+                    <div class="control-group">
+                        <div class="form-group row">
+                            <label class="col-md-3 col-sm-3 control-label" for="Display_Name" data-bind="attr:{placeholder:'Ex First Name'}" placeholder="Ex First Name">Display Name</label>
+                            <div class="col-md-6 col-sm-6">
+                                <input class="form-control text-box single-line" data-val="true" data-val-required="The DisplayName field is required." name="DisplayName" type="text" value="First Name" data-bind="value: DisplayName, attr:{placeholder:'Ex First Name'}" placeholder="Ex First Name">
+                            </div>
+                            <div class="col-md-3 col-sm-3">
+                                <span data-toggle="tooltip" data-placement="right" class="fa fa-question-circle helptip" title="This is a friendly name to display to your users"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <div class="form-group row">
+                            <label class="col-md-3 col-sm-3 control-label">Default Value</label>
+                            <div class="col-md-6 col-sm-6">
+                                <span data-bind="editable: ParameterValue"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <div class="form-group row">
+                            <label class="col-md-3 col-sm-3 control-label" data-bind="">Required</label>
+                            <div class="col-md-6 col-sm-6">
+                                <div class="checkbox">
+                                    <label>
+                                        <input class="check-box" data-val="true" type="checkbox" value="true" data-bind="checked:Required">
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <div class="form-group row">
+                            <label class="col-md-3 col-sm-3 control-label" for="Foreign_Key" data-bind="">Use Lookup Table</label>
+                            <div class="col-md-6 col-sm-6">
+                                <div class="checkbox">
+                                    <label>
+                                        <input class="check-box" data-val="true" name="ForeignKey" type="checkbox" value="true" data-bind="checked:ForeignKey"><input name="ForeignKey" type="hidden" value="false">
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-sm-3">
+                                <span data-toggle="tooltip" data-placement="right" class="fa fa-question-circle helptip" title="Using lookup table allows friendly selection in report using a Dropdown List"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <div class="form-group row">
+                            <label class="col-md-3 col-sm-3 control-label" for="Foreign_Table" data-bind="visible:ForeignKey(), attr: {required: ForeignKey()?'True':null, placeholder: 'Ex tblEmployees'}" placeholder="Ex tblEmployees" style="display: none;">Lookup Table</label>
+                            <div class="col-md-6 col-sm-6">
+                                <select class="form-control" data-bind="value: JoinTable, visible:ForeignKey(), options: $root.Procedures.tables, optionsText: 'TableName'" placeholder="Ex tblEmployees" style="display: none;"></select>
+
+                            </div>
+                            <div class="col-md-3 col-sm-3">
+                                <span class="field-validation-valid help-inline indent" data-valmsg-for="ForeignTable" data-valmsg-replace="true"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <div class="form-group row">
+                            <label class="col-md-3 col-sm-3 control-label" for="Foreign_Key_Field" data-bind="visible:ForeignKey(), attr: {required: ForeignKey()?'True':null, placeholder: 'Ex EmployeeId'}" placeholder="Ex EmployeeId" style="display: none;">Lookup Key Field</label>
+                            <div class="col-md-6 col-sm-6">
+                                <select class="form-control" name="ForeignKeyField" data-bind="options: JoinTable().Columns, optionsText: 'ColumnName', optionsValue: 'ColumnName', value: ForeignKeyField, visible:ForeignKey(), attr: {required: ForeignKey()?'True':null}" placeholder="Ex EmployeeId" style="display: none;"></select>
+                            </div>
+                            <div class="col-md-3 col-sm-3">
+                                <span data-bind="visible:ForeignKey()" data-toggle="tooltip" data-placement="right" class="fa fa-question-circle helptip" style="display: none;" title="Foreign Key field is a Column from the Foreign table which is used as the Key field"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <div class="form-group row">
+                            <label class="col-md-3 col-sm-3 control-label" for="Foreign_Value_Field" data-bind="visible:ForeignKey(), attr: {required: ForeignKey()?'True':null, placeholder: 'Ex EmployeeName'}" placeholder="Ex EmployeeName" style="display: none;">Lookup Value Field</label>
+                            <div class="col-md-6 col-sm-6">
+                                <select class="form-control" name="ForeignValueField" data-bind="options: JoinTable().Columns, optionsText: 'ColumnName', optionsValue: 'ColumnName', value: ForeignValueField, visible:ForeignKey(), attr: {required: ForeignKey()?'True':null}" placeholder="Ex EmployeeName" style="display: none;"></select>
+                            </div>
+                            <div class="col-md-3 col-sm-3">
+                                <span data-bind="visible:ForeignKey()" data-toggle="tooltip" data-placement="right" class="fa fa-question-circle helptip" style="display: none;" title="Lookup Value field is a Column from the Lookup table which is used to display the value to the User in the Report Designer"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Done</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="role-access-modal" role="dialog" tabindex="-2">
     <div class="modal-dialog" role="document">
         <div class="modal-content" data-bind="with: editAllowedRoles">
             <div class="modal-header">
@@ -446,6 +705,7 @@
         </div>
     </div>
 </div>
+
 <div class="clearfix"></div>
 
 <div class="modal" id="add-connection-modal" role="dialog">
