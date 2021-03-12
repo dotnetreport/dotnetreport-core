@@ -88,6 +88,7 @@ namespace ReportBuilder.Web.Core.Models
     public class TableViewModel
     {
         public int Id { get; set; }
+        public string SchemaName { get; set; }
         public string TableName { get; set; }
         public string DisplayName { get; set; }
         public bool Selected { get; set; }
