@@ -1370,6 +1370,7 @@ var reportViewModel = function (options) {
 					HeaderFontColor: x.headerFontColor(),
 					HeaderBackColor: x.headerBackColor(),
 					FontBold: x.fontBold(),
+					HeaderFontBold: x.headerFontBold(),
 					FieldWidth: x.fieldWidth(),
 					FieldConditionOp: x.fieldConditionOp(),
 					FieldConditionVal: x.fieldConditionVal()
@@ -1569,6 +1570,7 @@ var reportViewModel = function (options) {
 					e.fieldLabel = col.fieldLabel;
 					e.fieldWidth = col.fieldWidth;
 					e.fontBold = col.fontBold;
+					e.headerFontBold = col.headerFontBold;
 					e.headerFontColor = col.headerFontColor;
 					e.headerBackColor = col.headerBackColor;
 					e.fieldId = col.fieldId;
@@ -1915,6 +1917,7 @@ var reportViewModel = function (options) {
 		e.headerFontColor = ko.observable(e.headerFontColor);
 		e.headerBackColor = ko.observable(e.headerBackColor || '#ffffff');
 		e.fontBold = ko.observable(e.fontBold);
+		e.headerFontBold = ko.observable(e.headerFontBold);
 		e.fieldWidth = ko.observable(e.fieldWidth);
 		e.fieldConditionOp = ko.observable(e.fieldConditionOp);
 		e.fieldConditionVal = ko.observable(e.fieldConditionVal);
@@ -1924,6 +1927,7 @@ var reportViewModel = function (options) {
 		e.applyAllFontColor = ko.observable(false);
 		e.applyAllBackColor = ko.observable(false);
 		e.applyAllBold = ko.observable(false);
+		e.applyAllHeaderBold = ko.observable(false);
 
 		e.toggleDisable = function () {
 			if (!e.disabled() && self.enabledFields().length < 2) return;
@@ -1975,6 +1979,7 @@ var reportViewModel = function (options) {
 				headerFontColor: e.headerFontColor(),
 				headerBackColor: e.headerBackColor(),
 				fontBold: e.fontBold(),
+				headerFontBold: e.headerFontBold(),
 				fieldWidth: e.fieldWidth(),
 				fieldConditionOp: e.fieldConditionOp(),
 				fieldConditionVal: e.fieldConditionVal()
@@ -1990,6 +1995,7 @@ var reportViewModel = function (options) {
 				if (e.applyAllFontColor()) f.fontColor(e.fontColor());
 				if (e.applyAllBackColor()) f.backColor(e.backColor());
 				if (e.applyAllBold()) f.fontBold(e.fontBold());
+				if (e.applyAllHeaderBold()) f.headerFontBold(e.headerFontBold());
 			});
 
 			if (options.fieldOptionsModal) options.fieldOptionsModal.modal('hide');
@@ -2005,6 +2011,7 @@ var reportViewModel = function (options) {
 			e.headerFontColor(self.currentFieldOptions.headerFontColor);
 			e.headerBackColor(self.currentFieldOptions.headerBackColor);
 			e.fontBold(self.currentFieldOptions.fontBold);
+			e.headerFontBold(self.currentFieldOptions.headerFontBold);
 			e.fieldWidth(self.currentFieldOptions.fieldWidth);
 			e.fieldConditionOp(self.currentFieldOptions.fieldConditionOp);
 			e.fieldConditionVal(self.currentFieldOptions.fieldConditionVal);
