@@ -149,18 +149,17 @@
                                 <option value="engagement">Engagement</option>
                             </select>
                             &nbsp;
-                            <select class="form-control form-control-sm" title="Text Align">
+                            <select class="form-control form-control-sm" title="Text Align" data-bind="event: {change: setTextAlign }, value: objectProperties.textAlign">
                                 <option>Left</option>
                                 <option>Center</option>
                                 <option>Right</option>
                                 <option>Justify</option>
                             </select>
                             &nbsp;
-                            <input type="color" size="5" class="btn-object-action" title="Font Color">
-                            <input type="range" value="" min="1" max="120" step="1" id="text-font-size" class="btn-object-action" title="Font Size">
-                            <button class="btn btn-sm" title="Bold"><span class="fa fa-bold"></span></button>
-                            <button class="btn btn-sm" title="Italic"><span class="fa fa-italic"></span></button>
-                            <button class="btn btn-sm" title="Underline"><span class="fa fa-underline"></span></button>
+                            <input type="color" size="5" class="btn-object-action" title="Font Color" data-bind="event: {change: setFontColor }, value: objectProperties.fontColor">
+                            <button class="btn btn-sm" title="Bold" data-bind="event: {click: setFontBold }, value: objectProperties.fontBold"><span class="fa fa-bold"></span></button>
+                            <button class="btn btn-sm" title="Italic" data-bind="event: {click: setFontItalic }, value: objectProperties.fontItalic"><span class="fa fa-italic"></span></button>
+                            <button class="btn btn-sm" title="Underline" data-bind="event: {click: setFontUnderline }, value: objectProperties.fontUnderline"><span class="fa fa-underline"></span></button>
                             <!-- /ko -->
                         </div>
                         <!-- /ko-->

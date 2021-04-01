@@ -403,18 +403,35 @@ var headerDesigner = function (options) {
 			fontUnderline: ko.observable()
 		}
 
-		// snap to grid
 		canvas.on('object:moving', function (options) {
-			options.target.set({
-				left: Math.round(options.target.left / grid) * grid,
-				top: Math.round(options.target.top / grid) * grid
-			});
+			// keep in bounds
+			var obj = options.target;
+			// if object is too big ignore
+			if (obj.currentHeight > obj.canvas.height || obj.currentWidth > obj.canvas.width) {
+				return;
+			}
+			obj.setCoords();
+			// top-left  corner
+			if (obj.getBoundingRect().top < 0 || obj.getBoundingRect().left < 0) {
+				obj.top = Math.max(obj.top, obj.top - obj.getBoundingRect().top);
+				obj.left = Math.max(obj.left, obj.left - obj.getBoundingRect().left);
+			}
+			// bot-right corner
+			if (obj.getBoundingRect().top + obj.getBoundingRect().height > obj.canvas.height || obj.getBoundingRect().left + obj.getBoundingRect().width > obj.canvas.width) {
+				obj.top = Math.min(obj.top, obj.canvas.height - obj.getBoundingRect().height + obj.top - obj.getBoundingRect().top);
+				obj.left = Math.min(obj.left, obj.canvas.width - obj.getBoundingRect().width + obj.left - obj.getBoundingRect().left);
+			}
 		});
 
 		// handle selection
 		canvas.on('selection:created', function (obj) {
 			self.selectedObject(obj);
 			self.objectProperties.fontFamily(self.getFontFamily());
+			self.objectProperties.fontBold(self.getFontBold());
+			self.objectProperties.fontItalic(self.getFontItalic());
+			self.objectProperties.fontColor(self.getFontColor());
+			self.objectProperties.fontUnderline(self.getFontUnderline());
+			self.objectProperties.textAlign(self.getTextAlign());
 		});
 
 		canvas.on('selection:cleared', function (obj) {
@@ -539,7 +556,37 @@ var headerDesigner = function (options) {
 	self.setFontFamily = function (value, e) {
 		setActiveProp('fontFamily', e.currentTarget.value);
 	};
-
+	self.getFontBold = function () {
+		return getActiveProp('fontWeight').toLowerCase();
+	};
+	self.setFontBold = function (value, e) {
+		setActiveProp('fontWeight', getActiveProp('fontWeight') == 'bold' ? '' : 'bold');
+	};
+	self.getFontItalic = function () {
+		return getActiveProp('fontStyle').toLowerCase();
+	};
+	self.setFontItalic = function (value, e) {
+		setActiveProp('fontStyle', getActiveProp('fontStyle') == 'italic' ? '' : 'italic');
+	};
+	self.getFontColor = function () {
+		return getActiveProp('stroke');
+	};
+	self.setFontColor = function (value, e) {
+		setActiveProp('stroke', e.currentTarget.value);
+		setActiveProp('fill', e.currentTarget.value);
+	};
+	self.getFontUnderline = function () {
+		return getActiveProp('underline').toLowerCase();
+	};
+	self.setFontUnderline = function (value, e) {
+		setActiveProp('underline', getActiveProp('underline') ? '' : 'underline');
+	};
+	self.getTextAlign = function () {
+		return getActiveProp('textAlign');
+	};
+	self.setTextAlign = function (value, e) {
+		setActiveProp('textAlign', e.currentTarget.value.toLowerCase());
+	};
 }
 
 var reportViewModel = function (options) {
