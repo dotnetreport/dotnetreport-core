@@ -138,6 +138,7 @@ namespace ReportBuilder.Web.Core.Controllers
                     {
                         Id = item.tableId,
                         SchemaName = item.schemaName,
+                        AccountIdField = item.accountIdField,
                         TableName = item.tableDbName,
                         DisplayName = item.tableName,
                         AllowedRoles = item.tableRoles.ToObject<List<string>>()
