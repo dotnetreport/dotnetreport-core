@@ -1818,18 +1818,18 @@ var reportViewModel = function (options) {
 		_.forEach(reportData.Columns, function (e, i) {
 			var field = self.SelectedFields()[i];
 			if (i == 0) {
-				data.addColumn(e.IsNumeric ? 'number' : 'string', e.ColumnName);
+				data.addColumn(e.IsNumeric ? 'number' : 'string', e.fieldLabel || e.ColumnName);
 			} else if (typeof field !== "undefined" && field.groupInGraph()) {
-				subGroups.push({ index: i, column: e.ColumnName });
+				subGroups.push({ index: i, column: e.fieldLabel || e.ColumnName });
 			} else if (e.IsNumeric) {
-				valColumns.push({ index: i, column: e.ColumnName });
+				valColumns.push({ index: i, column: e.fieldLabel || e.ColumnName });
 			}
 		});
 
 		if (subGroups.length == 0) {
 			_.forEach(reportData.Columns, function (e, i) {
 				if (i > 0 && e.IsNumeric) {
-					data.addColumn(e.IsNumeric ? 'number' : 'string', e.ColumnName);
+					data.addColumn(e.IsNumeric ? 'number' : 'string', e.fieldLabel || e.ColumnName);
 				}
 			});
 		}
