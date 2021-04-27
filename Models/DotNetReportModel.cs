@@ -532,12 +532,11 @@ namespace ReportBuilder.Web.Core.Models
             int height = await page.EvaluateExpressionAsync<int>("document.body.offsetHeight");
             int width = await page.EvaluateExpressionAsync<int>("$('table').width()");
             var pdfFile = Path.Combine(AppContext.BaseDirectory, $"App_Data\\{reportName}.pdf");
-            //await page.AddStyleTagAsync(new AddTagOptions { Content = "html body {{width: {width}}}" });
 
             var pdfOptions = new PdfOptions
             {
                 PreferCSSPageSize = false,
-                MarginOptions = new MarginOptions() { Top = "0.75in", Bottom = "0.75in" }
+                MarginOptions = new MarginOptions() { Top = "0.75in", Bottom = "0.75in", Left = "0.1in", Right = "0.1in" }
             };
 
             if (width < 900)
@@ -547,6 +546,7 @@ namespace ReportBuilder.Web.Core.Models
             }
             else
             {
+                await page.SetViewportAsync(new ViewPortOptions { Width = width });
                 await page.AddStyleTagAsync(new AddTagOptions { Content = "@page {size: landscape }" });
                 pdfOptions.Width = $"{width}px";
             }
