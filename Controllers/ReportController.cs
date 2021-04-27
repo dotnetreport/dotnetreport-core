@@ -75,7 +75,7 @@ namespace ReportBuilder.Web.Core.Controllers
         [AllowAnonymous]
         public IActionResult ReportPrint(int reportId, string reportName, string reportDescription, bool includeSubTotal, bool showUniqueRecords,
             bool aggregateReport, bool showDataWithGraph, string reportSql, string connectKey, string reportFilter, string reportType, int selectedFolder,
-            string reportSeries)
+            string reportSeries, bool expandAll)
         {
             var model = new DotNetReportModel
             {
@@ -90,7 +90,8 @@ namespace ReportBuilder.Web.Core.Controllers
                 ShowDataWithGraph = showDataWithGraph,
                 SelectedFolder = selectedFolder,
                 ReportSeries = !string.IsNullOrEmpty(reportSeries) ? reportSeries.Replace("%20", " ") : string.Empty,
-                ReportFilter = reportFilter // json data to setup filter correctly again
+                ReportFilter = reportFilter, // json data to setup filter correctly again
+                ExpandAll = expandAll
             };
 
             return View(model);
@@ -135,10 +136,10 @@ namespace ReportBuilder.Web.Core.Controllers
         }
 
         [HttpPost]
-        public IActionResult DownloadExcel(string reportSql, string connectKey, string reportName)
+        public IActionResult DownloadExcel(string reportSql, string connectKey, string reportName, bool expandAll = false)
         {
             reportSql = HttpUtility.HtmlDecode(reportSql);
-            var excel = DotNetReportHelper.GetExcelFile(reportSql, connectKey, reportName);
+            var excel = DotNetReportHelper.GetExcelFile(reportSql, connectKey, reportName, expandAll);
             Response.Headers.Add("content-disposition", "attachment; filename=" + reportName + ".xlsx");
             Response.ContentType = "application/vnd.ms-excel";
             
@@ -146,10 +147,10 @@ namespace ReportBuilder.Web.Core.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> DownloadPdf(string printUrl, int reportId, string reportSql, string connectKey, string reportName)
+        public async Task<IActionResult> DownloadPdf(string printUrl, int reportId, string reportSql, string connectKey, string reportName, bool expandAll = false)
         {
             reportSql = HttpUtility.HtmlDecode(reportSql);
-            var pdf = await DotNetReportHelper.GetPdfFile(printUrl, reportId, reportSql, connectKey, reportName);
+            var pdf = await DotNetReportHelper.GetPdfFile(printUrl, reportId, reportSql, connectKey, reportName, expandAll: expandAll);
             return File(pdf, "application/pdf", reportName + ".pdf");
         }
 

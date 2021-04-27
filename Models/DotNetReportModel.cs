@@ -34,6 +34,7 @@ namespace ReportBuilder.Web.Core.Models
         public int SelectedFolder { get; set; }
 
         public string ReportSeries { get; set; }
+        public bool ExpandAll { get; set; }
     }
 
     public class DotNetReportResultModel
@@ -410,7 +411,7 @@ namespace ReportBuilder.Web.Core.Models
             return "";
         }
 
-        public static byte[] GetExcelFile(string reportSql, string connectKey, string reportName)
+        public static byte[] GetExcelFile(string reportSql, string connectKey, string reportName, bool expandAll = false)
         {
             var sql = Decrypt(reportSql);
 
@@ -480,7 +481,7 @@ namespace ReportBuilder.Web.Core.Models
         }
 
         public static async Task<byte[]> GetPdfFile(string printUrl, int reportId, string reportSql, string connectKey, string reportName,
-                    string userId = null, string clientId = null, string currentUserRole = null)
+                    string userId = null, string clientId = null, string currentUserRole = null, bool expandAll = false)
         {
             var installPath = AppContext.BaseDirectory + "\\App_Data\\local-chromium";
             await new BrowserFetcher(new BrowserFetcherOptions { Path = installPath }).DownloadAsync(BrowserFetcher.DefaultRevision);
@@ -501,6 +502,7 @@ namespace ReportBuilder.Web.Core.Models
             formData.AppendLine($"<input name=\"userId\" value=\"{userId}\" />");
             formData.AppendLine($"<input name=\"clientId\" value=\"{clientId}\" />");
             formData.AppendLine($"<input name=\"currentUserRole\" value=\"{currentUserRole}\" />");
+            formData.AppendLine($"<input name=\"expandAll\" value=\"{expandAll}\" />");
             formData.AppendLine($"</form>");
             formData.AppendLine("<script type=\"text/javascript\">document.getElementsByTagName('form')[0].submit();</script>");
             formData.AppendLine("</body></html>");
@@ -528,7 +530,7 @@ namespace ReportBuilder.Web.Core.Models
             });
 
             await page.WaitForSelectorAsync(".report-inner", new WaitForSelectorOptions { Visible = true });
-            
+
             int height = await page.EvaluateExpressionAsync<int>("document.body.offsetHeight");
             int width = await page.EvaluateExpressionAsync<int>("$('table').width()");
             var pdfFile = Path.Combine(AppContext.BaseDirectory, $"App_Data\\{reportName}.pdf");

@@ -700,6 +700,7 @@ var reportViewModel = function (options) {
 	self.currentSql = ko.observable();
 	self.currentConnectKey = ko.observable();
 	self.adminMode = ko.observable(false);
+	self.allExpanded = ko.observable(false);
 
 	self.x = ko.observable(0);
 	self.y = ko.observable(0);
@@ -1798,12 +1799,14 @@ var reportViewModel = function (options) {
 		_.forEach(self.ReportResult().ReportData().Rows, function (e) {
 			e.expand();
 		});
+		self.allExpanded(true);
 	};
 
 	self.CollapseAll = function () {
 		_.forEach(self.ReportResult().ReportData().Rows, function (e) {
 			e.collapse();
 		});
+		self.allExpanded(false);
 	};
 
 	self.skipDraw = options.skipDraw === true ? true : false;
@@ -2206,7 +2209,7 @@ var reportViewModel = function (options) {
 			}
 
 			if (self.ReportMode() == "execute" || self.ReportMode() == "dashboard") {
-				self.ExecuteReportQuery(options.reportSql, options.reportConnect, reportSeries);
+				return self.ExecuteReportQuery(options.reportSql, options.reportConnect, reportSeries);
 			}
 		});
 	};
