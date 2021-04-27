@@ -528,13 +528,30 @@ namespace ReportBuilder.Web.Core.Models
             });
 
             await page.WaitForSelectorAsync(".report-inner", new WaitForSelectorOptions { Visible = true });
-
+            
+            int height = await page.EvaluateExpressionAsync<int>("document.body.offsetHeight");
+            int width = await page.EvaluateExpressionAsync<int>("$('table').width()");
             var pdfFile = Path.Combine(AppContext.BaseDirectory, $"App_Data\\{reportName}.pdf");
-            await page.PdfAsync(pdfFile, new PdfOptions
+            //await page.AddStyleTagAsync(new AddTagOptions { Content = "html body {{width: {width}}}" });
+
+            var pdfOptions = new PdfOptions
             {
-                Format = PaperFormat.Letter,
+                PreferCSSPageSize = false,
                 MarginOptions = new MarginOptions() { Top = "0.75in", Bottom = "0.75in" }
-            });
+            };
+
+            if (width < 900)
+            {
+                pdfOptions.Format = PaperFormat.Letter;
+                pdfOptions.Landscape = false;
+            }
+            else
+            {
+                await page.AddStyleTagAsync(new AddTagOptions { Content = "@page {size: landscape }" });
+                pdfOptions.Width = $"{width}px";
+            }
+
+            await page.PdfAsync(pdfFile, pdfOptions);
             return File.ReadAllBytes(pdfFile);
         }
 
