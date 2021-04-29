@@ -1483,13 +1483,14 @@ var reportViewModel = function (options) {
 		var isExecuteReportQuery = false;
 		var _result = null;
 		var seriesCount = self.AdditionalSeries().length;
+		var promises = [];
 		do {
 			if (i > 0) {
 				isComparison = true;
 				self.CanSaveReports(false);
 			}
 
-			ajaxcall({
+			promises.push(ajaxcall({
 				url: options.runReportApiUrl,
 				type: "POST",
 				data: JSON.stringify({
@@ -1521,34 +1522,35 @@ var reportViewModel = function (options) {
 						self.ExecuteReportQuery(result.sql, result.connectKey, self.ReportSeries);
 					}
 				}
-			});
+			}));
 			i++;
 		}
 		while (i < seriesCount + 1);
-
-		if (isExecuteReportQuery === false) {
-			if (saveOnly) {
-				toastr.success("Report Saved");
-				return;
+		$.when.apply($, promises).done(function () {
+			if (isExecuteReportQuery === false) {
+				if (saveOnly) {
+					toastr.success("Report Saved");
+					return;
+				}
+				redirectToReport(options.runReportUrl, {
+					reportId: _result.reportId,
+					reportName: self.ReportName(),
+					reportDescription: self.ReportDescription(),
+					includeSubTotal: self.IncludeSubTotal(),
+					showUniqueRecords: self.ShowUniqueRecords(),
+					aggregateReport: self.AggregateReport(),
+					showDataWithGraph: self.ShowDataWithGraph(),
+					reportSql: self.AllSqlQuries(),
+					connectKey: _result.connectKey,
+					reportFilter: JSON.stringify(_.map(self.FlyFilters(), function (x) { return ko.toJS(x); })),
+					reportType: self.ReportType(),
+					selectedFolder: self.SelectedFolder() != null ? self.SelectedFolder().Id : 0,
+					reportSeries: _.map(self.AdditionalSeries(), function (e, i) {
+						return e.Value();
+					})
+				});
 			}
-			redirectToReport(options.runReportUrl, {
-				reportId: _result.reportId,
-				reportName: self.ReportName(),
-				reportDescription: self.ReportDescription(),
-				includeSubTotal: self.IncludeSubTotal(),
-				showUniqueRecords: self.ShowUniqueRecords(),
-				aggregateReport: self.AggregateReport(),
-				showDataWithGraph: self.ShowDataWithGraph(),
-				reportSql: self.AllSqlQuries(),
-				connectKey: _result.connectKey,
-				reportFilter: JSON.stringify(_.map(self.FlyFilters(), function (x) { return ko.toJS(x); })),
-				reportType: self.ReportType(),
-				selectedFolder: self.SelectedFolder() != null ? self.SelectedFolder().Id : 0,
-				reportSeries: _.map(self.AdditionalSeries(), function (e, i) {
-					return e.Value();
-				})
-			});
-		}
+		});
 	};
 
 	self.ExecuteReportQuery = function (reportSql, connectKey, reportSeries) {
