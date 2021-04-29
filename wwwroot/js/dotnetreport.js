@@ -1500,11 +1500,10 @@ var reportViewModel = function (options) {
 				}),
 				async: false
 			}).done(function (result) {
-
+				if (result.d) { result = result.d; }
 				_result = result;
 				self.AllSqlQuries(self.AllSqlQuries() + (result.sql + ","));
 
-				if (result.d) { result = result.d; }
 				self.ReportID(result.reportId);
 				if (self.SaveReport()) {
 
