@@ -1781,7 +1781,8 @@ var reportViewModel = function (options) {
 							pageNumber: 1,
 							pageSize: 1,
 							sortBy: '',
-							desc: false
+							desc: false,
+							ReportSeries: null
 						})
 					}).done(function (subtotalResult) {
 						if (subtotalResult.d) { subtotalResult = subtotalResult.d; }
@@ -2619,7 +2620,7 @@ var dashboardViewModel = function (options) {
 		report.panelStyle = 'panel-' + (i == 0 ? 'default' : (i == 1 ? 'info' : (i == 2 ? 'warning' : 'danger')));
 		i = i == 3 ? 0 : i + 1;
 		self.reports.push(report);
-		report.LoadReport(x.reportId, true);
+		report.LoadReport(x.reportId, true, '');
 
 		report.showFlyFilters = ko.observable(false);
 		report.toggleFlyFilters = function () {
