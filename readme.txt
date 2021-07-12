@@ -66,7 +66,9 @@ Second, add the following to your project to copy front end files included in yo
 
 The list of libraries dotnet Report uses from npm is included package.dotnetreport.json. Please manually merge the contents in to your project's actual package.json. If you don't have one, just rename this file to package.json.
 
-Then run gulpfile.dotnetreport.js (merge it in with your gulpfile, if you don't have one, just rename this file to gulpfile.js). 
+Then run gulpfile.dotnetreport.js (merge it in with your gulpfile, if you don't have one, just rename this file to gulpfile.js). You can run the gulp file by right clicking on it and going to task manager. 
+If it doesn't load, you would have make sure npm is installed in your folder. You can do so by running "npm install" from project directory. The purpose of the gulp file is to take js libraries copied by npm 
+and add them to wwwroot/lib folder, and that's where the layout file references them from.
 
 3. Add Static Config to your Startup.cs
 
