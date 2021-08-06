@@ -119,6 +119,7 @@ namespace ReportBuilder.Web.Core.Models
         public string ForeignJoin { get; set; }
         public string ForeignKeyField { get; set; }
         public string ForeignValueField { get; set; }
+        public bool Hidden { get; set; }
 
     }
     public class RelationModel
