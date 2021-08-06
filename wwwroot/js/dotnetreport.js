@@ -696,6 +696,7 @@ var reportViewModel = function (options) {
 	self.useStoredProc = ko.observable(false);
 	self.StoredProcId = ko.observable();
 	self.Parameters = ko.observableArray([]);
+	self.showParameters = ko.observable(true);
 	self.pager = new pagerViewModel();
 	self.currentSql = ko.observable();
 	self.currentConnectKey = ko.observable();
@@ -922,6 +923,7 @@ var reportViewModel = function (options) {
 		proc.SelectedFields = null;
 		self.SelectedFields(selectedFields);
 
+		var allHidden = true;
 		var parameters = _.map(proc.Parameters, function (e) {
 			var match = ko.toJS(proc.SelectedParameters && proc.SelectedParameters.length ? _.find(proc.SelectedParameters, { ParameterName: e.ParameterName }) : null);
 			e.operators = ['='];
@@ -963,12 +965,16 @@ var reportViewModel = function (options) {
 				});
 			}
 
+			if (!e.Hidden) {
+				allHidden = false;
+            }
+
 			return e;
 		});
 
 		proc.SelectedParameters = null;
 		self.Parameters(parameters);
-
+		self.showParameters(!allHidden);
 	});
 
 	self.SelectedTable.subscribe(function (table) {
