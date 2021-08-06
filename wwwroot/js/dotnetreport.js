@@ -670,6 +670,7 @@ var reportViewModel = function (options) {
 
 	self.fieldFormatTypes = ['Auto', 'Number', 'Decimal', 'Currency', 'Percentage', 'Date', 'Date and Time', 'Time'];
 	self.decimalFormatTypes = ['Number', 'Decimal', 'Currency', 'Percentage'];
+	self.dateFormatTypes = ['Date', 'Date and Time', 'Time'];
 	self.fieldAlignments = ['Auto', 'Left', 'Right', 'Center'];
 	self.designingHeader = ko.observable(false);
 	self.headerDesigner = new headerDesigner({
@@ -1666,6 +1667,13 @@ var reportViewModel = function (options) {
 							case 'Percentage': r.FormattedValue = r.FormattedValue + '%'; break;
 						}
 					}
+					if (self.dateFormatTypes.indexOf(col.fieldFormat) >= 0) {
+						switch (col.fieldFormat) {
+							case 'Date': r.FormattedValue = r.FormattedValue; break;
+							case 'Date and Time': r.FormattedValue = r.FormattedValue; break;
+							case 'Time': r.FormattedValue = r.FormattedValue; break;
+						}
+                    }
 				});
 			}
 
