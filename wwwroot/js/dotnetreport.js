@@ -439,6 +439,14 @@ var headerDesigner = function (options) {
 		});
 	}
 
+	self.resizeCanvas = function (width) {
+		var canvas = self.canvas;
+		if (canvas == null) return;
+		width = isNaN(width) ? $("#" + options.canvasId).parent().parent().width() : width;
+		if (width > 100) canvas.setWidth(width);
+		canvas.renderAll();
+	}
+
 	self.dispose = function () {
 		if (self.canvas) {
 			self.canvas.dispose();

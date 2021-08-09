@@ -173,7 +173,7 @@
                                 <div class="checkbox">
                                     <label>
                                         <input type="checkbox" data-bind="checked: Selected, enable: $parent.Selected()">
-                                        <span data-bind="editable: DisplayName"></span>
+                                        <span data-bind="editable: DisplayName, attr: {title: 'DB field is ' + ColumnName()}"></span>
                                         <label data-bind="visible: PrimaryKey" class="badge badge-primary">Primary</label>
                                         <label data-bind="visible: ForeignKey" class="badge badge-info">Foreign</label>
                                     </label>
@@ -322,7 +322,7 @@
                                 <!-- ko foreach: Columns -->
                                 <div class="list-group-item">
                                     <label>
-                                        <span data-bind="editable: DisplayName"></span>
+                                        <span data-bind="editable: DisplayName, attr: {title: 'DB field is ' + ColumnName()}"></span>
                                         <span class="badge badge-info" data-bind="text: FieldType"></span>
                                     </label>
                                 </div>
@@ -334,7 +334,7 @@
                                 <!-- ko foreach: Parameters -->
                                 <div class="list-group-item">
                                     <label>
-                                        <span data-bind="editable: DisplayName"></span>
+                                        <span data-bind="editable: DisplayName, attr: {title: 'DB field is ' + ParameterName()}"></span>
                                         <span class="badge badge-info" data-bind="text: ParameterDataTypeString"></span>
                                         &nbsp;
                                         &nbsp;

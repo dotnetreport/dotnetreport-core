@@ -319,7 +319,7 @@ namespace ReportBuilder.Web.Core.Models
 
         public static string GetLabelValue(DataColumn col, DataRow row)
         {
-            if (@row[col] != null)
+            if (@row[col] != null && row[col] != DBNull.Value)
             {
                 switch (Type.GetTypeCode(col.DataType))
                 {
@@ -412,7 +412,26 @@ namespace ReportBuilder.Web.Core.Models
             return "";
         }
 
-        public static byte[] GetExcelFile(string reportSql, string connectKey, string reportName, bool expandAll = false)
+        private static void FormatExcelSheet(DataTable dt, ExcelWorksheet ws, int rowstart, int colstart)
+        {
+            ws.Cells[rowstart, colstart].LoadFromDataTable(dt, true);
+            ws.Cells[rowstart, colstart, rowstart, dt.Columns.Count].Style.Font.Bold = true;
+
+            int i = 1;
+            foreach (DataColumn dc in dt.Columns)
+            {
+                if (dc.DataType == typeof(decimal))
+                    ws.Column(i).Style.Numberformat.Format = "#0.00";
+
+                if (dc.DataType == typeof(DateTime))
+                    ws.Column(i).Style.Numberformat.Format = "mm/dd/yyyy";
+
+                i++;
+            }
+            ws.Cells[ws.Dimension.Address].AutoFitColumns();
+        }
+
+        public static byte[] GetExcelFile(string reportSql, string connectKey, string reportName, bool allExpanded = false, List<string> expandSqls = null)
         {
             var sql = Decrypt(reportSql);
 
@@ -425,41 +444,46 @@ namespace ReportBuilder.Web.Core.Models
                 var adapter = new OleDbDataAdapter(command);
 
                 adapter.Fill(dt);
-            }
 
-            using (ExcelPackage xp = new ExcelPackage())
-            {
 
-                ExcelWorksheet ws = xp.Workbook.Worksheets.Add(reportName);
-
-                int rowstart = 1;
-                int colstart = 1;
-                int rowend = rowstart;
-                int colend = dt.Columns.Count;
-
-                ws.Cells[rowstart, colstart, rowend, colend].Merge = true;
-                ws.Cells[rowstart, colstart, rowend, colend].Value = reportName;
-                ws.Cells[rowstart, colstart, rowend, colend].Style.Font.Bold = true;
-                ws.Cells[rowstart, colstart, rowend, colend].Style.Font.Size = 14;
-
-                rowstart += 2;
-                rowend = rowstart + dt.Rows.Count;
-                ws.Cells[rowstart, colstart].LoadFromDataTable(dt, true);
-                ws.Cells[rowstart, colstart, rowstart, colend].Style.Font.Bold = true;
-
-                int i = 1;
-                foreach (DataColumn dc in dt.Columns)
+                using (ExcelPackage xp = new ExcelPackage())
                 {
-                    if (dc.DataType == typeof(decimal))
-                        ws.Column(i).Style.Numberformat.Format = "#0.00";
+                    ExcelWorksheet ws = xp.Workbook.Worksheets.Add(reportName);
 
-                    if (dc.DataType == typeof(DateTime))
-                        ws.Column(i).Style.Numberformat.Format = "mm/dd/yyyy";
+                    int rowstart = 1;
+                    int colstart = 1;
+                    int rowend = rowstart;
+                    int colend = dt.Columns.Count;
 
-                    i++;
+                    ws.Cells[rowstart, colstart, rowend, colend].Merge = true;
+                    ws.Cells[rowstart, colstart, rowend, colend].Value = reportName;
+                    ws.Cells[rowstart, colstart, rowend, colend].Style.Font.Bold = true;
+                    ws.Cells[rowstart, colstart, rowend, colend].Style.Font.Size = 14;
+
+                    rowstart += 2;
+                    rowend = rowstart + dt.Rows.Count;
+
+                    FormatExcelSheet(dt, ws, rowstart, colstart);
+
+                    if (allExpanded)
+                    {
+                        var j = 0;
+                        foreach (DataRow dr in dt.Rows)
+                        {
+                            if (j < expandSqls.Count)
+                            {
+                                var dtNew = new DataTable();
+                                command.CommandText = Decrypt(expandSqls[j++]);
+                                adapter.Fill(dtNew);
+
+                                var wsNew = xp.Workbook.Worksheets.Add(dr[0].ToString());
+                                FormatExcelSheet(dtNew, wsNew, 1, 1);
+                            }
+                        }
+                    }
+
+                    return xp.GetAsByteArray();
                 }
-                ws.Cells[ws.Dimension.Address].AutoFitColumns();
-                return xp.GetAsByteArray();
             }
         }
 
@@ -482,7 +506,7 @@ namespace ReportBuilder.Web.Core.Models
         }
 
         public static async Task<byte[]> GetPdfFile(string printUrl, int reportId, string reportSql, string connectKey, string reportName,
-                    string userId = null, string clientId = null, string currentUserRole = null, bool expandAll = false)
+                    string userId = null, string clientId = null, string currentUserRole = null, string dataFilters = "", bool expandAll = false)
         {
             var installPath = AppContext.BaseDirectory + "\\App_Data\\local-chromium";
             await new BrowserFetcher(new BrowserFetcherOptions { Path = installPath }).DownloadAsync(BrowserFetcher.DefaultRevision);
@@ -504,6 +528,7 @@ namespace ReportBuilder.Web.Core.Models
             formData.AppendLine($"<input name=\"clientId\" value=\"{clientId}\" />");
             formData.AppendLine($"<input name=\"currentUserRole\" value=\"{currentUserRole}\" />");
             formData.AppendLine($"<input name=\"expandAll\" value=\"{expandAll}\" />");
+            formData.AppendLine($"<input name=\"dataFilters\" value=\"{HttpUtility.HtmlEncode(dataFilters)}\" />");
             formData.AppendLine($"</form>");
             formData.AppendLine("<script type=\"text/javascript\">document.getElementsByTagName('form')[0].submit();</script>");
             formData.AppendLine("</body></html>");

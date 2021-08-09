@@ -20,8 +20,7 @@ namespace ReportBuilder.Web.Core.Controllers
         }
 
         public IActionResult Report(int reportId, string reportName, string reportDescription, bool includeSubTotal, bool showUniqueRecords,
-            bool aggregateReport, bool showDataWithGraph, string reportSql, string connectKey, string reportFilter, string reportType, int selectedFolder,
-            string reportSeries)
+            bool aggregateReport, bool showDataWithGraph, string reportSql, string connectKey, string reportFilter, string reportType, int selectedFolder, string reportSeries)
         {
             var model = new DotNetReportModel
             {
@@ -61,6 +60,7 @@ namespace ReportBuilder.Web.Core.Controllers
                     new KeyValuePair<string, string>("filterId", filterId.HasValue ? filterId.ToString() : ""),
                     new KeyValuePair<string, string>("filterValue", filterValue.ToString()),
                     new KeyValuePair<string, string>("adminMode", adminMode.ToString()),
+                    new KeyValuePair<string, string>("dataFilters", JsonConvert.SerializeObject(settings.DataFilters))
                 });
 
                 var response = await client.PostAsync(new Uri(settings.ApiUrl + $"/ReportApi/RunLinkedReport"), content);
@@ -72,11 +72,17 @@ namespace ReportBuilder.Web.Core.Controllers
             return View("Report", model);
         }
 
-        [AllowAnonymous]
-        public IActionResult ReportPrint(int reportId, string reportName, string reportDescription, bool includeSubTotal, bool showUniqueRecords,
-            bool aggregateReport, bool showDataWithGraph, string reportSql, string connectKey, string reportFilter, string reportType, int selectedFolder,
-            string reportSeries, bool expandAll)
+        public IActionResult ReportPrint(int reportId, string reportName, string reportDescription, string reportSql, string connectKey, string reportFilter, string reportType,
+            int selectedFolder = 0, bool includeSubTotal = false, bool showUniqueRecords = false, bool aggregateReport = false, bool showDataWithGraph = true,
+            string userId = null, string clientId = null, string currentUserRole = null, string dataFilters = "",
+            string reportSeries = "", bool expandAll = false)
         {
+            TempData["reportPrint"] = "true";
+            TempData["userId"] = userId;
+            TempData["clientId"] = clientId;
+            TempData["currentUserRole"] = currentUserRole;
+            TempData["dataFilters"] = dataFilters;
+
             var model = new DotNetReportModel
             {
                 ReportId = reportId,
@@ -136,13 +142,13 @@ namespace ReportBuilder.Web.Core.Controllers
         }
 
         [HttpPost]
-        public IActionResult DownloadExcel(string reportSql, string connectKey, string reportName, bool expandAll = false)
+        public IActionResult DownloadExcel(string reportSql, string connectKey, string reportName, bool allExpanded, string expandSqls)
         {
             reportSql = HttpUtility.HtmlDecode(reportSql);
-            var excel = DotNetReportHelper.GetExcelFile(reportSql, connectKey, reportName, expandAll);
+            var excel = DotNetReportHelper.GetExcelFile(reportSql, connectKey, reportName, allExpanded, expandSqls.Split(',').ToList());
             Response.Headers.Add("content-disposition", "attachment; filename=" + reportName + ".xlsx");
             Response.ContentType = "application/vnd.ms-excel";
-            
+
             return File(excel, "application/vnd.ms-excel", reportName + ".xlsx");
         }
 
@@ -150,10 +156,12 @@ namespace ReportBuilder.Web.Core.Controllers
         public async Task<IActionResult> DownloadPdf(string printUrl, int reportId, string reportSql, string connectKey, string reportName, bool expandAll = false)
         {
             reportSql = HttpUtility.HtmlDecode(reportSql);
-            var pdf = await DotNetReportHelper.GetPdfFile(printUrl, reportId, reportSql, connectKey, reportName, expandAll: expandAll);
+            var reportApi = new ReportApiController();
+            var settings = reportApi.GetSettings();
+            var dataFilters = settings.DataFilters != null ? JsonConvert.SerializeObject(settings.DataFilters) : "";
+            var pdf = await DotNetReportHelper.GetPdfFile(printUrl, reportId, reportSql, connectKey, reportName, settings.UserId, settings.ClientId, string.Join(",", settings.CurrentUserRole), dataFilters, expandAll);
             return File(pdf, "application/pdf", reportName + ".pdf");
         }
-
         [HttpPost]
         public IActionResult DownloadXml(string reportSql, string connectKey, string reportName)
         {

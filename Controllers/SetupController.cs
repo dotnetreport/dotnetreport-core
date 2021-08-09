@@ -365,7 +365,7 @@ namespace ReportBuilder.Web.Core.Controllers
                     cmd.CommandType = CommandType.StoredProcedure;
                     foreach (var data in parameterViewModels)
                     {
-                        cmd.Parameters.Add(new OleDbParameter { Value = data.ParameterValue, ParameterName = data.ParameterName, Direction = ParameterDirection.Input, IsNullable = true });
+                        cmd.Parameters.Add(new OleDbParameter { Value = DBNull.Value, ParameterName = data.ParameterName, Direction = ParameterDirection.Input, IsNullable = true });
                     }
                     
                     OleDbDataReader reader = cmd.ExecuteReader();

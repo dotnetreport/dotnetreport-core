@@ -41,6 +41,7 @@
                 users: data.users,
                 userRoles: data.userRoles,
                 allowAdmin: data.allowAdminMode,
+                dataFilters: data.dataFilters,
                 dashboardId: @(Context.Request.Query["id"].Any() ? Context.Request.Query["id"].First() : "0")
             });
 
