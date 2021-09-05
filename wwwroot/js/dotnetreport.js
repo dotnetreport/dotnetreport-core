@@ -1,4 +1,4 @@
-﻿/// dotnet Report Builder view model v4.2.0
+﻿/// dotnet Report Builder view model v4.2.2
 /// License has to be purchased for use
 /// 2018-2021 (c) www.dotnetreport.com
 function pagerViewModel(args) {
@@ -921,11 +921,12 @@ var reportViewModel = function (options) {
 		self.SelectedFields([]);
 
 		var selectedFields = _.map(proc.Columns, function (e) {
-			var match = ko.toJS(proc.SelectedFields && proc.SelectedFields.length ? _.find(proc.SelectedFields, { fieldName: e.ColumnName }) : null);
+			var match = ko.toJS(proc.SelectedFields && proc.SelectedFields.length ? _.find(proc.SelectedFields, { fieldName: e.DisplayName }) : null);
 			var field = match || self.getEmptyFormulaField();
 			field.fieldName = e.DisplayName;
 			field.tableName = proc.DisplayName;
-			field.procColumnId = e.Id
+			field.procColumnId = e.Id;
+			field.procColumnName = e.ColumnName;
 			return self.setupField(field)
 		});
 
@@ -938,18 +939,26 @@ var reportViewModel = function (options) {
 			e.operators = ['='];
 			if (e.ParameterValue) e.operators.push('is default');
 			if (!e.Required) e.operators.push('is blank');
-			e.Operator = ko.observable(match ? match.Operator : '=');
-			e.Value = ko.observable(match ? match.Value : e.ParameterValue);
+
+			if (e.Operator) {
+				e.Operator(match ? match.Operator : '=');
+				e.Value(match ? match.Value : e.ParameterValue);
+			}
+			else {
+				e.Operator = ko.observable(match ? match.Operator : '=');
+				e.Value = ko.observable(match ? match.Value : e.ParameterValue);
+
+				e.Operator.subscribe(function (newValue) {
+					if (newValue == 'is default') {
+						e.Value(e.ParameterValue);
+					}
+				});
+			}
+
 			e.Field = {
 				hasForeignKey: e.ForeignKey,
 				fieldType: e.ParameterDataTypeString
 			}
-			e.Operator.subscribe(function (newValue) {
-				if (newValue == 'is default') {
-					e.Value(e.ParameterValue);
-				}
-			});
-
 			e.LookupList = ko.observableArray([]);
 			if (e.Value()) {
 				e.LookupList.push({ id: e.Value(), text: e.Value() });
@@ -1616,7 +1625,11 @@ var reportViewModel = function (options) {
 
 			function processCols(cols) {
 				_.forEach(cols, function (e, i) {
-					var col = _.find(self.SelectedFields(), function (x) { return matchColumnName(x.fieldName, e.ColumnName); });
+					var col;
+					if (self.useStoredProc())
+						col = _.find(self.SelectedFields(), function (x) { return matchColumnName(x.procColumnName, e.ColumnName); });
+					else
+						col = _.find(self.SelectedFields(), function (x) { return matchColumnName(x.fieldName, e.ColumnName); });
 					if (col && col.linkField()) {
 						e.linkItem = col.linkFieldItem.toJs();
 						e.linkField = true;
@@ -1632,12 +1645,15 @@ var reportViewModel = function (options) {
 					e.fieldConditionVal = col.fieldConditionVal;
 					e.fieldFormat = col.fieldFormat;
 					e.fieldLabel = col.fieldLabel;
+					e.fieldName = col.fieldName;
 					e.fieldWidth = col.fieldWidth;
 					e.fontBold = col.fontBold;
 					e.headerFontBold = col.headerFontBold;
 					e.headerFontColor = col.headerFontColor;
 					e.headerBackColor = col.headerBackColor;
 					e.fieldId = col.fieldId;
+					e.fontColor = col.fontColor;
+					e.backColor = col.backColor;
 				});
 			}
 
@@ -1677,9 +1693,9 @@ var reportViewModel = function (options) {
 					}
 					if (self.dateFormatTypes.indexOf(col.fieldFormat) >= 0) {
 						switch (col.fieldFormat) {
-							case 'Date': r.FormattedValue = r.FormattedValue; break;
-							case 'Date and Time': r.FormattedValue = r.FormattedValue; break;
-							case 'Time': r.FormattedValue = r.FormattedValue; break;
+							case 'Date': r.FormattedValue = (new Date(r.Value)).toLocaleDateString("en-US", { year: 'numeric', month: 'numeric', day: 'numeric' }); break;
+							case 'Date and Time': r.FormattedValue = (new Date(r.Value)).toLocaleDateString("en-US", { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' }); break;
+							case 'Time': r.FormattedValue = (new Date(r.Value)).toLocaleTimeString("en-US", { hour: 'numeric', minute: 'numeric', second: 'numeric' }); break;
 						}
 					}
 				});
@@ -2397,7 +2413,7 @@ var reportViewModel = function (options) {
 	};
 
 	self.loadProcs = function () {
-		ajaxcall({
+		return ajaxcall({
 			url: options.apiUrl,
 			data: {
 				method: "/ReportApi/GetProcedures",
