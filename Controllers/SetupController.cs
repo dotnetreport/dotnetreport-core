@@ -127,7 +127,7 @@ namespace ReportBuilder.Web.Core.Controllers
             using (var client = new HttpClient())
             {
                 var response = await client.GetAsync(String.Format("{0}/ReportApi/GetTables?account={1}&dataConnect={2}&clientId=", Startup.StaticConfig.GetValue<string>("dotNetReport:apiUrl"), accountKey, dataConnectKey));
-                
+
                 response.EnsureSuccessStatusCode();
                 var content = await response.Content.ReadAsStringAsync();
                 dynamic values = JsonConvert.DeserializeObject<dynamic>(content);
@@ -176,14 +176,12 @@ namespace ReportBuilder.Web.Core.Controllers
                         DisplayOrder = item.fieldOrder,
                         ForeignKeyField = item.foreignKey,
                         ForeignValueField = item.foreignValue,
+                        ForeignJoin = item.foreignJoin,
                         ForeignTable = item.foreignTable,
                         DoNotDisplay = item.doNotDisplay,
+                        ForceFilter = item.forceFilter,
                         AllowedRoles = item.columnRoles.ToObject<List<string>>()
                     };
-
-                    JoinTypes join;
-                    Enum.TryParse<JoinTypes>((string)item.foreignJoin, out join);
-                    column.ForeignJoin = join;
 
                     columns.Add(column);
                 }
@@ -262,7 +260,7 @@ namespace ReportBuilder.Web.Core.Controllers
                             column.Id = matchColumn.Id;
                             column.DoNotDisplay = matchColumn.DoNotDisplay;
                             column.DisplayOrder = matchColumn.DisplayOrder;
-
+                            column.ForceFilter = matchColumn.ForceFilter;
                             column.Selected = true;
                         }
 
@@ -318,7 +316,7 @@ namespace ReportBuilder.Web.Core.Controllers
         [HttpPost]
         public async Task<ActionResult> SearchProcedure([FromBody] dynamic data)
         {
-            string value = data.value;  string accountKey = data.accountKey;  string dataConnectKey = data.dataConnectKey;
+            string value = data.value; string accountKey = data.accountKey; string dataConnectKey = data.dataConnectKey;
             return Json(await GetSearchProcedure(value, accountKey, dataConnectKey));
         }
 
@@ -368,10 +366,10 @@ namespace ReportBuilder.Web.Core.Controllers
                     {
                         cmd.Parameters.Add(new OleDbParameter { Value = DBNull.Value, ParameterName = data.ParameterName, Direction = ParameterDirection.Input, IsNullable = true });
                     }
-                    
+
                     OleDbDataReader reader = cmd.ExecuteReader();
                     dt = reader.GetSchemaTable();
-                    
+
                     // Store the table names in the class scoped array list of table names
                     List<ColumnViewModel> columnViewModels = new List<ColumnViewModel>();
                     for (int i = 0; i < dt.Rows.Count; i++)

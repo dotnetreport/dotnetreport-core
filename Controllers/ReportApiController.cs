@@ -26,7 +26,7 @@ namespace ReportBuilder.Web.Core.Controllers
                 AccountApiToken = Startup.StaticConfig.GetValue<string>("dotNetReport:accountApiToken"), // Your Account Api Token from your http://dotnetreport.com Account
                 DataConnectApiToken = Startup.StaticConfig.GetValue<string>("dotNetReport:dataconnectApiToken") // Your Data Connect Api Token from your http://dotnetreport.com Account
             };
-
+            
             // Populate the values below using your Application Roles/Claims if applicable
             settings.ClientId = "";  // You can pass your multi-tenant client id here to track their reports and folders
             settings.UserId = ""; // You can pass your current authenticated user id here to track their reports and folders            
@@ -40,7 +40,7 @@ namespace ReportBuilder.Web.Core.Controllers
 
             return settings;
         }
-        
+
         [HttpPost]
         public IActionResult GetLookupList(dynamic model)
         {
@@ -103,7 +103,7 @@ namespace ReportBuilder.Web.Core.Controllers
                 var data = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(model);
                 foreach (var key in data.Keys)
                 {
-                    if (key != "adminMode" || (key == "adminMode" && settings.CanUseAdminMode))
+                    if ((key != "adminMode" || (key == "adminMode" && settings.CanUseAdminMode)) && data[key] != null)
                     {
                         keyvalues.Add(new KeyValuePair<string, string>(key, data[key].ToString()));
                     }
@@ -112,7 +112,7 @@ namespace ReportBuilder.Web.Core.Controllers
                 var content = new FormUrlEncodedContent(keyvalues);
                 var response = await client.PostAsync(new Uri(settings.ApiUrl + method), content);
                 var stringContent = await response.Content.ReadAsStringAsync();
-                var result = JsonConvert.DeserializeObject(stringContent);                
+                var result = JsonConvert.DeserializeObject(stringContent);
                 if (stringContent == "\"\"") result = new {};
                 return Ok(result);
             }
@@ -132,6 +132,8 @@ namespace ReportBuilder.Web.Core.Controllers
             string reportSeries = data.ReportSeries;
 
             var sql = "";
+            var sqlCount = "";
+            int totalRecords = 0;
 
             try
             {
@@ -140,7 +142,6 @@ namespace ReportBuilder.Web.Core.Controllers
                     throw new Exception("Query not found");
                 }
                 var allSqls = reportSql.Split(new string[] { "%2C" }, StringSplitOptions.RemoveEmptyEntries);
-                var dt = new DataTable();
                 var dtPaged = new DataTable();
                 var dtCols = 0;
 
@@ -156,6 +157,9 @@ namespace ReportBuilder.Web.Core.Controllers
                         sqlFields = Regex.Split(sqlSplit, "], (?![^\\(]*?\\))").Where(x => x != "CONVERT(VARCHAR(3)")
                             .Select(x => x.EndsWith("]") ? x : x + "]")
                             .ToList();
+
+                        var sqlFrom = $"SELECT {sqlFields[0]} {sql.Substring(sql.IndexOf("FROM"))}";
+                        sqlCount = $"SELECT COUNT(*) FROM ({ (sqlFrom.Contains("ORDER BY") ? sqlFrom.Substring(0, sqlFrom.IndexOf("ORDER BY")) : sqlFrom)}) as countQry";
 
                         if (!String.IsNullOrEmpty(sortBy))
                         {
@@ -176,29 +180,37 @@ namespace ReportBuilder.Web.Core.Controllers
                                 sql = sql.Substring(0, sql.IndexOf("ORDER BY")) + "ORDER BY " + sortBy + (desc ? " DESC" : "");
                             }
                         }
+
+                        if (sql.Contains("ORDER BY"))
+                            sql = sql + $" OFFSET {pageNumber - 1} ROWS FETCH NEXT {pageSize} ROWS ONLY";
                     }
                     // Execute sql
-                    var dtRun = new DataTable();
                     var dtPagedRun = new DataTable();
                     using (var conn = new OleDbConnection(DotNetReportHelper.GetConnectionString(connectKey)))
                     {
                         conn.Open();
-                        var command = new OleDbCommand(sql, conn);
-                        var adapter = new OleDbDataAdapter(command);
-                        adapter.Fill(dtRun);
-                        dtPagedRun = (dtRun.Rows.Count > 0) ? dtPagedRun = dtRun.AsEnumerable().Skip((pageNumber - 1) * pageSize).Take(pageSize).CopyToDataTable() : dtRun;
+                        var command = new OleDbCommand(sqlCount, conn);
+                        if (!sql.StartsWith("EXEC")) totalRecords = (int)command.ExecuteScalar();
 
+                        command = new OleDbCommand(sql, conn);
+                        var adapter = new OleDbDataAdapter(command);
+                        adapter.Fill(dtPagedRun);
+                        if (sql.StartsWith("EXEC"))
+                        {
+                            totalRecords = dtPagedRun.Rows.Count;
+                            if (dtPagedRun.Rows.Count > 0)
+                                dtPagedRun = dtPagedRun.AsEnumerable().Skip((pageNumber - 1) * pageSize).Take(pageSize).CopyToDataTable();
+                        }
                         if (!sqlFields.Any())
                         {
-                            foreach (DataColumn c in dtRun.Columns) { sqlFields.Add($"{c.ColumnName} AS {c.ColumnName}"); }
+                            foreach (DataColumn c in dtPagedRun.Columns) { sqlFields.Add($"{c.ColumnName} AS {c.ColumnName}"); }
                         }
 
                         string[] series = { };
                         if (i == 0)
                         {
-                            dt = dtRun;
                             dtPaged = dtPagedRun;
-                            dtCols = dtRun.Columns.Count;
+                            dtCols = dtPagedRun.Columns.Count;
                             fields.AddRange(sqlFields);
                         }
                         else if (i > 0)
@@ -255,8 +267,8 @@ namespace ReportBuilder.Web.Core.Controllers
                     {
                         CurrentPage = pageNumber,
                         PageSize = pageSize,
-                        TotalRecords = dt.Rows.Count,
-                        TotalPages = (int)((dt.Rows.Count / pageSize) + 1)
+                        TotalRecords = totalRecords,
+                        TotalPages = (int)(totalRecords == pageSize ? (totalRecords / pageSize) : (totalRecords / pageSize) + 1)
                     }
                 };
 
@@ -308,7 +320,7 @@ namespace ReportBuilder.Web.Core.Controllers
                 return model;
             }
         }
-        
+
         [HttpGet]
         public IActionResult GetUsersAndRoles()
         {
@@ -336,7 +348,7 @@ namespace ReportBuilder.Web.Core.Controllers
             }
 
             return warning;
-        }        
+        }
 
         private DotNetReportDataModel DataTableToDotNetReportDataModel(DataTable dt, List<string> sqlFields)
         {

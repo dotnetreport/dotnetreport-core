@@ -106,6 +106,7 @@ namespace ReportBuilder.Web.Core.Models
 
     public class ParameterViewModel
     {
+        public int Id { get; set; }
         public string ParameterName { get; set; }
         public string DisplayName { get; set; }
         public string ParameterValue { get; set; }
@@ -161,10 +162,11 @@ namespace ReportBuilder.Web.Core.Models
         public bool ForeignKey { get; set; }
         public bool AccountIdField { get; set; }
         public string ForeignTable { get; set; }
-        public JoinTypes ForeignJoin { get; set; }
+        public string ForeignJoin { get; set; }
         public string ForeignKeyField { get; set; }
         public string ForeignValueField { get; set; }
         public bool DoNotDisplay { get; set; }
+        public bool ForceFilter { get; set; }
         public List<string> AllowedRoles { get; set; }
     }
 
@@ -276,6 +278,13 @@ namespace ReportBuilder.Web.Core.Models
         /// Set true if the current user can enter Admin Mode
         /// </summary>
         public bool CanUseAdminMode { get; set; }
+    }
+
+    public class CustomColumnName
+    {
+        public string ReportColumnName { get; set; }
+        public string DisplayColumnName { get; set; }
+        public bool IsHidden { get; set; }
     }
 
     public class DotNetReportHelper
@@ -431,7 +440,7 @@ namespace ReportBuilder.Web.Core.Models
             ws.Cells[ws.Dimension.Address].AutoFitColumns();
         }
 
-        public static byte[] GetExcelFile(string reportSql, string connectKey, string reportName, bool allExpanded = false, List<string> expandSqls = null)
+        public static byte[] GetExcelFile(string reportSql, string connectKey, string reportName, bool allExpanded = false, List<string> expandSqls = null, List<CustomColumnName> customColumnNames = null)
         {
             var sql = Decrypt(reportSql);
 
@@ -445,6 +454,20 @@ namespace ReportBuilder.Web.Core.Models
 
                 adapter.Fill(dt);
 
+                if (customColumnNames?.Count > 0)
+                {
+                    foreach (var customName in customColumnNames)
+                    {
+                        if (dt.Columns.Contains(customName.ReportColumnName) && customName.IsHidden)
+                        {
+                            dt.Columns.Remove(customName.ReportColumnName);
+                        }
+                        else if (!String.IsNullOrWhiteSpace(customName.DisplayColumnName) && dt.Columns.Contains(customName.ReportColumnName))
+                        {
+                            dt.Columns[customName.ReportColumnName].ColumnName = customName.DisplayColumnName;
+                        }
+                    }
+                }
 
                 using (ExcelPackage xp = new ExcelPackage())
                 {
@@ -485,6 +508,11 @@ namespace ReportBuilder.Web.Core.Models
                     return xp.GetAsByteArray();
                 }
             }
+        }
+
+        public static void UpdateColumnNames(DataTable dt)
+        {
+
         }
 
         /// <summary>

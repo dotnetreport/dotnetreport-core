@@ -142,10 +142,12 @@ namespace ReportBuilder.Web.Core.Controllers
         }
 
         [HttpPost]
-        public IActionResult DownloadExcel(string reportSql, string connectKey, string reportName, bool allExpanded, string expandSqls)
+        public IActionResult DownloadExcel(string reportSql, string connectKey, string reportName, bool allExpanded, string expandSqls, string customColumnNames = null)
         {
             reportSql = HttpUtility.HtmlDecode(reportSql);
-            var excel = DotNetReportHelper.GetExcelFile(reportSql, connectKey, reportName, allExpanded, expandSqls.Split(',').ToList());
+            var customColumnNameList = JsonConvert.DeserializeObject<List<CustomColumnName>>(customColumnNames);
+
+            var excel = DotNetReportHelper.GetExcelFile(reportSql, connectKey, reportName, allExpanded, expandSqls.Split(',').ToList(), customColumnNameList);
             Response.Headers.Add("content-disposition", "attachment; filename=" + reportName + ".xlsx");
             Response.ContentType = "application/vnd.ms-excel";
 
