@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.OleDb;
 using System.IO;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -280,11 +281,14 @@ namespace ReportBuilder.Web.Core.Models
         public bool CanUseAdminMode { get; set; }
     }
 
-    public class CustomColumnName
+    public class ReportHeaderColumn
     {
-        public string ReportColumnName { get; set; }
-        public string DisplayColumnName { get; set; }
-        public bool IsHidden { get; set; }
+        public string fieldName { get; set; }
+        public string fieldLabel { get; set; }
+        public bool hideStoredProcColumn { get; set; }
+        public int? decimalPlaces { get; set; }
+        public string fieldAlign { get; set; }
+        public string fieldFormat { get; set; }
     }
 
     public class DotNetReportHelper
@@ -421,7 +425,7 @@ namespace ReportBuilder.Web.Core.Models
             return "";
         }
 
-        private static void FormatExcelSheet(DataTable dt, ExcelWorksheet ws, int rowstart, int colstart)
+        private static void FormatExcelSheet(DataTable dt, ExcelWorksheet ws, int rowstart, int colstart, List<ReportHeaderColumn> columns = null)
         {
             ws.Cells[rowstart, colstart].LoadFromDataTable(dt, true);
             ws.Cells[rowstart, colstart, rowstart, dt.Columns.Count].Style.Font.Bold = true;
@@ -430,17 +434,23 @@ namespace ReportBuilder.Web.Core.Models
             foreach (DataColumn dc in dt.Columns)
             {
                 if (dc.DataType == typeof(decimal))
-                    ws.Column(i).Style.Numberformat.Format = "#0.00";
+                    ws.Column(i).Style.Numberformat.Format = "###,###,##0.00";
 
                 if (dc.DataType == typeof(DateTime))
                     ws.Column(i).Style.Numberformat.Format = "mm/dd/yyyy";
+
+                var formatColumn = columns?.FirstOrDefault(x => dc.ColumnName.StartsWith(x.fieldName));
+                if (formatColumn != null && formatColumn.fieldFormat == "Currency")
+                {
+                    ws.Column(i).Style.Numberformat.Format = "$###,###,##0.00";
+                }
 
                 i++;
             }
             ws.Cells[ws.Dimension.Address].AutoFitColumns();
         }
 
-        public static byte[] GetExcelFile(string reportSql, string connectKey, string reportName, bool allExpanded = false, List<string> expandSqls = null, List<CustomColumnName> customColumnNames = null)
+        public static byte[] GetExcelFile(string reportSql, string connectKey, string reportName, bool allExpanded = false, List<string> expandSqls = null, List<ReportHeaderColumn> columns = null)
         {
             var sql = Decrypt(reportSql);
 
@@ -454,17 +464,17 @@ namespace ReportBuilder.Web.Core.Models
 
                 adapter.Fill(dt);
 
-                if (customColumnNames?.Count > 0)
+                if (columns?.Count > 0)
                 {
-                    foreach (var customName in customColumnNames)
+                    foreach (var col in columns)
                     {
-                        if (dt.Columns.Contains(customName.ReportColumnName) && customName.IsHidden)
+                        if (dt.Columns.Contains(col.fieldName) && col.hideStoredProcColumn)
                         {
-                            dt.Columns.Remove(customName.ReportColumnName);
+                            dt.Columns.Remove(col.fieldName);
                         }
-                        else if (!String.IsNullOrWhiteSpace(customName.DisplayColumnName) && dt.Columns.Contains(customName.ReportColumnName))
+                        else if (!String.IsNullOrWhiteSpace(col.fieldLabel) && dt.Columns.Contains(col.fieldName))
                         {
-                            dt.Columns[customName.ReportColumnName].ColumnName = customName.DisplayColumnName;
+                            dt.Columns[col.fieldName].ColumnName = col.fieldLabel;
                         }
                     }
                 }
@@ -486,7 +496,7 @@ namespace ReportBuilder.Web.Core.Models
                     rowstart += 2;
                     rowend = rowstart + dt.Rows.Count;
 
-                    FormatExcelSheet(dt, ws, rowstart, colstart);
+                    FormatExcelSheet(dt, ws, rowstart, colstart, columns);
 
                     if (allExpanded)
                     {

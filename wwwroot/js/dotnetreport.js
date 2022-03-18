@@ -1,4 +1,4 @@
-﻿/// dotnet Report Builder view model v4.2.4
+﻿/// dotnet Report Builder view model v4.2.3
 /// License has to be purchased for use
 /// 2018-2021 (c) www.dotnetreport.com
 function pagerViewModel(args) {
@@ -305,6 +305,15 @@ function filterGroupViewModel(args) {
 		e = e || {};
 		var lookupList = ko.observableArray([]);
 
+		var url = new URL(window.location.href);
+		var filterId = url.searchParams.get("filterId");
+		var filterValue = url.searchParams.get("filterValue");
+
+		if (filterId && filterValue && e.FieldId == parseInt(filterId)) {
+			e.Value1 = filterValue;
+			e.Operator = "=";
+		}
+
 		if (e.Value1) {
 			lookupList.push({ id: e.Value1, text: e.Value1 });
 		}
@@ -326,6 +335,11 @@ function filterGroupViewModel(args) {
 			Apply: ko.observable(e.Apply != null ? e.Apply : true),
 			IsFilterOnFly: isFilterOnFly === true ? true : false
 		};
+
+		filter.Operator.subscribe(function () {
+			filter.Value(null);
+			filter.Value2(null);
+		});
 
 		var addingFilter = true;
 		field.subscribe(function (newField) {
@@ -725,14 +739,14 @@ var reportViewModel = function (options) {
 	self.currentConnectKey = ko.observable();
 	self.adminMode = ko.observable(false);
 	self.allExpanded = ko.observable(false);
-	self.pager.currentPage(1)
+	self.pager.currentPage(1);
 
 	self.x = ko.observable(0);
 	self.y = ko.observable(0);
 	self.width = ko.observable(3);
 	self.height = ko.observable(2);
 
-	self.customColumnNames = ko.observableArray([]);
+	self.columnDetails = ko.observableArray([]);
 
 	self.useStoredProc.subscribe(function () {
 		self.SelectedTable(null);
@@ -1675,7 +1689,7 @@ var reportViewModel = function (options) {
 			}
 
 			function processCols(cols) {
-				self.customColumnNames([]);
+				self.columnDetails([]);
 				_.forEach(cols, function (e, i) {
 					var col;
 					if (self.useStoredProc()) {
@@ -1693,7 +1707,7 @@ var reportViewModel = function (options) {
 					}
 					col = ko.toJS(col || { fieldName: e.ColumnName });
 
-					self.customColumnNames.push({ ReportColumnName: col.fieldName, DisplayColumnName: col.fieldLabel, IsHidden: e.hideStoredProcColumn });
+					self.columnDetails.push(col);
 
 					e.decimalPlaces = col.decimalPlaces;
 					e.fieldAlign = col.fieldAlign;
@@ -1923,8 +1937,8 @@ var reportViewModel = function (options) {
 		return _.map(_.orderBy(self.expandSqls(), 'index'), function (x) { return x.sql; });
 	});
 
-	self.getCustomColumnNames = ko.computed(function () {
-		var formatData = JSON.stringify(self.customColumnNames());
+	self.getColumnDetails = ko.computed(function () {
+		var formatData = JSON.stringify(self.columnDetails());
 		return formatData;
 	});
 
@@ -2478,6 +2492,14 @@ var reportViewModel = function (options) {
 				$(curInputs[i]).addClass("is-invalid");
 			}
 		}
+
+		_.forEach(self.SavedReports(), function (e) {
+			if (e.reportName == self.ReportName() && e.reportId != self.ReportID()) {
+				isValid = false;
+				toastr.error("Report name is already in use, please choose a different name");
+				return false;
+			}
+		});
 
 		return isValid;
 	};

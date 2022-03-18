@@ -56,7 +56,7 @@
             <input data-bind="datepicker: $parent.Value2" class="form-control" required />
             <!-- /ko -->
             <!-- ko if: ['range'].indexOf($parent.Operator()) != -1 -->
-            <select data-bind="value: $parent.Value" class="form-control">
+            <select data-bind="value: $parent.Value" class="form-control" required>
                 <option>Today</option>
                 <option>Yesterday</option>
                 <option>This Week</option>
@@ -68,10 +68,11 @@
                 <option>This Month To Date</option>
                 <option>This Year To Date</option>
                 <option>Last 30 Days</option>
+                <option value=""></option>
             </select>
             <!-- /ko -->
             <!-- /ko -->
-            <!-- ko if: ['Int','Money','Float'].indexOf(fieldType) != -1 -->
+            <!-- ko if: ['Int','Money','Float','Double'].indexOf(fieldType) != -1 -->
             <!-- ko if: ['=','>','<','>=','<=', 'not equal'].indexOf($parent.Operator()) != -1 && ['is blank', 'is not blank', 'is null', 'is not null'].indexOf($parent.Operator()) == -1 -->
             <input class="form-control" type="number" data-bind="value: $parent.Value, disable: $parent.Operator() == 'is default'" required />
             <!-- /ko -->
@@ -88,7 +89,7 @@
                 <option value="0">No</option>
             </select>
             <!-- /ko -->
-            <!-- ko if: ['Int','Money','Float','Date','DateTime','Boolean'].indexOf(fieldType) == -1 && ['is blank', 'is not blank', 'is null', 'is not null'].indexOf($parent.Operator()) == -1 -->
+            <!-- ko if: ['Int','Money','Float','Double','Date','DateTime','Boolean'].indexOf(fieldType) == -1 && ['is blank', 'is not blank', 'is null', 'is not null'].indexOf($parent.Operator()) == -1 -->
             <input class="form-control" type="text" data-bind="value: $parent.Value, disable: $parent.Operator() == 'is default'" required />
             <!-- /ko -->
             <!-- /ko -->
@@ -106,7 +107,7 @@
         <div class="pager-container">
             <a href="" title="first" data-bind="click: first, enable: !isFirstPage()"><i class="fa fa-backward report-pager-btn" style="font-size: 18px;"></i></a>&nbsp;
             <a href="" title="previous" data-bind="click: previous, enable: !isFirstPage()"><i class="fa fa-caret-left fa-2x report-pager-btn"></i></a>
-            <select class="form-control form-control-sm" data-bind="options: [30,50,100,150,200,500], value: pageSize"></select>
+            <select class="form-control form-control-sm" data-bind="options: [10,30,50,100,150,200,500], value: pageSize"></select>
             <span class="pager-pageinfo">
                 <span>Page</span>&nbsp;
                 <input type="number" min="1" pattern="[0-9]*" class="form-control form-control-sm text-center" data-bind="
@@ -124,10 +125,15 @@
     <script type="text/html" id="report-column-header">
         <!-- ko foreach: Columns -->
         <th data-bind="attr: { id: fieldId }, css: {'right-align': IsNumeric}, style: {'width': fieldWidth, 'background-color': headerBackColor }" style="border-right: 1px solid;">
+            <!-- ko if: $parents[1].useStoredProc ? $parents[1].useStoredProc() : ($parents[2].useStoredProc ? $parents[2].useStoredProc() : false) -->
+            <span data-bind="text: fieldLabel ? fieldLabel : fieldName, style: {'color': headerFontColor, 'font-weight': headerFontBold ? 'bold' : 'normal'}"></span>
+            <!-- /ko -->
+            <!-- ko ifnot: $parents[1].useStoredProc ? $parents[1].useStoredProc() : ($parents[2].useStoredProc ? $parents[2].useStoredProc() : false)  -->
             <a href="" data-bind="click: function(){ $parents[1].pager ? $parents[1].changeSort(SqlField) : $parents[2].changeSort(SqlField); }, style: {'color': headerFontColor, 'font-weight': headerFontBold ? 'bold' : 'normal'}">
-                <span data-bind="text: ($root.useStoredProc() ? (fieldLabel ? fieldLabel : fieldName) : (fieldLabel ? fieldLabel : ColumnName))"></span>
+                <span data-bind="text: fieldLabel ? fieldLabel : ColumnName"></span>
                 <span data-bind="text: ($parents[1].pager ? $parents[1].pager.sortColumn() : $parents[2].pager.sortColumn()) === SqlField ? (($parents[1].pager ? $parents[1].pager.sortDescending() : $parents[2].pager.sortDescending()) ? '&#9660;' : '&#9650;') : ''"></span>
             </a>
+            <!-- /ko -->
         </th>
         <!-- /ko -->
     </script>

@@ -53,33 +53,37 @@
     }
 
     $(document).ready(function () {
-        var vm = new reportViewModel({
-            runReportUrl: "@Url.Action("Report")",
-            execReportUrl: "@Url.Action("RunReport", "ReportApi")",
-            runLinkReportUrl: "@Url.Action("ReportLink")",
-            reportWizard: $("#filter-panel"),
-            reportHeader: "report-header",
-            lookupListUrl: "@Url.Action("GetLookupList", "ReportApi")",
-            apiUrl: '@Url.Action("CallReportApi", "ReportApi")',
-            runReportApiUrl: '@Url.Action("RunReportApi", "ReportApi")',
-            reportFilter: htmlDecode('@System.Web.HttpUtility.UrlDecode(Model.ReportFilter)'),
-            reportMode: "execute",
-            reportSql: "@Model.ReportSql",
-            reportConnect: "@Model.ConnectKey",
-            ReportSeries : "@Model.ReportSeries",
-            AllSqlQuries : "@Model.ReportSql"
-        });
+        ajaxcall({ url: '@Url.Action("GetUsersAndRoles", "ReportApi")' }).done(function (data) {
+            var vm = new reportViewModel({
+                runReportUrl: "@Url.Action("Report")",
+                execReportUrl: "@Url.Action("RunReport", "ReportApi")",
+                runLinkReportUrl: "@Url.Action("ReportLink")",
+                reportWizard: $("#filter-panel"),
+                reportHeader: "report-header",
+                lookupListUrl: "@Url.Action("GetLookupList", "ReportApi")",
+                apiUrl: '@Url.Action("CallReportApi", "ReportApi")',
+                runReportApiUrl: '@Url.Action("RunReportApi", "ReportApi")',
+                reportFilter: htmlDecode('@System.Web.HttpUtility.UrlDecode(Model.ReportFilter)'),
+                reportMode: "execute",
+                reportSql: "@Model.ReportSql",
+                reportConnect: "@Model.ConnectKey",
+                ReportSeries: "@Model.ReportSeries",
+                AllSqlQuries: "@Model.ReportSql",
+                userSettings: data,
+                dataFilters: data.dataFilters
+            });
 
-        vm.loadProcs().done(function () {
-            vm.LoadReport(@Model.ReportId, true, "@Model.ReportSeries").done(function () {
-                ko.applyBindings(vm);
+            vm.loadProcs().done(function () {
+                vm.LoadReport(@Model.ReportId, true, "@Model.ReportSeries").done(function () {
+                    ko.applyBindings(vm);
+                    vm.headerDesigner.resizeCanvas();
+                });
+            });
+
+            $(window).resize(function () {
+                vm.DrawChart();
                 vm.headerDesigner.resizeCanvas();
             });
-        });
-
-        $(window).resize(function(){
-            vm.DrawChart();
-            vm.headerDesigner.resizeCanvas();
         });
     });
 
@@ -97,6 +101,7 @@
             <input type="hidden" name="reportName" data-bind="value: ReportName" />
             <input type="hidden" name="allExpanded" data-bind="value: allExpanded" />
             <input type="hidden" name="expandSqls" data-bind="value: getExpandSqls" />
+            <input type="hidden" name="columnDetails" data-bind="value: getColumnDetails" />
         }
 
         @using (Html.BeginForm("DownloadXml", "Report", FormMethod.Post, new { id = "downloadXml" }))

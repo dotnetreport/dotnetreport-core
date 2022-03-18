@@ -9,6 +9,7 @@ using System.IO;
 using System.Net.Http;
 using System.Net.Mail;
 using System.Threading.Tasks;
+using System.Web.Script.Serialization;
 
 namespace ReportBuilder.Web.Core.Jobs
 {
@@ -103,7 +104,13 @@ namespace ReportBuilder.Web.Core.Jobs
                                 content = await response.Content.ReadAsStringAsync();
                                 var reportToRun = JsonConvert.DeserializeObject<DotNetReportModel>(content);
 
-                                var excelFile = DotNetReportHelper.GetExcelFile(reportToRun.ReportSql, reportToRun.ConnectKey, reportToRun.ReportName);
+                                response = await client.GetAsync($"{apiUrl}/ReportApi/LoadReportColumnDetails?account={accountApiKey}&dataConnect={databaseApiKey}&reportId={report.Id}&clientId={clientId}");
+                                response.EnsureSuccessStatusCode();
+
+                                content = await response.Content.ReadAsStringAsync();
+                                var columnDetails = JsonConvert.DeserializeObject<List<ReportHeaderColumn>>(content);
+
+                                var excelFile = DotNetReportHelper.GetExcelFile(reportToRun.ReportSql, reportToRun.ConnectKey, reportToRun.ReportName, columns: columnDetails);
 
                                 // send email
                                 var mail = new MailMessage
