@@ -18,6 +18,7 @@ namespace ReportBuilder.Web.Core.Controllers
         {
             var connect = GetConnection(databaseApiKey);
             var tables = new List<TableViewModel>();
+            var procedures = new List<TableViewModel>();
 
             tables.AddRange(await GetTables("TABLE", connect.AccountApiKey, connect.DatabaseApiKey));
             tables.AddRange(await GetTables("VIEW", connect.AccountApiKey, connect.DatabaseApiKey));
@@ -27,7 +28,8 @@ namespace ReportBuilder.Web.Core.Controllers
                 ApiUrl = connect.ApiUrl,
                 AccountApiKey = connect.AccountApiKey,
                 DatabaseApiKey = connect.DatabaseApiKey,
-                Tables = tables
+                Tables = tables,
+                Procedures = procedures
             };
 
             return View(model);
@@ -179,7 +181,7 @@ namespace ReportBuilder.Web.Core.Controllers
 
                 // Get the Tables
                 var schemaTable = conn.GetSchema(type == "TABLE" ? "Tables" : "Views");
-                var tablesToFilter = new List<string> { ""};
+                var tablesToFilter = new List<string> {};
 
                 // Store the table names in the class scoped array list of table names
                 for (int i = 0; i < schemaTable.Rows.Count; i++)
