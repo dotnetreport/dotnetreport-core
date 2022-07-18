@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using iTextSharp.text;
+using iTextSharp.text.pdf;
+using Microsoft.Extensions.Configuration;
 using MySql.Data.MySqlClient;
 using OfficeOpenXml;
 using PuppeteerSharp;
@@ -515,105 +517,103 @@ namespace ReportBuilder.Web.Core.Models
             }
         }
 
-        public static void UpdateColumnNames(DataTable dt)
+        public static async Task<byte[]> GetPdfFile(string reportSql, string connectKey, string reportName, string chartData = null, List<ReportHeaderColumn> columns = null)
         {
-
-        }
-
-        /// <summary>
-        /// Customize this method with a login for dotnet report so that it can login to print pdf reports
-        /// </summary>
-        public static async Task PerformLogin(Page page, string printUrl)
-        {
-            var loginUrl = printUrl.Replace("/DotNetReport/ReportPrint", "/Account/Login"); // link to your login page
-            var loginEmail = "yourloginid@yourcompany.com"; // your login id
-            var loginPassword = "yourPassword"; // your login password
-
-            await page.GoToAsync(loginUrl, new NavigationOptions
+            var sql = Decrypt(reportSql);
+            var dt = new DataTable();
+            using (var conn = new OleDbConnection(GetConnectionString(connectKey)))
             {
-                WaitUntil = new[] { WaitUntilNavigation.Networkidle0 }
-            });
-            await page.TypeAsync("#Email", loginEmail); // Make sure #Email is replaced with the username form input id
-            await page.TypeAsync("#Password", loginPassword); // Make sure #Password is replaced with the password form input id
-            await page.ClickAsync("#LoginSubmit"); // Make sure #LoginSubmit is replaced with the login button form input id
-        }
+                conn.Open();
+                var command = new OleDbCommand(sql, conn);
+                var adapter = new OleDbDataAdapter(command);
 
-        public static async Task<byte[]> GetPdfFile(string printUrl, int reportId, string reportSql, string connectKey, string reportName,
-                    string userId = null, string clientId = null, string currentUserRole = null, string dataFilters = "", bool expandAll = false)
-        {
-            var installPath = AppContext.BaseDirectory + "\\App_Data\\local-chromium";
-            await new BrowserFetcher(new BrowserFetcherOptions { Path = installPath }).DownloadAsync(BrowserFetcher.DefaultRevision);
-            var executablePath = $"{Directory.GetDirectories(installPath)[0]}\\chrome-win\\chrome.exe";
-            var browser = await Puppeteer.LaunchAsync(new LaunchOptions { Headless = true, ExecutablePath = executablePath });
-            var page = await browser.NewPageAsync();
-            await page.SetRequestInterceptionAsync(true);
+                adapter.Fill(dt);
 
-            var formPosted = false;
-            var formData = new StringBuilder();
-            formData.AppendLine("<html><body>");
-            formData.AppendLine($"<form action=\"{printUrl}\" method=\"post\">");
-            formData.AppendLine($"<input name=\"reportSql\" value=\"{HttpUtility.HtmlEncode(reportSql)}\" />");
-            formData.AppendLine($"<input name=\"connectKey\" value=\"{HttpUtility.HtmlEncode(connectKey)}\" />");
-            formData.AppendLine($"<input name=\"reportId\" value=\"{reportId}\" />");
-            formData.AppendLine($"<input name=\"pageNumber\" value=\"{1}\" />");
-            formData.AppendLine($"<input name=\"pageSize\" value=\"{99999}\" />");
-            formData.AppendLine($"<input name=\"userId\" value=\"{userId}\" />");
-            formData.AppendLine($"<input name=\"clientId\" value=\"{clientId}\" />");
-            formData.AppendLine($"<input name=\"currentUserRole\" value=\"{currentUserRole}\" />");
-            formData.AppendLine($"<input name=\"expandAll\" value=\"{expandAll}\" />");
-            formData.AppendLine($"<input name=\"dataFilters\" value=\"{HttpUtility.HtmlEncode(dataFilters)}\" />");
-            formData.AppendLine($"</form>");
-            formData.AppendLine("<script type=\"text/javascript\">document.getElementsByTagName('form')[0].submit();</script>");
-            formData.AppendLine("</body></html>");
-
-            page.Request += async (sender, e) =>
-            {
-                if (formPosted)
+                if (columns?.Count > 0)
                 {
-                    await e.Request.ContinueAsync();
-                    return;
+                    foreach (var col in columns)
+                    {
+                        if (dt.Columns.Contains(col.fieldName) && col.hideStoredProcColumn)
+                        {
+                            dt.Columns.Remove(col.fieldName);
+                        }
+                        else if (!String.IsNullOrWhiteSpace(col.fieldLabel) && dt.Columns.Contains(col.fieldName))
+                        {
+                            dt.Columns[col.fieldName].ColumnName = col.fieldLabel;
+                        }
+                    }
                 }
-
-                await e.Request.RespondAsync(new ResponseData
+            }
+            Document document = new Document();
+            using (var ms = new MemoryStream())
+            {
+                PdfWriter writer = PdfWriter.GetInstance(document, ms);
+                document.Open();
+                document.Add(new Phrase(reportName));
+                PdfPTable table = new PdfPTable(dt.Columns.Count);
+                table.WidthPercentage = 100;
+                // table.DefaultCell.Border = 1;
+                //Set columns names in the pdf file
+                for (int k = 0; k < dt.Columns.Count; k++)
                 {
-                    Status = System.Net.HttpStatusCode.OK,
-                    Body = formData.ToString()
-                });
+                    PdfPCell cell = new PdfPCell(new Phrase(dt.Columns[k].ColumnName));
+                    cell.HorizontalAlignment = PdfPCell.ALIGN_CENTER;
+                    cell.VerticalAlignment = PdfPCell.ALIGN_CENTER;
+                    cell.BorderColor = BaseColor.LIGHT_GRAY;
+                    cell.BorderWidth = 1f;
+                    // cell.BackgroundColor = new iTextSharp.text.BaseColor(51, 102, 102);
+                    table.AddCell(cell);
+                }
+                //Add values of DataTable in pdf file
+                foreach (DataRow dr in dt.Rows)
+                {
+                    foreach (DataColumn dc in dt.Columns)
+                    {
+                        var value = GetFormattedValue(dc, dr);
+                        var formatColumn = columns?.FirstOrDefault(x => dc.ColumnName.StartsWith(x.fieldName));
+                        if (formatColumn != null && formatColumn.fieldFormat == "Currency")
+                        {
+                            value = Convert.ToDouble(dr[dc].ToString()).ToString("C");
+                        }
 
-                formPosted = true;
-            };
+                        PdfPCell cell = new PdfPCell(new Phrase(value));
 
-            await page.GoToAsync(printUrl, new NavigationOptions
-            {
-                WaitUntil = new[] { WaitUntilNavigation.Networkidle0 }
-            });
-
-            await page.WaitForSelectorAsync(".report-inner", new WaitForSelectorOptions { Visible = true });
-
-            int height = await page.EvaluateExpressionAsync<int>("document.body.offsetHeight");
-            int width = await page.EvaluateExpressionAsync<int>("$('table').width()");
-            var pdfFile = Path.Combine(AppContext.BaseDirectory, $"App_Data\\{reportName}.pdf");
-
-            var pdfOptions = new PdfOptions
-            {
-                PreferCSSPageSize = false,
-                MarginOptions = new MarginOptions() { Top = "0.75in", Bottom = "0.75in", Left = "0.1in", Right = "0.1in" }
-            };
-
-            if (width < 900)
-            {
-                pdfOptions.Format = PaperFormat.Letter;
-                pdfOptions.Landscape = false;
+                        cell.HorizontalAlignment = IsNumericType(dc.DataType) ? PdfPCell.ALIGN_RIGHT : PdfPCell.ALIGN_LEFT;
+                        cell.VerticalAlignment = PdfPCell.ALIGN_LEFT;
+                        cell.BorderColor = BaseColor.LIGHT_GRAY;
+                        cell.BorderWidth = 1f;
+                        table.AddCell(cell);
+                    }
+                }
+                //Create a PdfReader bound to that byte array
+                if (!string.IsNullOrEmpty(chartData))
+                {
+                    byte[] sPDFDecoded = Convert.FromBase64String(chartData.Substring(chartData.LastIndexOf(',') + 1));
+                    var image = Image.GetInstance(sPDFDecoded);
+                    if (image.Height > image.Width)
+                    {
+                        //Maximum height is 800 pixels.
+                        float percentage = 0.0f;
+                        percentage = 700 / image.Height;
+                        image.ScalePercent(percentage * 100);
+                    }
+                    else
+                    {
+                        //Maximum width is 600 pixels.
+                        float percentage = 0.0f;
+                        percentage = 540 / image.Width;
+                        image.ScalePercent(percentage * 100);
+                    }
+                    // If need to add boarder
+                    //   image.Border = iTextSharp.text.Rectangle.BOX;
+                    //  image.BorderColor = iTextSharp.text.BaseColor.BLACK;
+                    //  image.BorderWidth = 3f;
+                    document.Add(image);
+                }
+                document.Add(table);
+                document.Close();
+                return ms.ToArray();
             }
-            else
-            {
-                await page.SetViewportAsync(new ViewPortOptions { Width = width });
-                await page.AddStyleTagAsync(new AddTagOptions { Content = "@page {size: landscape }" });
-                pdfOptions.Width = $"{width}px";
-            }
-
-            await page.PdfAsync(pdfFile, pdfOptions);
-            return File.ReadAllBytes(pdfFile);
         }
 
         private static byte[] Combine(byte[] a, byte[] b)

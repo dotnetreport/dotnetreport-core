@@ -156,13 +156,15 @@ namespace ReportBuilder.Web.Core.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> DownloadPdf(string printUrl, int reportId, string reportSql, string connectKey, string reportName, bool expandAll = false)
+        public async Task<IActionResult> DownloadPdf(string reportSql, string connectKey, string reportName, string chartData = null, string columnDetails = null)
         {
             reportSql = HttpUtility.HtmlDecode(reportSql);
+            var columns = columnDetails == null ? new List<ReportHeaderColumn>() : JsonConvert.DeserializeObject<List<ReportHeaderColumn>>(columnDetails);
+
             var reportApi = new ReportApiController();
             var settings = reportApi.GetSettings();
             var dataFilters = settings.DataFilters != null ? JsonConvert.SerializeObject(settings.DataFilters) : "";
-            var pdf = await DotNetReportHelper.GetPdfFile(printUrl, reportId, reportSql, connectKey, reportName, settings.UserId, settings.ClientId, string.Join(",", settings.CurrentUserRole), dataFilters, expandAll);
+            var pdf = await DotNetReportHelper.GetPdfFile(reportSql, connectKey, reportName, chartData, columns);
             return File(pdf, "application/pdf", reportName + ".pdf");
         }
         [HttpPost]
