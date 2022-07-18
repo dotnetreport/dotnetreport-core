@@ -6,7 +6,6 @@ using PuppeteerSharp.Media;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.OleDb;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
@@ -114,7 +113,7 @@ namespace ReportBuilder.Web.Core.Models
         public string ParameterValue { get; set; }
         public string ParameterDataTypeString { get; set; }
         public Type ParameterDataTypeCLR { get; set; }
-        public OleDbType ParamterDataTypeOleDbType { get; set; }
+        public SqlDbType ParamterDataTypeOleDbType { get; set; }
         public int ParamterDataTypeOleDbTypeInteger { get; set; }
         public bool Required { get; set; }
         public bool ForeignKey { get; set; }

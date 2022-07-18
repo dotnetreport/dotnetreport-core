@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using ReportBuilder.Web.Core.Models;
-using System.Data.OleDb;
 using Newtonsoft.Json;
 using System.Data;
 using MySql.Data.MySqlClient;
@@ -58,68 +57,6 @@ namespace ReportBuilder.Web.Core.Controllers
                 return DotNetReportHelper.GetConnectionString(content.Replace("\"", ""));
             }
 
-        }
-
-        private FieldTypes ConvertToJetDataType(int oleDbDataType)
-        {
-            switch (((OleDbType)oleDbDataType))
-            {
-                case OleDbType.LongVarChar:
-                    return FieldTypes.Varchar; // "varchar";
-                case OleDbType.BigInt:
-                    return FieldTypes.Int; // "int";       // In Jet this is 32 bit while bigint is 64 bits
-                case OleDbType.Binary:
-                case OleDbType.LongVarBinary:
-                    return FieldTypes.Varchar; // "binary";
-                case OleDbType.Boolean:
-                    return FieldTypes.Boolean; // "bit";
-                case OleDbType.Char:
-                    return FieldTypes.Varchar; // "char";
-                case OleDbType.Currency:
-                    return FieldTypes.Money; // "decimal";
-                case OleDbType.DBDate:
-                case OleDbType.Date:
-                case OleDbType.DBTimeStamp:
-                    return FieldTypes.DateTime; // "datetime";
-                case OleDbType.Decimal:
-                case OleDbType.Numeric:
-                    return FieldTypes.Double; // "decimal";
-                case OleDbType.Double:
-                    return FieldTypes.Double; // "double";
-                case OleDbType.Integer:
-                    return FieldTypes.Int; // "int";
-                case OleDbType.Single:
-                    return FieldTypes.Int; // "single";
-                case OleDbType.SmallInt:
-                    return FieldTypes.Int; // "smallint";
-                case OleDbType.TinyInt:
-                    return FieldTypes.Int; // "smallint";  // Signed byte not handled by jet so we need 16 bits
-                case OleDbType.UnsignedTinyInt:
-                    return FieldTypes.Int; // "byte";
-                case OleDbType.VarBinary:
-                    return FieldTypes.Varchar; // "varbinary";
-                case OleDbType.VarChar:
-                    return FieldTypes.Varchar; // "varchar";
-                case OleDbType.BSTR:
-                case OleDbType.Variant:
-                case OleDbType.VarWChar:
-                case OleDbType.VarNumeric:
-                case OleDbType.Error:
-                case OleDbType.WChar:
-                case OleDbType.DBTime:
-                case OleDbType.Empty:
-                case OleDbType.Filetime:
-                case OleDbType.Guid:
-                case OleDbType.IDispatch:
-                case OleDbType.IUnknown:
-                case OleDbType.UnsignedBigInt:
-                case OleDbType.UnsignedInt:
-                case OleDbType.UnsignedSmallInt:
-                case OleDbType.PropVariant:
-                default:
-                    return FieldTypes.Varchar; // 
-                    //throw new ArgumentException(string.Format("The data type {0} is not handled by Jet. Did you retrieve this from Jet?", ((OleDbType)oleDbDataType)));
-            }
         }
 
         private FieldTypes ConvertMySqlDataTypeToFieldType(string dbDataType)
@@ -389,7 +326,7 @@ namespace ReportBuilder.Web.Core.Controllers
                                 DisplayName = param.ParameterName,
                                 ParameterValue = param.Value != null ? param.Value.ToString() : "",
                                 ParamterDataTypeOleDbTypeInteger = Convert.ToInt32(param.MySqlDbType),
-                                ParameterDataTypeString = GetType(ConvertToJetDataType(Convert.ToInt32(param.MySqlDbType))).Name
+                                ParameterDataTypeString = GetType(ConvertMySqlDataTypeToFieldType(param.MySqlDbType.ToString())).Name
                             };
                             if (parameter.ParameterDataTypeString.StartsWith("Int")) parameter.ParameterDataTypeString = "Int";
                             parameterViewModels.Add(parameter);
@@ -414,7 +351,7 @@ namespace ReportBuilder.Web.Core.Controllers
                         {
                             ColumnName = dt.Rows[i].ItemArray[0].ToString(),
                             DisplayName = dt.Rows[i].ItemArray[0].ToString(),
-                            FieldType = ConvertToJetDataType((int)dt.Rows[i]["ProviderType"]).ToString()
+                            FieldType = ConvertMySqlDataTypeToFieldType(dt.Rows[i]["ProviderType"].ToString()).ToString()
                         };
                         columnViewModels.Add(column);
                     }
@@ -448,7 +385,7 @@ namespace ReportBuilder.Web.Core.Controllers
                 {
                     if (string.IsNullOrEmpty(para.ParameterValue))
                     {
-                        if (para.ParamterDataTypeOleDbType == OleDbType.DBTimeStamp || para.ParamterDataTypeOleDbType == OleDbType.DBDate)
+                        if (para.ParamterDataTypeOleDbType == SqlDbType.Timestamp || para.ParamterDataTypeOleDbType == SqlDbType.Date)
                         {
                             para.ParameterValue = DateTime.Now.ToShortDateString();
                         }

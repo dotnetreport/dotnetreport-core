@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
         <id>dotNetReport.core.mysql</id>
-        <version>4.2.6</version>
+        <version>4.3.0</version>
         <authors>dotnetReport Builder</authors>
         <owners>dotnetReport Builder</owners>
         <projectUrl>https://dotnetreport.com/</projectUrl>
@@ -17,8 +17,7 @@
             <dependency id="Quartz" version="3.0.7" />
 			<dependency id="PuppeteerSharp" version="2.0.4" />
             <dependency id="System.Data.Common" version="4.3.0"></dependency>
-            <dependency id="System.Data.OleDb" version="4.7.0"></dependency>
-            <dependency id="System.Data.SqlClient" version="4.7.0"></dependency>
+            <dependency id="MySql.Data" version="8.0.29"></dependency>
         </dependencies>
       <contentFiles>
         <files include="any/any/wwwroot/img/report-logo.png" buildAction="None" />
