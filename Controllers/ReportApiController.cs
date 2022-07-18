@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.OleDb;
+using MySql.Data.MySqlClient;
 using System.Linq;
 using System.Net.Http;
 using System.Text.RegularExpressions;
@@ -53,11 +53,11 @@ namespace ReportBuilder.Web.Core.Controllers
             sql = sql.Replace("SELECT ", "SELECT TOP 500 ");
 
             var dt = new DataTable();
-            using (var conn = new OleDbConnection(DotNetReportHelper.GetConnectionString(connectKey)))
+            using (var conn = new MySqlConnection(DotNetReportHelper.GetConnectionString(connectKey)))
             {
                 conn.Open();
-                var command = new OleDbCommand(sql, conn);
-                var adapter = new OleDbDataAdapter(command);
+                var command = new MySqlCommand(sql, conn);
+                var adapter = new MySqlDataAdapter(command);
 
                 adapter.Fill(dt);
             }
@@ -150,13 +150,13 @@ namespace ReportBuilder.Web.Core.Controllers
                 for (int i = 0; i < allSqls.Length; i++)
                 {
                     sql = DotNetReportHelper.Decrypt(HttpUtility.HtmlDecode(allSqls[i]));
-                    if (!sql.StartsWith("EXEC"))
+                    if (!sql.StartsWith("CALL "))
                     {
 
                         var sqlSplit = sql.Substring(0, sql.IndexOf("FROM")).Replace("SELECT", "").Trim();
-                        sqlFields = Regex.Split(sqlSplit, "], (?![^\\(]*?\\))").Where(x => x != "CONVERT(VARCHAR(3)")
-                            .Select(x => x.EndsWith("]") ? x : x + "]")
-                            .ToList();
+                        sqlFields = Regex.Split(sqlSplit, "`, (?!`^\\(`*?\\))").Where(x => x != "CONVERT(VARCHAR(3)")
+                         .Select(x => x.EndsWith("`") ? x : x + "`")
+                         .ToList();
 
                         var sqlFrom = $"SELECT {sqlFields[0]} {sql.Substring(sql.IndexOf("FROM"))}";
                         sqlCount = $"SELECT COUNT(*) FROM ({ (sqlFrom.Contains("ORDER BY") ? sqlFrom.Substring(0, sqlFrom.IndexOf("ORDER BY")) : sqlFrom)}) as countQry";
@@ -182,20 +182,20 @@ namespace ReportBuilder.Web.Core.Controllers
                         }
 
                         if (sql.Contains("ORDER BY"))
-                            sql = sql + $" OFFSET {pageNumber - 1} ROWS FETCH NEXT {pageSize} ROWS ONLY";
+                            sql = sql + $" LIMIT {pageSize} OFFSET {(pageNumber - 1) * pageSize};";
                     }
                     // Execute sql
                     var dtPagedRun = new DataTable();
-                    using (var conn = new OleDbConnection(DotNetReportHelper.GetConnectionString(connectKey)))
+                    using (var conn = new MySqlConnection(DotNetReportHelper.GetConnectionString(connectKey)))
                     {
                         conn.Open();
-                        var command = new OleDbCommand(sqlCount, conn);
-                        if (!sql.StartsWith("EXEC")) totalRecords = (int)command.ExecuteScalar();
+                        var command = new MySqlCommand(sqlCount, conn);
+                        if (!sql.StartsWith("CALL ")) totalRecords = Convert.ToInt32(command.ExecuteScalar());
 
-                        command = new OleDbCommand(sql, conn);
-                        var adapter = new OleDbDataAdapter(command);
+                        command = new MySqlCommand(sql, conn);
+                        var adapter = new MySqlDataAdapter(command);
                         adapter.Fill(dtPagedRun);
-                        if (sql.StartsWith("EXEC"))
+                        if (sql.StartsWith("CALL "))
                         {
                             totalRecords = dtPagedRun.Rows.Count;
                             if (dtPagedRun.Rows.Count > 0)

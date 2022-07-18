@@ -296,13 +296,7 @@ namespace ReportBuilder.Web.Core.Models
         public static string GetConnectionString(string key)
         {
             var connString = Startup.StaticConfig.GetConnectionString(key);
-            connString = connString.Replace("Trusted_Connection=True", "");
-
-            if (!connString.ToLower().StartsWith("provider"))
-            {
-                connString = "Provider=sqloledb;" + connString;
-            }
-
+            
             return connString;
         }
 
