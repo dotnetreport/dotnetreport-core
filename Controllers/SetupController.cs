@@ -361,12 +361,12 @@ namespace ReportBuilder.Web.Core.Controllers
         {
             var tables = new List<TableViewModel>();
             var connString = await GetConnectionString(GetConnection(dataConnectKey));
-            using (OleDbConnection conn = new OleDbConnection(connString))
+            using (var conn = new MySqlConnection(connString))
             {
                 // open the connection to the database 
                 conn.Open();
                 string spQuery = "SELECT ROUTINE_NAME, ROUTINE_DEFINITION, ROUTINE_SCHEMA FROM INFORMATION_SCHEMA.ROUTINES WHERE ROUTINE_DEFINITION LIKE '%" + value + "%' AND ROUTINE_TYPE = 'PROCEDURE'";
-                OleDbCommand cmd = new OleDbCommand(spQuery, conn);
+                var cmd = new MySqlCommand(spQuery, conn);
                 cmd.CommandType = CommandType.Text;
                 DataTable dtProcedures = new DataTable();
                 dtProcedures.Load(cmd.ExecuteReader());
@@ -374,12 +374,12 @@ namespace ReportBuilder.Web.Core.Controllers
                 foreach (DataRow dr in dtProcedures.Rows)
                 {
                     string procName = dr["ROUTINE_NAME"].ToString();
-                    cmd = new OleDbCommand(procName, conn);
+                    cmd = new MySqlCommand(procName, conn);
                     cmd.CommandType = CommandType.StoredProcedure;
                     // Get the parameters.
-                    OleDbCommandBuilder.DeriveParameters(cmd);
+                    MySqlCommandBuilder.DeriveParameters(cmd);
                     List<ParameterViewModel> parameterViewModels = new List<ParameterViewModel>();
-                    foreach (OleDbParameter param in cmd.Parameters)
+                    foreach (MySqlParameter param in cmd.Parameters)
                     {
                         if (param.Direction == ParameterDirection.Input)
                         {
@@ -388,23 +388,22 @@ namespace ReportBuilder.Web.Core.Controllers
                                 ParameterName = param.ParameterName,
                                 DisplayName = param.ParameterName,
                                 ParameterValue = param.Value != null ? param.Value.ToString() : "",
-                                ParamterDataTypeOleDbTypeInteger = Convert.ToInt32(param.OleDbType),
-                                ParamterDataTypeOleDbType = param.OleDbType,
-                                ParameterDataTypeString = GetType(ConvertToJetDataType(Convert.ToInt32(param.OleDbType))).Name
+                                ParamterDataTypeOleDbTypeInteger = Convert.ToInt32(param.MySqlDbType),
+                                ParameterDataTypeString = GetType(ConvertToJetDataType(Convert.ToInt32(param.MySqlDbType))).Name
                             };
                             if (parameter.ParameterDataTypeString.StartsWith("Int")) parameter.ParameterDataTypeString = "Int";
                             parameterViewModels.Add(parameter);
                         }
                     }
                     DataTable dt = new DataTable();
-                    cmd = new OleDbCommand($"[{procName}]", conn);
+                    cmd = new MySqlCommand($"[{procName}]", conn);
                     cmd.CommandType = CommandType.StoredProcedure;
                     foreach (var data in parameterViewModels)
                     {
-                        cmd.Parameters.Add(new OleDbParameter { Value = DBNull.Value, ParameterName = data.ParameterName, Direction = ParameterDirection.Input, IsNullable = true });
+                        cmd.Parameters.Add(new MySqlParameter { Value = DBNull.Value, ParameterName = data.ParameterName, Direction = ParameterDirection.Input, IsNullable = true });
                     }
 
-                    OleDbDataReader reader = cmd.ExecuteReader();
+                    var reader = cmd.ExecuteReader();
                     dt = reader.GetSchemaTable();
 
                     // Store the table names in the class scoped array list of table names
@@ -439,11 +438,11 @@ namespace ReportBuilder.Web.Core.Controllers
         {
             DataTable dt = new DataTable();
             var connString = await GetConnectionString(GetConnection(dataConnectKey));
-            using (OleDbConnection conn = new OleDbConnection(connString))
+            using (var conn = new MySqlConnection(connString))
             {
                 // open the connection to the database 
                 conn.Open();
-                OleDbCommand cmd = new OleDbCommand(model.TableName, conn);
+                var cmd = new MySqlCommand(model.TableName, conn);
                 cmd.CommandType = CommandType.StoredProcedure;
                 foreach (var para in model.Parameters)
                 {

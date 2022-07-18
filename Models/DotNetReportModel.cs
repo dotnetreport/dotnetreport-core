@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
+using MySql.Data.MySqlClient;
 using OfficeOpenXml;
 using PuppeteerSharp;
 using PuppeteerSharp.Media;
@@ -450,11 +451,11 @@ namespace ReportBuilder.Web.Core.Models
 
             // Execute sql
             var dt = new DataTable();
-            using (var conn = new OleDbConnection(GetConnectionString(connectKey)))
+            using (var conn = new MySqlConnection(GetConnectionString(connectKey)))
             {
                 conn.Open();
-                var command = new OleDbCommand(sql, conn);
-                var adapter = new OleDbDataAdapter(command);
+                var command = new MySqlCommand(sql, conn);
+                var adapter = new MySqlDataAdapter(command);
 
                 adapter.Fill(dt);
 
@@ -629,11 +630,11 @@ namespace ReportBuilder.Web.Core.Models
             // Execute sql
             var dt = new DataTable();
             var ds = new DataSet();
-            using (var conn = new OleDbConnection(GetConnectionString(connectKey)))
+            using (var conn = new MySqlConnection(GetConnectionString(connectKey)))
             {
                 conn.Open();
-                var command = new OleDbCommand(sql, conn);
-                var adapter = new OleDbDataAdapter(command);
+                var command = new MySqlCommand(sql, conn);
+                var adapter = new MySqlDataAdapter(command);
 
                 adapter.Fill(dt);
             }
