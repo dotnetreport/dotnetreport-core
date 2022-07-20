@@ -30,13 +30,13 @@ It's always a good idea to checkin your code before adding the dotnetreport nuge
 First, add GeneratePathProperty="true" dotNetReport.core package reference:
 
   <ItemGroup>
-    <PackageReference Include="dotNetReport.core" Version="x.x.x" GeneratePathProperty="true" />
+    <PackageReference Include="dotNetReport.core.mysql" Version="x.x.x" GeneratePathProperty="true" />
   </ItemGroup>
 
 Second, add the following to your project to copy front end files included in your project directly rather than as a reference.
 
   <PropertyGroup>
-    <ContentFilesPath>$(PkgdotNetReport_core)\contentFiles\any\any\</ContentFilesPath>
+    <ContentFilesPath>$(PkgdotNetReport_core_mysql)\contentFiles\any\any\</ContentFilesPath>
   </PropertyGroup>
   <Target Name="CopyDotNetReportContent" BeforeTargets="PreBuildEvent">
     <Copy SourceFiles="$(ContentFilesPath)gulpfile.dotnetreport.js" DestinationFiles="$(ProjectDir)\gulpfile.dotnetreport.js"></Copy>

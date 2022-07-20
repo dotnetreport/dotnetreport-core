@@ -1,0 +1,26 @@
+﻿<Project>
+	<PropertyGroup>
+		<ContentFilesPath>$(PkgdotNetReport_core_mysql)\contentFiles\any\any\</ContentFilesPath>
+	</PropertyGroup>
+
+	<Target Name="CopyDotNetReportContent" BeforeTargets="Build">
+		<Copy SourceFiles="$(ContentFilesPath)gulpfile.dotnetreport.js" DestinationFiles="$(ProjectDir)\gulpfile.dotnetreport.js"></Copy>
+		<Copy SourceFiles="$(ContentFilesPath)package.dotnetreport.json" DestinationFiles="$(ProjectDir)\package.dotnetreport.json"></Copy>
+		<Copy SourceFiles="$(ContentFilesPath)wwwroot/img/report-logo.png" DestinationFiles="$(ProjectDir)\wwwroot/img/report-logo.png"></Copy>
+		<Copy SourceFiles="$(ContentFilesPath)wwwroot/js/dotnetreport.js" DestinationFiles="$(ProjectDir)\wwwroot/js/dotnetreport.js"></Copy>
+		<Copy SourceFiles="$(ContentFilesPath)wwwroot/js/dotnetreport-helper.js" DestinationFiles="$(ProjectDir)\wwwroot/js/dotnetreport-helper.js"></Copy>
+		<Copy SourceFiles="$(ContentFilesPath)wwwroot/js/dotnetreport-setup.js" DestinationFiles="$(ProjectDir)\wwwroot/js/dotnetreport-setup.js"></Copy>
+		<Copy SourceFiles="$(ContentFilesPath)wwwroot/css/dotnetreport.css" DestinationFiles="$(ProjectDir)\wwwroot/css/dotnetreport.css"></Copy>
+		<Copy SourceFiles="$(ContentFilesPath)Jobs/DotNetReportJob.cs" DestinationFiles="$(ProjectDir)Jobs/DotNetReportJob.cs"></Copy>
+		<Copy SourceFiles="$(ContentFilesPath)Models/DotNetReportModel.cs" DestinationFiles="$(ProjectDir)Models/DotNetReportModel.cs"></Copy>
+		<Copy SourceFiles="$(ContentFilesPath)Controllers/ReportApiController.cs" DestinationFiles="$(ProjectDir)Controllers/ReportApiController.cs"></Copy>
+		<Copy SourceFiles="$(ContentFilesPath)Controllers/ReportController.cs" DestinationFiles="$(ProjectDir)Controllers/ReportController.cs"></Copy>
+		<Copy SourceFiles="$(ContentFilesPath)Controllers/SetupController.cs" DestinationFiles="$(ProjectDir)Controllers/SetupController.cs"></Copy>
+		<Copy SourceFiles="$(ContentFilesPath)Views/Report/Dashboard.cshtml" DestinationFiles="$(ProjectDir)Views/Report/Dashboard.cshtml"></Copy>
+		<Copy SourceFiles="$(ContentFilesPath)Views/Report/Index.cshtml" DestinationFiles="$(ProjectDir)Views/Report/Index.cshtml"></Copy>
+		<Copy SourceFiles="$(ContentFilesPath)Views/Report/Report.cshtml" DestinationFiles="$(ProjectDir)Views/Report/Report.cshtml"></Copy>
+		<Copy SourceFiles="$(ContentFilesPath)Views/Report/ReportPrint.cshtml" DestinationFiles="$(ProjectDir)Views/Report/ReportPrint.cshtml"></Copy>
+		<Copy SourceFiles="$(ContentFilesPath)Views/Setup/Index.cshtml" DestinationFiles="$(ProjectDir)Views/Setup/Index.cshtml"></Copy>
+		<Copy SourceFiles="$(ContentFilesPath)Views/Shared/_Layout.Report.cshtml" DestinationFiles="$(ProjectDir)Views/Shared/_Layout.Report.cshtml"></Copy>
+	</Target>
+</Project>
